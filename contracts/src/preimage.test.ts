@@ -3,11 +3,12 @@ import {
   shutdown,
   Field,
   Circuit,
+  CircuitString,
   PrivateKey,
   PublicKey,
 } from 'snarkyjs';
 
-import { Participant } from './preimage';
+import { Participant, Outcome, Preimage } from './preimage';
 
 describe('hmmm', () => {
   beforeAll(async () => {
@@ -30,6 +31,57 @@ describe('hmmm', () => {
     const arbiter_sk: PrivateKey = PrivateKey.random();
     const arbiter_pk: PublicKey = arbiter_sk.toPublicKey();
     const arbiter: Participant = new Participant(arbiter_pk);
+
+    const outcome_deposited: Outcome = new Outcome(
+      CircuitString.fromString(''),
+      new Field(12),
+      new Field(6),
+      new Field(6),
+      new Field(-1),
+      new Field(-1)
+    );
+
+    const outcome_success: Outcome = new Outcome(
+      CircuitString.fromString('The contractor successfully did the job'),
+      new Field(6),
+      new Field(12),
+      new Field(6),
+      new Field(-1),
+      new Field(-1)
+    );
+
+    const outcome_failure: Outcome = new Outcome(
+      CircuitString.fromString('The contractor failed to do the job on time'),
+      new Field(11),
+      new Field(5),
+      new Field(8),
+      new Field(-1),
+      new Field(-1)
+    );
+
+    const outcome_cancel: Outcome = new Outcome(
+      CircuitString.fromString(
+        'One of the parties decided to cancel the contract'
+      ),
+      new Field(12),
+      new Field(6),
+      new Field(6),
+      new Field(-1),
+      new Field(-1)
+    );
+
+    const mac_contract: Preimage = new Preimage(
+      CircuitString.fromString(
+        'The contractor will do the job and arbiter will verify it'
+      ),
+      employer,
+      contractor,
+      arbiter,
+      outcome_deposited,
+      outcome_success,
+      outcome_failure,
+      outcome_cancel
+    );
 
     Circuit.runAndCheck(() => {
       const x = Circuit.witness(Field, () => new Field(5000));

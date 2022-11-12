@@ -5,6 +5,7 @@ import {
   prop,
   arrayProp,
   Circuit,
+  CircuitString,
   Poseidon,
 } from 'snarkyjs';
 
@@ -22,7 +23,7 @@ export class Participant extends CircuitValue {
 }
 
 export class Outcome extends CircuitValue {
-  @arrayProp(Field, 280) description: Field[];
+  @prop description: CircuitString;
 
   @prop payment_employer: Field;
   @prop payment_contractor: Field;
@@ -32,7 +33,7 @@ export class Outcome extends CircuitValue {
   @prop finish_before: Field;
 
   constructor(
-    description: Field[],
+    description: CircuitString,
     payment_employer: Field,
     payment_contractor: Field,
     payment_arbiter: Field,
@@ -59,6 +60,8 @@ export class Outcome extends CircuitValue {
 export class Preimage extends CircuitValue {
   @prop protocol_version: Field;
 
+  @prop contract: CircuitString;
+
   @prop employer: Participant;
   @prop contractor: Participant;
   @prop arbiter: Participant;
@@ -69,6 +72,7 @@ export class Preimage extends CircuitValue {
   @prop cancel: Outcome;
 
   constructor(
+    contract: CircuitString,
     employer: Participant,
     contractor: Participant,
     arbiter: Participant,
