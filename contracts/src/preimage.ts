@@ -57,6 +57,8 @@ export class Outcome extends CircuitValue {
 }
 
 export class Preimage extends CircuitValue {
+  @prop protocol_version: Field;
+
   @prop employer: Participant;
   @prop contractor: Participant;
   @prop arbiter: Participant;
@@ -76,6 +78,8 @@ export class Preimage extends CircuitValue {
     cancel: Outcome
   ) {
     super();
+
+    this.protocol_version = Field(0);
 
     this.employer = employer;
     this.contractor = contractor;
