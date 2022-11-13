@@ -1,6 +1,7 @@
 import {
   isReady,
   shutdown,
+  Bool,
   Field,
   Circuit,
   CircuitString,
@@ -84,9 +85,21 @@ describe('hmmm', () => {
     );
 
     Circuit.runAndCheck(() => {
-      const x = Circuit.witness(Field, () => new Field(5000));
-      const y = Circuit.witness(Field, () => new Field(5000));
-      x.assertEquals(y);
+      mac_contract.isEmployer(employer_pk).assertEquals(Bool(true));
+      mac_contract.isEmployer(contractor_pk).assertEquals(Bool(false));
+      mac_contract.isEmployer(arbiter_pk).assertEquals(Bool(false));
+
+      mac_contract.isContractor(employer_pk).assertEquals(Bool(false));
+      mac_contract.isContractor(contractor_pk).assertEquals(Bool(true));
+      mac_contract.isContractor(arbiter_pk).assertEquals(Bool(false));
+
+      mac_contract.isArbiter(employer_pk).assertEquals(Bool(false));
+      mac_contract.isArbiter(contractor_pk).assertEquals(Bool(false));
+      mac_contract.isArbiter(arbiter_pk).assertEquals(Bool(true));
+
+      mac_contract.isParty(employer_pk).assertEquals(Bool(true));
+      mac_contract.isParty(contractor_pk).assertEquals(Bool(true));
+      mac_contract.isParty(arbiter_pk).assertEquals(Bool(true));
     });
   });
 });
