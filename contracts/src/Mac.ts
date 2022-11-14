@@ -8,9 +8,16 @@ import {
   Permissions,
   PublicKey,
   PrivateKey,
+  AccountUpdate,
 } from 'snarkyjs';
 
 import { Preimage } from './preimage';
+
+const state_initial: number = 0;
+const state_deposited: number = 1;
+const state_canceled: number = 2;
+const state_succeeded: number = 3;
+const state_failed: number = 4;
 
 function implies(a: Bool, b: Bool): Bool {
   return a.not().or(b);
@@ -73,47 +80,39 @@ export class Mac extends SmartContract {
     let actor: PublicKey = signerPrivateKey.toPublicKey();
     contract_preimage.isParty(actor).assertEqual();
 
-    // make sure the party who attempts to deposit has not deposited yet
-    // so there are three cases to consider, one for each party
-    implies(
-      contract_preimage.isEmployer(actor),
-      this.memory
-        .equals(0)
-        .or(this.memory.equals(1))
-        .or(this.memory.equals(2))
-        .or(this.memory.equals(3))
-    ).assertTrue();
-    implies(
-      contract_preimage.isContractor(actor),
-      this.memory
-        .equals(0)
-        .or(this.memory.equals(1))
-        .or(this.memory.equals(4))
-        .or(this.memory.equals(5))
-    ).assertTrue();
-    implies(
-      contract_preimage.isArbiter(actor),
-      this.memory
-        .equals(1)
-        .or(this.memory.equals(3))
-        .or(this.memory.equals(5))
-        .or(this.memory.equals(7))
-    ).assertTrue();
+    // only someone who has not yet deposited can deposit
+    const has_not_acted: Bool = this.hasNotActed(contract_preimage, actor);
+    has_not_acted.assertTrue();
 
-    // TODO allow the deposit to happen
-    let next_memory_state: Field = Circuit.if(
+    // do the deposit
+    const amount: Field = Circuit.if(
       contract_preimage.isEmployer(actor),
+      contract_preimage.deposited.payment_employer,
       Circuit.if(
-        this.memory.equals(0),
-        Field(4),
+        contract_preimage.isContractor(actor),
+        contract_preimage.deposited.payment_contractor,
         Circuit.if(
-          this.memory.equals(1),
-          Field(5),
-          Circuit.if(this.memory.equals(2), Field(6))
+          contract_preimage.isArbiter(actor),
+          contract_preimage.deposited.payment_arbiter,
+          Field(0)
         )
       )
     );
-    // TODO if everyone deposited, update the state
+    const payerUpdate = AccountUpdate.createSigned(signerPrivateKey);
+    payerUpdate.balance.subInPlace(amount);
+    this.balance.addInPlace(amount);
+
+    // update the memory
+    this.updateMemoryAfterAction(contract_preimage, actor);
+
+    // update state
+    const has_everyone_acted: Bool = this.hasEveryoneActed(contract_preimage);
+    const new_state: Field = Circuit.if(
+      has_everyone_acted,
+      Field(state_deposited),
+      Field(state_initial)
+    );
+    this.automaton_state.set(new_state);
   }
 
   @method withdraw() {
@@ -152,5 +151,47 @@ export class Mac extends SmartContract {
     this.commitment.assertEquals(contract_preimage.getCommitment());
 
     // TODO
+  }
+
+  hasNotActed(contract_preimage: Preimage, actor: PublicKey): Bool {
+    const actions: Bool[] = this.memory.toBits(3);
+    const acted: Bool = Circuit.if(
+      contract_preimage.isEmployer(actor),
+      actions[0],
+      Circuit.if(
+        contract_preimage.isContractor(actor),
+        actions[1],
+        Circuit.if(contract_preimage.isArbiter(actor), actions[2], Bool(false))
+      )
+    );
+    return acted.not();
+  }
+
+  hasEveryoneActed(contract_preimage: Preimage): Bool {
+    const actions: Bool[] = this.memory.toBits(3);
+    return actions[0].and(actions[1]).and(actions[2]);
+  }
+
+  updateMemoryAfterAction(contract_preimage: Preimage, actor: PublicKey): Bool {
+    let actions: Bool[] = this.memory.toBits(3);
+
+    actions[0] = Circuit.if(
+      contract_preimage.isEmployer(actor),
+      Bool(true),
+      actions[0]
+    );
+    actions[1] = Circuit.if(
+      contract_preimage.isContractor(actor),
+      Bool(true),
+      actions[1]
+    );
+    actions[2] = Circuit.if(
+      contract_preimage.isArbiter(actor),
+      Bool(true),
+      actions[2]
+    );
+
+    const new_memory: Field = Field.ofBits(actions);
+    this.memory.set(new_memory);
   }
 }
