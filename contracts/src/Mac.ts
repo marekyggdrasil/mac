@@ -85,7 +85,7 @@ export class Mac extends SmartContract {
     has_not_acted.assertTrue();
 
     // do the deposit
-    const amount: Field = Circuit.if(
+    const amount: UInt64 = Circuit.if(
       contract_preimage.isEmployer(actor),
       contract_preimage.deposited.payment_employer,
       Circuit.if(
@@ -94,13 +94,13 @@ export class Mac extends SmartContract {
         Circuit.if(
           contract_preimage.isArbiter(actor),
           contract_preimage.deposited.payment_arbiter,
-          Field(0)
+          Uint64(0)
         )
       )
     );
     const payerUpdate = AccountUpdate.createSigned(signerPrivateKey);
-    payerUpdate.balance.subInPlace(amount);
-    this.balance.addInPlace(amount);
+    payerUpdate.send(this.address, amount);
+    payerUpdate.sign(signerPrivateKey);
 
     // update the memory
     this.updateMemoryAfterAction(contract_preimage, actor);
