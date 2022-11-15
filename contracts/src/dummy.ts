@@ -13,7 +13,9 @@ import {
 import { Participant, Outcome, Preimage } from './preimage';
 
 export function makeDummyPreimage(
-  employer_sk: PrivateKey
+  employer_sk: PrivateKey,
+  contractor_sk: PrivateKey,
+  arbiter_sk: PrivateKey
 ): [
   Participant,
   Participant,
@@ -36,11 +38,9 @@ export function makeDummyPreimage(
   const employer_pk: PublicKey = employer_sk.toPublicKey();
   employer = new Participant(employer_pk);
 
-  const contractor_sk: PrivateKey = PrivateKey.random();
   const contractor_pk: PublicKey = contractor_sk.toPublicKey();
   contractor = new Participant(contractor_pk);
 
-  const arbiter_sk: PrivateKey = PrivateKey.random();
   const arbiter_pk: PublicKey = arbiter_sk.toPublicKey();
   arbiter = new Participant(arbiter_pk);
 

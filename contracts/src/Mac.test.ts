@@ -48,11 +48,17 @@ describe('Mac tests', () => {
     mac_contract: Preimage;
 
   let deployerAccount: PrivateKey,
+    employer_sk: PrivateKey,
+    contractor_sk: PrivateKey,
+    arbiter_sk: PrivateKey,
     zkAppAddress: PublicKey,
     zkAppPrivateKey: PrivateKey;
 
   beforeEach(async () => {
     await isReady;
+    employer_sk = PrivateKey.random();
+    contractor_sk = PrivateKey.random();
+    arbiter_sk = PrivateKey.random();
     deployerAccount = createLocalBlockchain();
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
@@ -65,7 +71,7 @@ describe('Mac tests', () => {
       outcome_failure,
       outcome_cancel,
       mac_contract,
-    ] = makeDummyPreimage(zkAppPrivateKey);
+    ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk);
   });
 
   afterAll(async () => {
