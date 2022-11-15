@@ -25,6 +25,8 @@ describe('Preimage tests', () => {
 
   beforeEach(async () => {
     await isReady;
+
+    const employer_sk: PrivateKey = PrivateKey.random();
     [
       employer,
       contractor,
@@ -34,7 +36,7 @@ describe('Preimage tests', () => {
       outcome_failure,
       outcome_cancel,
       mac_contract,
-    ] = makeDummyPreimage();
+    ] = makeDummyPreimage(employer_sk);
   });
 
   afterAll(async () => {

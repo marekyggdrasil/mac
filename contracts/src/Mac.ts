@@ -1,6 +1,8 @@
 import {
+  Bool,
   Field,
   SmartContract,
+  Circuit,
   state,
   State,
   method,
@@ -9,6 +11,7 @@ import {
   PublicKey,
   PrivateKey,
   AccountUpdate,
+  UInt64,
 } from 'snarkyjs';
 
 import { Preimage } from './preimage';
@@ -54,11 +57,7 @@ export class Mac extends SmartContract {
     super.deploy(args);
     this.setPermissions({
       ...Permissions.default(),
-      deposit: Permissions.proofOrSignature(),
-      withdraw: Permissions.proofOrSignature(),
-      approveSuccess: Permissions.proofOrSignature(),
-      approveFailure: Permissions.proofOrSignature(),
-      cancel: Permissions.proofOrSignature(),
+      editState: Permissions.proofOrSignature(),
     });
   }
 
@@ -69,16 +68,19 @@ export class Mac extends SmartContract {
   }
 
   @method deposit(contract_preimage: Preimage, signerPrivateKey: PrivateKey) {
+    const automaton_state: Field = this.automaton_state.get();
+    const memory: Field = this.memory.get();
+
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
     this.commitment.assertEquals(contract_preimage.getCommitment());
 
     // make sure contract is in the or initial stage
-    contract_preimage.isInitial(this.automaton_state);
+    contract_preimage.isInitial(automaton_state);
 
     // make sure the caller is a party in the contract
     let actor: PublicKey = signerPrivateKey.toPublicKey();
-    contract_preimage.isParty(actor).assertEqual();
+    contract_preimage.isParty(actor).assertTrue();
 
     // only someone who has not yet deposited can deposit
     const has_not_acted: Bool = this.hasNotActed(contract_preimage, actor);
@@ -94,12 +96,12 @@ export class Mac extends SmartContract {
         Circuit.if(
           contract_preimage.isArbiter(actor),
           contract_preimage.deposited.payment_arbiter,
-          Uint64(0)
+          new UInt64(0)
         )
       )
     );
     const payerUpdate = AccountUpdate.createSigned(signerPrivateKey);
-    payerUpdate.send(this.address, amount);
+    payerUpdate.send({ to: this.address, amount });
     payerUpdate.sign(signerPrivateKey);
 
     // update the memory
@@ -115,37 +117,42 @@ export class Mac extends SmartContract {
     this.automaton_state.set(new_state);
   }
 
-  @method withdraw() {
+  @method withdraw(contract_preimage: Preimage) {
+    const automaton_state: Field = this.automaton_state.get();
+    const memory: Field = this.memory.get();
     // make sure this is the right contract
     this.commitment.assertEquals(contract_preimage.getCommitment());
 
     // withdrawal is only possible if state is cancelled, succeeded or failed
-    this.automaton_state
+    automaton_state
       .equals(Field(2)) // cancelled
-      .or(this.automaton_state.equals(Field(3))) // succeeded
-      .or(this.automaton_state.equals(Field(4))); // field
+      .or(automaton_state.equals(Field(3))) // succeeded
+      .or(automaton_state.equals(Field(4)))
+      .assertTrue(); // field
 
     // TODO
   }
 
-  @method approveSuccess() {
+  @method approveSuccess(contract_preimage: Preimage) {
+    const commitment: Field = this.commitment.get();
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
-    this.commitment.assertEquals(contract_preimage.getCommitment());
+    commitment.assertEquals(contract_preimage.getCommitment());
 
     // approval can only be done
     // TODO
   }
 
-  @method approveFailure() {
+  @method approveFailure(contract_preimage: Preimage) {
+    const commitment: Field = this.commitment.get();
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
-    this.commitment.assertEquals(contract_preimage.getCommitment());
+    commitment.assertEquals(contract_preimage.getCommitment());
 
     // TODO
   }
 
-  @method cancel() {
+  @method cancel(contract_preimage: Preimage) {
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
     this.commitment.assertEquals(contract_preimage.getCommitment());
@@ -154,7 +161,10 @@ export class Mac extends SmartContract {
   }
 
   hasNotActed(contract_preimage: Preimage, actor: PublicKey): Bool {
-    const actions: Bool[] = this.memory.toBits(3);
+    const automaton_state: Field = this.automaton_state.get();
+    const memory: Field = this.memory.get();
+
+    const actions: Bool[] = memory.toBits(3);
     const acted: Bool = Circuit.if(
       contract_preimage.isEmployer(actor),
       actions[0],
@@ -168,12 +178,18 @@ export class Mac extends SmartContract {
   }
 
   hasEveryoneActed(contract_preimage: Preimage): Bool {
-    const actions: Bool[] = this.memory.toBits(3);
+    const automaton_state: Field = this.automaton_state.get();
+    const memory: Field = this.memory.get();
+
+    const actions: Bool[] = memory.toBits(3);
     return actions[0].and(actions[1]).and(actions[2]);
   }
 
-  updateMemoryAfterAction(contract_preimage: Preimage, actor: PublicKey): Bool {
-    let actions: Bool[] = this.memory.toBits(3);
+  updateMemoryAfterAction(contract_preimage: Preimage, actor: PublicKey) {
+    const automaton_state: Field = this.automaton_state.get();
+    const memory: Field = this.memory.get();
+
+    let actions: Bool[] = memory.toBits(3);
 
     actions[0] = Circuit.if(
       contract_preimage.isEmployer(actor),
