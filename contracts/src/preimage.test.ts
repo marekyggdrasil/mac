@@ -60,6 +60,7 @@ describe('Preimage tests', () => {
     expect(l.length).toEqual(0);
   });
 
+  /*
   it('should correctly serialize/deserialize a whole contract', () => {
     const [serialized, contract_string]: [Field[], string] =
       mac_contract.serialize();
@@ -68,6 +69,7 @@ describe('Preimage tests', () => {
       contract_string
     );
   });
+  */
 
   it('should correctly identify the participants by their keys', () => {
     Circuit.runAndCheck(() => {

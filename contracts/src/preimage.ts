@@ -8,6 +8,7 @@ import {
   CircuitString,
   Poseidon,
   UInt64,
+  Bool,
 } from 'snarkyjs';
 
 export class Participant extends CircuitValue {
@@ -135,47 +136,48 @@ export class Preimage extends CircuitValue {
   }
 
   // identify the actor of the contract
-  isEmployer(actor: PublicKey) {
+  isEmployer(actor: PublicKey): Bool {
     return actor.equals(this.employer.participant_address);
   }
 
-  isContractor(actor: PublicKey) {
+  isContractor(actor: PublicKey): Bool {
     return actor.equals(this.contractor.participant_address);
   }
 
-  isArbiter(actor: PublicKey) {
+  isArbiter(actor: PublicKey): Bool {
     return actor.equals(this.arbiter.participant_address);
   }
 
-  isParty(actor: PublicKey) {
+  isParty(actor: PublicKey): Bool {
     return this.isEmployer(actor)
       .or(this.isContractor(actor))
       .or(this.isArbiter(actor));
   }
 
   // state identification
-  isInitial(automaton_state: Field): Circuit {
+  isInitial(automaton_state: Field): Bool {
     return automaton_state.equals(Field(0)); // initial state
   }
 
-  isDeposit(automaton_state: Field): Circuit {
+  isDeposit(automaton_state: Field): Bool {
     return automaton_state.equals(Field(1)); // deposit state
   }
 
-  isCanceled(automaton_state: Field): Circuit {
+  isCanceled(automaton_state: Field): Bool {
     return automaton_state.equals(Field(2)); // canceled state
   }
 
-  isSuccess(automaton_state: Field): Circuit {
+  isSuccess(automaton_state: Field): Bool {
     return automaton_state.equals(Field(3)); // success state
   }
 
-  isFailed(automaton_state: Field): Circuit {
+  isFailed(automaton_state: Field): Bool {
     return automaton_state.equals(Field(4)); // failed state
   }
 
   // handling the serialization
-  serialize(): [Field[], string] {
+  serialize(): Field[] {
+    // [Field[], string] {
     let serialized: Field[] = [this.protocol_version];
     serialized = serialized.concat(this.employer.serialize());
     serialized = serialized.concat(this.contractor.serialize());
@@ -185,8 +187,9 @@ export class Preimage extends CircuitValue {
     serialized = serialized.concat(this.failure.serialize());
     serialized = serialized.concat(this.cancel.serialize());
 
-    const contract_string: string = this.contract.toString();
-    return [serialized, contract_string];
+    // const contract_string: string = this.contract.toString();
+    // return [serialized, contract_string];
+    return serialized;
   }
 
   static deserialize(serialized: Field[], contract_string: string): Preimage {
@@ -254,11 +257,14 @@ export class Preimage extends CircuitValue {
   }
 
   getCommitment(): Field {
-    const [serialized, contract_string]: [Field[], string] = this.serialize();
-    const params_hash: Field = Poseidon.hash(serialized);
-    const contract: CircuitString = CircuitString.fromString(contract_string);
-    const contract_hash: Field = contract.hash();
-    return Poseidon.hash([params_hash, contract_hash]);
+    //const [serialized, contract_string]: [Field[], string] = this.serialize();
+    const serialized: Field[] = this.serialize();
+    serialized.concat(this.contract.hash());
+    //const params_hash: Field = Poseidon.hash(serialized);
+    // const contract: CircuitString = CircuitString.fromString(contract_string);
+    //  const contract_hash: Field = contract.hash();
+    //return Poseidon.hash([params_hash, contract_hash]);
+    return Poseidon.hash(serialized);
   }
 
   // shareable contract
