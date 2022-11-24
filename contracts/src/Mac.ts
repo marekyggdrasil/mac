@@ -96,12 +96,6 @@ export class Mac extends SmartContract {
     has_not_acted.assertTrue();
 
     // do the deposit
-    /*const amount: UInt64 = Circuit.if(
-      actor.equals(contract_preimage.employer.participant_address),
-      contract_preimage.deposited.payment_contractor,
-      contract_preimage.deposited.payment_arbiter
-    );*/
-    //UInt64.from(1000000);
     const amount: UInt64 = Circuit.if(
       contract_preimage.isEmployer(actor),
       contract_preimage.deposited.payment_employer,
