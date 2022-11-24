@@ -28,7 +28,7 @@ export class Add extends SmartContract {
     });
   }
 
-  @method init() {
+  @method initialize() {
     this.num.set(Field(1));
   }
 

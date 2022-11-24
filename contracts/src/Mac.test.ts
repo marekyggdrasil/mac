@@ -36,13 +36,20 @@ async function localDeploy(
   contractor_sk: PrivateKey,
   arbiter_sk: PrivateKey
 ) {
-  const tx = await Mina.transaction(deployerAccount, () => {
+  const tx_deploy = await Mina.transaction(deployerAccount, () => {
     AccountUpdate.fundNewAccount(deployerAccount);
-    zkAppInstance.initialize(mac_contract.getCommitment());
     zkAppInstance.deploy({ zkappKey: zkAppPrivatekey });
-    zkAppInstance.sign(zkAppPrivatekey);
   });
-  await tx.send();
+  await tx_deploy.prove();
+  await tx_deploy.sign([zkAppPrivatekey]);
+  await tx_deploy.send();
+
+  const tx_init = await Mina.transaction(deployerAccount, () => {
+    zkAppInstance.initialize(mac_contract.getCommitment());
+  });
+  await tx_init.prove();
+  await tx_init.sign([zkAppPrivatekey]);
+  await tx_init.send();
 }
 
 describe('Mac tests', () => {
@@ -66,11 +73,11 @@ describe('Mac tests', () => {
     await isReady;
     await Mac.compile();
 
-    [deployerAccount, employer_sk, contractor_sk, arbiter_sk] =
-      createLocalBlockchain();
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
 
+    [deployerAccount, employer_sk, contractor_sk, arbiter_sk] =
+      createLocalBlockchain();
     [
       employer,
       contractor,
@@ -98,10 +105,12 @@ describe('Mac tests', () => {
       contractor_sk,
       arbiter_sk
     );
+
     const tx = await Mina.transaction(employer_sk, () => {
-      zkAppInstance.deposit(mac_contract, employer_sk);
+      zkAppInstance.deposit(mac_contract, employer_sk.toPublicKey());
     });
     await tx.prove();
-    await tx.send().wait();
+    await tx.sign([employer_sk]);
+    await tx.send();
   });
 });

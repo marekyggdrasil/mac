@@ -11,6 +11,7 @@ import {
   PrivateKey,
   PublicKey,
   UInt64,
+  AccountUpdate,
 } from 'snarkyjs';
 
 import { Preimage } from './preimage';
@@ -52,7 +53,8 @@ export class Mac extends SmartContract {
     super.deploy(args);
     this.setPermissions({
       ...Permissions.default(),
-      editState: Permissions.proofOrSignature(),
+      editState: Permissions.proof(),
+      send: Permissions.proof(),
     });
   }
 
@@ -62,7 +64,8 @@ export class Mac extends SmartContract {
     this.memory.set(Field(0));
   }
 
-  @method deposit(contract_preimage: Preimage, signerPrivateKey: PrivateKey) {
+  @method deposit(contract_preimage: Preimage, actor: PublicKey) {
+    /*
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
 
@@ -77,7 +80,6 @@ export class Mac extends SmartContract {
     commitment.assertEquals(contract_preimage.getCommitment());
 
     // make sure the caller is a party in the contract
-    const actor: PublicKey = signerPrivateKey.toPublicKey();
     contract_preimage.isParty(actor).assertTrue();
 
     // only someone who has not yet deposited can deposit
@@ -92,10 +94,10 @@ export class Mac extends SmartContract {
       )
     );
     const has_not_acted: Bool = acted.not();
-    has_not_acted.assertTrue();
+    has_not_acted.assertTrue();*/
 
     // do the deposit
-    const amount: UInt64 = Circuit.if(
+    const amount: UInt64 = UInt64.from(1000000); /*Circuit.if(
       contract_preimage.isEmployer(actor),
       contract_preimage.deposited.payment_employer,
       Circuit.if(
@@ -107,13 +109,13 @@ export class Mac extends SmartContract {
           new UInt64(0)
         )
       )
-    );
+    );*/
 
-    // TODO fix here
-    //const payerUpdate = AccountUpdate.createSigned(signerPrivateKey);
-    //payerUpdate.send({ to: this.address, amount });
-    //payerUpdate.sign(signerPrivateKey);
+    // transfer the funds
+    const payerUpdate = AccountUpdate.create(actor);
+    payerUpdate.send({ to: this.address, amount: amount });
 
+    /*
     // update the memory
     actions[0] = Circuit.if(
       contract_preimage.isEmployer(actor),
@@ -131,7 +133,7 @@ export class Mac extends SmartContract {
       actions[2]
     );
 
-    const new_memory: Field = Field.ofBits(actions);
+    const new_memory: Field = Field.fromBits(actions);
     this.memory.set(new_memory);
 
     // update state
@@ -142,5 +144,6 @@ export class Mac extends SmartContract {
       Field(state_initial)
     );
     this.automaton_state.set(new_state);
+    */
   }
 }

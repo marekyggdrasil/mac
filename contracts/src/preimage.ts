@@ -28,7 +28,7 @@ export class Participant extends CircuitValue {
   }
 
   static deserialize(serialized: Field[]): Participant {
-    const deserialized: Participant = Participant.ofFields(serialized);
+    const deserialized: Participant = Participant.fromFields(serialized);
     if (deserialized === null) {
       throw Error();
     }
@@ -80,7 +80,7 @@ export class Outcome extends CircuitValue {
   }
 
   static deserialize(serialized: Field[]): Outcome {
-    const deserialized: Outcome = Outcome.ofFields(serialized);
+    const deserialized: Outcome = Outcome.fromFields(serialized);
     if (deserialized === null) {
       throw Error();
     }

@@ -30,10 +30,10 @@ async function localDeploy(
   const txn = await Mina.transaction(deployerAccount, () => {
     AccountUpdate.fundNewAccount(deployerAccount);
     zkAppInstance.deploy({ zkappKey: zkAppPrivatekey });
-    zkAppInstance.init();
+    zkAppInstance.initialize();
     zkAppInstance.sign(zkAppPrivatekey);
   });
-  await txn.send().wait();
+  await txn.send();
 }
 
 describe('Add', () => {
@@ -69,7 +69,7 @@ describe('Add', () => {
       zkAppInstance.update();
       zkAppInstance.sign(zkAppPrivateKey);
     });
-    await txn.send().wait();
+    await txn.send();
 
     const updatedNum = zkAppInstance.num.get();
     expect(updatedNum).toEqual(Field(3));
