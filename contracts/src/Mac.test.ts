@@ -66,6 +66,9 @@ describe('Mac tests', () => {
     employer_sk: PrivateKey,
     contractor_sk: PrivateKey,
     arbiter_sk: PrivateKey,
+    employer_pk: PublicKey,
+    contractor_pk: PublicKey,
+    arbiter_pk: PublicKey,
     zkAppAddress: PublicKey,
     zkAppPrivateKey: PrivateKey;
 
@@ -78,6 +81,11 @@ describe('Mac tests', () => {
 
     [deployerAccount, employer_sk, contractor_sk, arbiter_sk] =
       createLocalBlockchain();
+
+    employer_pk = employer_sk.toPublicKey();
+    contractor_pk = contractor_sk.toPublicKey();
+    arbiter_pk = arbiter_sk.toPublicKey();
+
     [
       employer,
       contractor,
@@ -95,6 +103,7 @@ describe('Mac tests', () => {
   });
 
   it('should correctly deploy Mac contract', async () => {
+    // deploy the contract
     const zkAppInstance = new Mac(zkAppAddress);
     await localDeploy(
       zkAppInstance,
@@ -105,12 +114,52 @@ describe('Mac tests', () => {
       contractor_sk,
       arbiter_sk
     );
+    // initial balance of the contract is zero
+    Mina.getBalance(zkAppAddress).assertEquals(UInt64.from(0));
+    Mina.getBalance(employer_pk).assertEquals(UInt64.from(1000000000000));
+    Mina.getBalance(contractor_pk).assertEquals(UInt64.from(1000000000000));
+    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(1000000000000));
 
-    const tx = await Mina.transaction(employer_sk, () => {
-      zkAppInstance.deposit(mac_contract, employer_sk.toPublicKey());
+    // let the employer do the deposit
+    const tx_deposit_employer = await Mina.transaction(employer_sk, () => {
+      zkAppInstance.deposit(mac_contract, employer_pk);
     });
-    await tx.prove();
-    await tx.sign([employer_sk]);
-    await tx.send();
+    await tx_deposit_employer.prove();
+    await tx_deposit_employer.sign([employer_sk]);
+    await tx_deposit_employer.send();
+
+    // check balances after the employer deposit
+    Mina.getBalance(zkAppAddress).assertEquals(UInt64.from(12000000));
+    Mina.getBalance(employer_pk).assertEquals(UInt64.from(999988000000));
+    Mina.getBalance(contractor_pk).assertEquals(UInt64.from(1000000000000));
+    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(1000000000000));
+
+    // let the employer do the deposit
+    const tx_deposit_contractor = await Mina.transaction(contractor_sk, () => {
+      zkAppInstance.deposit(mac_contract, contractor_pk);
+    });
+    await tx_deposit_contractor.prove();
+    await tx_deposit_contractor.sign([contractor_sk]);
+    await tx_deposit_contractor.send();
+
+    // check balances after the contractor deposit
+    Mina.getBalance(zkAppAddress).assertEquals(UInt64.from(18000000));
+    Mina.getBalance(employer_pk).assertEquals(UInt64.from(999988000000));
+    Mina.getBalance(contractor_pk).assertEquals(UInt64.from(999994000000));
+    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(1000000000000));
+
+    // let the arbiter do the deposit
+    const tx_deposit_arbiter = await Mina.transaction(arbiter_sk, () => {
+      zkAppInstance.deposit(mac_contract, arbiter_pk);
+    });
+    await tx_deposit_arbiter.prove();
+    await tx_deposit_arbiter.sign([arbiter_sk]);
+    await tx_deposit_arbiter.send();
+
+    // check balances after the arbiter deposit
+    Mina.getBalance(zkAppAddress).assertEquals(UInt64.from(24000000));
+    Mina.getBalance(employer_pk).assertEquals(UInt64.from(999988000000));
+    Mina.getBalance(contractor_pk).assertEquals(UInt64.from(999994000000));
+    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(999994000000));
   });
 });

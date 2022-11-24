@@ -46,40 +46,40 @@ export function makeDummyPreimage(
 
   outcome_deposited = new Outcome(
     CircuitString.fromString(''),
-    new UInt64(12),
-    new UInt64(6),
-    new UInt64(6),
-    new UInt64(0),
-    new UInt64(0)
+    UInt64.from(12000000),
+    UInt64.from(6000000),
+    UInt64.from(6000000),
+    UInt64.from(0),
+    UInt64.from(0)
   );
 
   outcome_success = new Outcome(
     CircuitString.fromString('The contractor successfully did the job'),
-    new UInt64(6),
-    new UInt64(12),
-    new UInt64(6),
-    new UInt64(0),
-    new UInt64(0)
+    UInt64.from(6000000),
+    UInt64.from(12000000),
+    UInt64.from(6000000),
+    UInt64.from(0),
+    UInt64.from(0)
   );
 
   outcome_failure = new Outcome(
     CircuitString.fromString('The contractor failed to do the job on time'),
-    new UInt64(11),
-    new UInt64(5),
-    new UInt64(8),
-    new UInt64(0),
-    new UInt64(0)
+    UInt64.from(11000000),
+    UInt64.from(5000000),
+    UInt64.from(8000000),
+    UInt64.from(0),
+    UInt64.from(0)
   );
 
   outcome_cancel = new Outcome(
     CircuitString.fromString(
       'One of the parties decided to cancel the contract'
     ),
-    new UInt64(12),
-    new UInt64(6),
-    new UInt64(6),
-    new UInt64(0),
-    new UInt64(0)
+    UInt64.from(12000000),
+    UInt64.from(6000000),
+    UInt64.from(6000000),
+    UInt64.from(0),
+    UInt64.from(0)
   );
 
   mac_contract = new Preimage(

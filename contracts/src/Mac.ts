@@ -65,7 +65,6 @@ export class Mac extends SmartContract {
   }
 
   @method deposit(contract_preimage: Preimage, actor: PublicKey) {
-    /*
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
 
@@ -94,10 +93,16 @@ export class Mac extends SmartContract {
       )
     );
     const has_not_acted: Bool = acted.not();
-    has_not_acted.assertTrue();*/
+    has_not_acted.assertTrue();
 
     // do the deposit
-    const amount: UInt64 = UInt64.from(1000000); /*Circuit.if(
+    /*const amount: UInt64 = Circuit.if(
+      actor.equals(contract_preimage.employer.participant_address),
+      contract_preimage.deposited.payment_contractor,
+      contract_preimage.deposited.payment_arbiter
+    );*/
+    //UInt64.from(1000000);
+    const amount: UInt64 = Circuit.if(
       contract_preimage.isEmployer(actor),
       contract_preimage.deposited.payment_employer,
       Circuit.if(
@@ -106,16 +111,15 @@ export class Mac extends SmartContract {
         Circuit.if(
           contract_preimage.isArbiter(actor),
           contract_preimage.deposited.payment_arbiter,
-          new UInt64(0)
+          UInt64.from(0)
         )
       )
-    );*/
+    );
 
     // transfer the funds
     const payerUpdate = AccountUpdate.create(actor);
     payerUpdate.send({ to: this.address, amount: amount });
 
-    /*
     // update the memory
     actions[0] = Circuit.if(
       contract_preimage.isEmployer(actor),
@@ -133,17 +137,23 @@ export class Mac extends SmartContract {
       actions[2]
     );
 
-    const new_memory: Field = Field.fromBits(actions);
+    // check if everyone acted
+    const has_everyone_acted: Bool = actions[0].and(actions[1]).and(actions[2]);
+
+    // update the memory
+    const new_memory: Field = Circuit.if(
+      has_everyone_acted,
+      Field(0),
+      Field.fromBits(actions)
+    );
     this.memory.set(new_memory);
 
     // update state
-    const has_everyone_acted: Bool = actions[0].and(actions[1]).and(actions[2]);
     const new_state: Field = Circuit.if(
       has_everyone_acted,
       Field(state_deposited),
       Field(state_initial)
     );
     this.automaton_state.set(new_state);
-    */
   }
 }
