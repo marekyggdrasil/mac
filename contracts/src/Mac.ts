@@ -19,9 +19,10 @@ import { Preimage } from './preimage';
 
 const state_initial: number = 0;
 const state_deposited: number = 1;
-const state_canceled: number = 2;
-const state_succeeded: number = 3;
-const state_failed: number = 4;
+const state_canceled_early: number = 2;
+const state_canceled: number = 3;
+const state_succeeded: number = 4;
+const state_failed: number = 5;
 
 export class Mac extends SmartContract {
   // on-chain state is public
@@ -234,6 +235,9 @@ export class Mac extends SmartContract {
     const automaton_state: Field = this.automaton_state.get();
     this.automaton_state.assertEquals(automaton_state);
 
+    const memory: Field = this.memory.get();
+    this.memory.assertEquals(memory);
+
     const blockchain_length: UInt32 = this.network.blockchainLength.get();
     this.network.blockchainLength.assertEquals(blockchain_length);
 
@@ -241,21 +245,43 @@ export class Mac extends SmartContract {
     // the caller is in possession of the correct preimage
     commitment.assertEquals(contract_preimage.getCommitment());
 
-    // check if the deposit deadline is respected
-    blockchain_length.assertGte(contract_preimage.cancel.start_after);
-    blockchain_length.assertLt(contract_preimage.cancel.finish_before);
-
     // make sure the caller is a party in the contract
     contract_preimage.isParty(actor_sk.toPublicKey()).assertTrue();
 
-    // state must be initial
-    automaton_state.assertEquals(Field(state_initial));
+    // before deposit deadline anyone can cancel
+    const is_in_deposit: Bool = contract_preimage.deposited.start_after
+      .lte(blockchain_length)
+      .and(contract_preimage.deposited.finish_before.gt(blockchain_length))
+      .and(automaton_state.equals(Field(state_initial)));
 
-    // update the state to "canceled"
-    this.automaton_state.set(Field(state_canceled));
+    // after deposit deadline only the employee can cancel
+    const is_within_deadline: Bool = contract_preimage.success.start_after
+      .lte(blockchain_length)
+      .and(contract_preimage.success.finish_before.gt(blockchain_length))
+      .and(automaton_state.equals(Field(state_deposited)));
 
-    // we do not zero the memory because in the canceled state
-    // the actors can withdraw whatever they deposited
-    // successufuly reversing their actions
+    // as for the deadline, it has to be either initial (for everyone)
+    // either deposited (for employee) in order to cancel
+    is_in_deposit.or(is_within_deadline).assertTrue();
+
+    // if it is after the initial stage, caller must be employee
+    const is_caller_correct: Bool = Circuit.if(
+      is_within_deadline,
+      contract_preimage.isEmployer(actor_sk.toPublicKey()),
+      Bool(true)
+    );
+    is_caller_correct.assertTrue();
+
+    // update the state to "canceled" or "canceled early"
+    const next_state: Field = Circuit.if(
+      is_within_deadline,
+      Field(state_canceled),
+      Field(state_canceled)
+    );
+    this.automaton_state.set(next_state);
+
+    // if canceled late then zero out the memory
+    const next_memory: Field = Circuit.if(is_within_deadline, Field(0), memory);
+    this.memory.set(next_memory);
   }
 }
