@@ -8,6 +8,7 @@ import {
   CircuitString,
   PrivateKey,
   PublicKey,
+  UInt32,
   UInt64,
   AccountUpdate,
 } from 'snarkyjs';
@@ -15,17 +16,6 @@ import {
 import { Participant, Outcome, Preimage } from './preimage';
 import { makeDummyPreimage } from './dummy';
 import { Mac } from './Mac';
-
-function createLocalBlockchain() {
-  const Local = Mina.LocalBlockchain();
-  Mina.setActiveInstance(Local);
-
-  let deployerAccount: PrivateKey = Local.testAccounts[0].privateKey;
-  let employer_sk: PrivateKey = Local.testAccounts[1].privateKey;
-  let contractor_sk: PrivateKey = Local.testAccounts[2].privateKey;
-  let arbiter_sk: PrivateKey = Local.testAccounts[3].privateKey;
-  return [deployerAccount, employer_sk, contractor_sk, arbiter_sk];
-}
 
 async function localDeploy(
   zkAppInstance: Mac,
@@ -72,15 +62,29 @@ describe('Mac tests', () => {
     zkAppAddress: PublicKey,
     zkAppPrivateKey: PrivateKey;
 
+  // let local: Mina;
+
   beforeEach(async () => {
     await isReady;
     await Mac.compile();
 
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
+  });
 
-    [deployerAccount, employer_sk, contractor_sk, arbiter_sk] =
-      createLocalBlockchain();
+  afterAll(async () => {
+    setTimeout(shutdown, 0);
+  });
+
+  it('should correctly deploy Mac contract', async () => {
+    const local = Mina.LocalBlockchain();
+    Mina.setActiveInstance(local);
+    local.setBlockchainLength(UInt32.from(0));
+
+    deployerAccount = local.testAccounts[0].privateKey;
+    employer_sk = local.testAccounts[1].privateKey;
+    contractor_sk = local.testAccounts[2].privateKey;
+    arbiter_sk = local.testAccounts[3].privateKey;
 
     employer_pk = employer_sk.toPublicKey();
     contractor_pk = contractor_sk.toPublicKey();
@@ -96,13 +100,7 @@ describe('Mac tests', () => {
       outcome_cancel,
       mac_contract,
     ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk);
-  });
 
-  afterAll(async () => {
-    setTimeout(shutdown, 0);
-  });
-
-  it('should correctly deploy Mac contract', async () => {
     // deploy the contract
     const zkAppInstance = new Mac(zkAppAddress);
     await localDeploy(
@@ -120,6 +118,8 @@ describe('Mac tests', () => {
     Mina.getBalance(contractor_pk).assertEquals(UInt64.from(1000000000000));
     Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(1000000000000));
 
+    local.setBlockchainLength(UInt32.from(1));
+
     // let the employer do the deposit
     const tx_deposit_employer = await Mina.transaction(employer_sk, () => {
       zkAppInstance.deposit(mac_contract, employer_pk);
@@ -133,6 +133,8 @@ describe('Mac tests', () => {
     Mina.getBalance(employer_pk).assertEquals(UInt64.from(999988000000));
     Mina.getBalance(contractor_pk).assertEquals(UInt64.from(1000000000000));
     Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(1000000000000));
+
+    local.setBlockchainLength(UInt32.from(2));
 
     // let the employer do the deposit
     const tx_deposit_contractor = await Mina.transaction(contractor_sk, () => {
@@ -148,6 +150,8 @@ describe('Mac tests', () => {
     Mina.getBalance(contractor_pk).assertEquals(UInt64.from(999994000000));
     Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(1000000000000));
 
+    local.setBlockchainLength(UInt32.from(3));
+
     // let the arbiter do the deposit
     const tx_deposit_arbiter = await Mina.transaction(arbiter_sk, () => {
       zkAppInstance.deposit(mac_contract, arbiter_pk);
@@ -161,5 +165,7 @@ describe('Mac tests', () => {
     Mina.getBalance(employer_pk).assertEquals(UInt64.from(999988000000));
     Mina.getBalance(contractor_pk).assertEquals(UInt64.from(999994000000));
     Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(999994000000));
+
+    local.setBlockchainLength(UInt32.from(4));
   });
 });

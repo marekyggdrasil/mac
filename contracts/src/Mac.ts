@@ -10,6 +10,7 @@ import {
   Permissions,
   PrivateKey,
   PublicKey,
+  UInt32,
   UInt64,
   AccountUpdate,
 } from 'snarkyjs';
@@ -74,9 +75,16 @@ export class Mac extends SmartContract {
     const memory: Field = this.memory.get();
     this.memory.assertEquals(memory);
 
+    const blockchain_length: UInt32 = this.network.blockchainLength.get();
+    this.network.blockchainLength.assertEquals(blockchain_length);
+
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
     commitment.assertEquals(contract_preimage.getCommitment());
+
+    // check if the deposit deadline is respected
+    blockchain_length.assertGte(contract_preimage.deposited.start_after);
+    blockchain_length.assertLt(contract_preimage.deposited.finish_before);
 
     // make sure the caller is a party in the contract
     contract_preimage.isParty(actor).assertTrue();
@@ -149,5 +157,105 @@ export class Mac extends SmartContract {
       Field(state_initial)
     );
     this.automaton_state.set(new_state);
+  }
+
+  @method success(contract_preimage: Preimage, actor_sk: PrivateKey) {
+    const commitment: Field = this.commitment.get();
+    this.commitment.assertEquals(commitment);
+
+    const automaton_state: Field = this.automaton_state.get();
+    this.automaton_state.assertEquals(automaton_state);
+
+    const blockchain_length: UInt32 = this.network.blockchainLength.get();
+    this.network.blockchainLength.assertEquals(blockchain_length);
+
+    // make sure this is the right contract by checking if
+    // the caller is in possession of the correct preimage
+    commitment.assertEquals(contract_preimage.getCommitment());
+
+    // check if the deposit deadline is respected
+    blockchain_length.assertGte(contract_preimage.success.start_after);
+    blockchain_length.assertLt(contract_preimage.success.finish_before);
+
+    // make sure the caller is a party in the contract
+    contract_preimage.isParty(actor_sk.toPublicKey()).assertTrue();
+
+    // state must be deposited
+    automaton_state.assertEquals(Field(state_deposited));
+
+    // ensure caller is the arbiter
+    contract_preimage.isArbiter(actor_sk.toPublicKey()).assertTrue();
+
+    // update the state to "succeeded"
+    this.automaton_state.set(Field(state_succeeded));
+
+    // zero the memory for the withdrawals
+    this.memory.set(Field(0));
+  }
+
+  @method failure(contract_preimage: Preimage, actor_sk: PrivateKey) {
+    const commitment: Field = this.commitment.get();
+    this.commitment.assertEquals(commitment);
+
+    const automaton_state: Field = this.automaton_state.get();
+    this.automaton_state.assertEquals(automaton_state);
+
+    const blockchain_length: UInt32 = this.network.blockchainLength.get();
+    this.network.blockchainLength.assertEquals(blockchain_length);
+
+    // make sure this is the right contract by checking if
+    // the caller is in possession of the correct preimage
+    commitment.assertEquals(contract_preimage.getCommitment());
+
+    // check if the deposit deadline is respected
+    blockchain_length.assertGte(contract_preimage.failure.start_after);
+    blockchain_length.assertLt(contract_preimage.failure.finish_before);
+
+    // make sure the caller is a party in the contract
+    contract_preimage.isParty(actor_sk.toPublicKey()).assertTrue();
+
+    // state must be deposited
+    automaton_state.assertEquals(Field(state_deposited));
+
+    // ensure caller is the arbiter
+    contract_preimage.isArbiter(actor_sk.toPublicKey()).assertTrue();
+
+    // update the state to "canceled"
+    this.automaton_state.set(Field(state_failed));
+
+    // zero the memory for the withdrawals
+    this.memory.set(Field(0));
+  }
+
+  @method cancel(contract_preimage: Preimage, actor_sk: PrivateKey) {
+    const commitment: Field = this.commitment.get();
+    this.commitment.assertEquals(commitment);
+
+    const automaton_state: Field = this.automaton_state.get();
+    this.automaton_state.assertEquals(automaton_state);
+
+    const blockchain_length: UInt32 = this.network.blockchainLength.get();
+    this.network.blockchainLength.assertEquals(blockchain_length);
+
+    // make sure this is the right contract by checking if
+    // the caller is in possession of the correct preimage
+    commitment.assertEquals(contract_preimage.getCommitment());
+
+    // check if the deposit deadline is respected
+    blockchain_length.assertGte(contract_preimage.cancel.start_after);
+    blockchain_length.assertLt(contract_preimage.cancel.finish_before);
+
+    // make sure the caller is a party in the contract
+    contract_preimage.isParty(actor_sk.toPublicKey()).assertTrue();
+
+    // state must be initial
+    automaton_state.assertEquals(Field(state_initial));
+
+    // update the state to "canceled"
+    this.automaton_state.set(Field(state_canceled));
+
+    // we do not zero the memory because in the canceled state
+    // the actors can withdraw whatever they deposited
+    // successufuly reversing their actions
   }
 }

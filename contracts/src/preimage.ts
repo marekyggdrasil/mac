@@ -8,6 +8,7 @@ import {
   CircuitString,
   Poseidon,
   UInt64,
+  UInt32,
   Bool,
 } from 'snarkyjs';
 
@@ -52,16 +53,16 @@ export class Outcome extends CircuitValue {
   @prop payment_contractor: UInt64;
   @prop payment_arbiter: UInt64;
 
-  @prop start_after: UInt64;
-  @prop finish_before: UInt64;
+  @prop start_after: UInt32;
+  @prop finish_before: UInt32;
 
   constructor(
     description: CircuitString,
     payment_employer: UInt64,
     payment_contractor: UInt64,
     payment_arbiter: UInt64,
-    start_after: UInt64,
-    finish_before: UInt64
+    start_after: UInt32,
+    finish_before: UInt32
   ) {
     super();
 

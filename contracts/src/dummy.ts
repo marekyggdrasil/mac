@@ -8,6 +8,7 @@ import {
   PrivateKey,
   PublicKey,
   UInt64,
+  UInt32,
 } from 'snarkyjs';
 
 import { Participant, Outcome, Preimage } from './preimage';
@@ -49,8 +50,8 @@ export function makeDummyPreimage(
     UInt64.from(12000000),
     UInt64.from(6000000),
     UInt64.from(6000000),
-    UInt64.from(0),
-    UInt64.from(0)
+    UInt32.from(0),
+    UInt32.from(5)
   );
 
   outcome_success = new Outcome(
@@ -58,8 +59,8 @@ export function makeDummyPreimage(
     UInt64.from(6000000),
     UInt64.from(12000000),
     UInt64.from(6000000),
-    UInt64.from(0),
-    UInt64.from(0)
+    UInt32.from(5),
+    UInt32.from(15)
   );
 
   outcome_failure = new Outcome(
@@ -67,8 +68,8 @@ export function makeDummyPreimage(
     UInt64.from(11000000),
     UInt64.from(5000000),
     UInt64.from(8000000),
-    UInt64.from(0),
-    UInt64.from(0)
+    UInt32.from(15),
+    UInt32.from(30)
   );
 
   outcome_cancel = new Outcome(
@@ -78,8 +79,8 @@ export function makeDummyPreimage(
     UInt64.from(12000000),
     UInt64.from(6000000),
     UInt64.from(6000000),
-    UInt64.from(0),
-    UInt64.from(0)
+    UInt32.from(0),
+    UInt32.from(5)
   );
 
   mac_contract = new Preimage(
