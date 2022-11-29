@@ -167,5 +167,14 @@ describe('Mac tests', () => {
     Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(999994000000));
 
     local.setBlockchainLength(UInt32.from(4));
+    local.setBlockchainLength(UInt32.from(5));
+
+    // now the arbitrator approves the job done by the employee
+    const tx_approval = await Mina.transaction(arbiter_sk, () => {
+      zkAppInstance.success(mac_contract, arbiter_sk);
+    });
+    await tx_approval.prove();
+    await tx_approval.sign([arbiter_sk]);
+    await tx_approval.send();
   });
 });
