@@ -15,7 +15,7 @@ import {
   AccountUpdate,
 } from 'snarkyjs';
 
-import { Preimage } from './preimage';
+import { Preimage, Outcome } from './preimage';
 
 const state_initial: number = 0;
 const state_deposited: number = 1;
@@ -158,6 +158,103 @@ export class Mac extends SmartContract {
       Field(state_initial)
     );
     this.automaton_state.set(new_state);
+  }
+
+  @method withdraw(contract_preimage: Preimage, actor: PublicKey) {
+    const commitment: Field = this.commitment.get();
+    this.commitment.assertEquals(commitment);
+
+    const automaton_state: Field = this.automaton_state.get();
+    this.automaton_state.assertEquals(automaton_state);
+
+    const memory: Field = this.memory.get();
+    this.memory.assertEquals(memory);
+
+    // make sure this is the right contract by checking if
+    // the caller is in possession of the correct preimage
+    commitment.assertEquals(contract_preimage.getCommitment());
+
+    // make sure the caller is a party in the contract
+    contract_preimage.isParty(actor).assertTrue();
+
+    // check who has acted
+    const actions: Bool[] = memory.toBits(3);
+    const acted: Bool = Circuit.if(
+      contract_preimage.isEmployer(actor),
+      actions[0],
+      Circuit.if(
+        contract_preimage.isContractor(actor),
+        actions[1],
+        Circuit.if(contract_preimage.isArbiter(actor), actions[2], Bool(false))
+      )
+    );
+    const has_not_acted: Bool = acted.not();
+
+    // determine if it is allowed to withdraw at this stage
+    const is_state_canceled_early: Bool = automaton_state.equals(
+      Field(state_canceled_early)
+    );
+    const is_state_canceled: Bool = automaton_state.equals(
+      Field(state_canceled)
+    );
+    const is_state_succeeded: Bool = automaton_state.equals(
+      Field(state_succeeded)
+    );
+    const is_state_failed: Bool = automaton_state.equals(Field(state_failed));
+
+    const withdraw_allowed: Bool = is_state_canceled_early
+      .and(acted)
+      .or(is_state_canceled.and(has_not_acted))
+      .or(is_state_succeeded.and(has_not_acted))
+      .or(is_state_failed.and(has_not_acted));
+    withdraw_allowed.assertTrue();
+
+    // determine the amount of the withdrawal
+    const current_outcome: Outcome = Circuit.if(
+      is_state_canceled_early,
+      contract_preimage.deposited,
+      Circuit.if(
+        is_state_canceled,
+        contract_preimage.cancel,
+        Circuit.if(
+          is_state_succeeded,
+          contract_preimage.success,
+          contract_preimage.failure // only option left...
+        )
+      )
+    );
+    const amount: UInt64 = Circuit.if(
+      contract_preimage.isEmployer(actor),
+      current_outcome.payment_employer,
+      Circuit.if(
+        contract_preimage.isContractor(actor),
+        current_outcome.payment_contractor,
+        current_outcome.payment_arbiter // only option left...
+      )
+    );
+
+    // do the withdrawal
+    this.send({ to: actor, amount: amount });
+
+    // update the memory
+    actions[0] = Circuit.if(
+      contract_preimage.isEmployer(actor),
+      actions[0].not(),
+      actions[0]
+    );
+    actions[1] = Circuit.if(
+      contract_preimage.isContractor(actor),
+      actions[1].not(),
+      actions[1]
+    );
+    actions[2] = Circuit.if(
+      contract_preimage.isArbiter(actor),
+      actions[2].not(),
+      actions[2]
+    );
+
+    const new_memory: Field = Field.fromBits(actions);
+    this.memory.set(new_memory);
   }
 
   @method success(contract_preimage: Preimage, actor_sk: PrivateKey) {
