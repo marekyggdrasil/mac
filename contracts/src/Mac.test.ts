@@ -110,7 +110,7 @@ describe('Mac tests', () => {
     setTimeout(shutdown, 0);
   });
 
-  it('should correctly deploy Mac contract, approve and withdraw', async () => {
+  it('should correctly deploy Mac contract, approve and withdraw but only at correct stages', async () => {
     const balance_initial = 1000000000000;
     const amount_payment = 6000000;
     const amount_deposit = 6000000;
@@ -163,6 +163,11 @@ describe('Mac tests', () => {
     // let the employer do the deposit
     await deposit(mac_contract, zkAppInstance, employer_sk);
 
+    // prevent employer from accidentally depositing again
+    await expect(async () => {
+      await deposit(mac_contract, zkAppInstance, employer_sk);
+    }).rejects.toThrow();
+
     // check balances after the employer deposit
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
@@ -193,6 +198,7 @@ describe('Mac tests', () => {
 
     // let the arbiter do the deposit
     await deposit(mac_contract, zkAppInstance, arbiter_sk);
+    local.setBlockchainLength(UInt32.from(4));
 
     // check balances after the arbiter deposit
     assertBalance(
@@ -205,7 +211,10 @@ describe('Mac tests', () => {
       ]
     );
 
-    local.setBlockchainLength(UInt32.from(4));
+    // prevent arbiter from doing withdrawal at this stage
+    await expect(async () => {
+      await withdraw(mac_contract, zkAppInstance, arbiter_sk);
+    }).rejects.toThrow();
     local.setBlockchainLength(UInt32.from(5));
 
     // now the arbitrator approves the job done by the employee
@@ -215,7 +224,6 @@ describe('Mac tests', () => {
     await tx_approval.prove();
     await tx_approval.sign([arbiter_sk]);
     await tx_approval.send();
-
     local.setBlockchainLength(UInt32.from(5));
 
     // let the contractor do the withdrawal
