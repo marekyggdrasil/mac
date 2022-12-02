@@ -76,7 +76,13 @@ describe('Mac tests', () => {
     setTimeout(shutdown, 0);
   });
 
-  it('should correctly deploy Mac contract', async () => {
+  it('should correctly deploy Mac contract, approve and withdraw', async () => {
+    const balance_initial = 1000000000000;
+    const amount_payment = 6000000;
+    const amount_deposit = 6000000;
+    const amount_arbitration_reward_employer_share = 1000000;
+    const amount_arbitration_reward_contractor_share = 1000000;
+
     const local = Mina.LocalBlockchain();
     Mina.setActiveInstance(local);
     local.setBlockchainLength(UInt32.from(0));
@@ -112,11 +118,12 @@ describe('Mac tests', () => {
       contractor_sk,
       arbiter_sk
     );
+
     // initial balance of the contract is zero
     Mina.getBalance(zkAppAddress).assertEquals(UInt64.from(0));
-    Mina.getBalance(employer_pk).assertEquals(UInt64.from(1000000000000));
-    Mina.getBalance(contractor_pk).assertEquals(UInt64.from(1000000000000));
-    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(1000000000000));
+    Mina.getBalance(employer_pk).assertEquals(UInt64.from(balance_initial));
+    Mina.getBalance(contractor_pk).assertEquals(UInt64.from(balance_initial));
+    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(balance_initial));
 
     local.setBlockchainLength(UInt32.from(1));
 
@@ -129,10 +136,14 @@ describe('Mac tests', () => {
     await tx_deposit_employer.send();
 
     // check balances after the employer deposit
-    Mina.getBalance(zkAppAddress).assertEquals(UInt64.from(12000000));
-    Mina.getBalance(employer_pk).assertEquals(UInt64.from(999988000000));
-    Mina.getBalance(contractor_pk).assertEquals(UInt64.from(1000000000000));
-    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(1000000000000));
+    Mina.getBalance(zkAppAddress).assertEquals(
+      UInt64.from(amount_payment + amount_deposit)
+    );
+    Mina.getBalance(employer_pk).assertEquals(
+      UInt64.from(balance_initial - amount_payment - amount_deposit)
+    );
+    Mina.getBalance(contractor_pk).assertEquals(UInt64.from(balance_initial));
+    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(balance_initial));
 
     local.setBlockchainLength(UInt32.from(2));
 
@@ -145,10 +156,16 @@ describe('Mac tests', () => {
     await tx_deposit_contractor.send();
 
     // check balances after the contractor deposit
-    Mina.getBalance(zkAppAddress).assertEquals(UInt64.from(18000000));
-    Mina.getBalance(employer_pk).assertEquals(UInt64.from(999988000000));
-    Mina.getBalance(contractor_pk).assertEquals(UInt64.from(999994000000));
-    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(1000000000000));
+    Mina.getBalance(zkAppAddress).assertEquals(
+      UInt64.from(amount_payment + 2 * amount_deposit)
+    );
+    Mina.getBalance(employer_pk).assertEquals(
+      UInt64.from(balance_initial - amount_payment - amount_deposit)
+    );
+    Mina.getBalance(contractor_pk).assertEquals(
+      UInt64.from(balance_initial - amount_deposit)
+    );
+    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(balance_initial));
 
     local.setBlockchainLength(UInt32.from(3));
 
@@ -161,10 +178,18 @@ describe('Mac tests', () => {
     await tx_deposit_arbiter.send();
 
     // check balances after the arbiter deposit
-    Mina.getBalance(zkAppAddress).assertEquals(UInt64.from(24000000));
-    Mina.getBalance(employer_pk).assertEquals(UInt64.from(999988000000));
-    Mina.getBalance(contractor_pk).assertEquals(UInt64.from(999994000000));
-    Mina.getBalance(arbiter_pk).assertEquals(UInt64.from(999994000000));
+    Mina.getBalance(zkAppAddress).assertEquals(
+      UInt64.from(amount_payment + 3 * amount_deposit)
+    );
+    Mina.getBalance(employer_pk).assertEquals(
+      UInt64.from(balance_initial - amount_payment - amount_deposit)
+    );
+    Mina.getBalance(contractor_pk).assertEquals(
+      UInt64.from(balance_initial - amount_deposit)
+    );
+    Mina.getBalance(arbiter_pk).assertEquals(
+      UInt64.from(balance_initial - amount_deposit)
+    );
 
     local.setBlockchainLength(UInt32.from(4));
     local.setBlockchainLength(UInt32.from(5));
@@ -176,5 +201,101 @@ describe('Mac tests', () => {
     await tx_approval.prove();
     await tx_approval.sign([arbiter_sk]);
     await tx_approval.send();
+
+    local.setBlockchainLength(UInt32.from(5));
+
+    // let the contractor do the withdrawal
+    const tx_withdraw_contractor = await Mina.transaction(contractor_sk, () => {
+      zkAppInstance.withdraw(mac_contract, contractor_pk);
+    });
+    await tx_withdraw_contractor.prove();
+    await tx_withdraw_contractor.sign([contractor_sk]);
+    await tx_withdraw_contractor.send();
+
+    local.setBlockchainLength(UInt32.from(6));
+
+    // check if the contractor has been paid
+    Mina.getBalance(zkAppAddress).assertEquals(
+      UInt64.from(
+        amount_payment +
+          amount_deposit +
+          amount_arbitration_reward_contractor_share
+      )
+    );
+    Mina.getBalance(employer_pk).assertEquals(
+      UInt64.from(balance_initial - amount_payment - amount_deposit)
+    );
+    Mina.getBalance(contractor_pk).assertEquals(
+      UInt64.from(
+        balance_initial +
+          amount_payment -
+          amount_arbitration_reward_contractor_share
+      )
+    );
+    Mina.getBalance(arbiter_pk).assertEquals(
+      UInt64.from(balance_initial - amount_deposit)
+    );
+
+    // let the arbiter get paid for own service as well
+    const tx_withdraw_arbiter = await Mina.transaction(arbiter_sk, () => {
+      zkAppInstance.withdraw(mac_contract, arbiter_pk);
+    });
+    await tx_withdraw_arbiter.prove();
+    await tx_withdraw_arbiter.sign([contractor_sk]);
+    await tx_withdraw_arbiter.send();
+
+    // check if the arbiter has been paid
+    Mina.getBalance(zkAppAddress).assertEquals(
+      UInt64.from(amount_deposit - amount_arbitration_reward_employer_share)
+    );
+    Mina.getBalance(employer_pk).assertEquals(
+      UInt64.from(balance_initial - amount_deposit - amount_payment)
+    );
+    Mina.getBalance(contractor_pk).assertEquals(
+      UInt64.from(
+        balance_initial +
+          amount_payment -
+          amount_arbitration_reward_contractor_share
+      )
+    );
+    Mina.getBalance(arbiter_pk).assertEquals(
+      UInt64.from(
+        balance_initial +
+          amount_arbitration_reward_employer_share +
+          amount_arbitration_reward_contractor_share
+      )
+    );
+
+    // finally, let the employer get own deposit back - the fee for the arbiter
+    const tx_withdraw_employer = await Mina.transaction(employer_sk, () => {
+      zkAppInstance.withdraw(mac_contract, employer_pk);
+    });
+    await tx_withdraw_employer.prove();
+    await tx_withdraw_employer.sign([employer_sk]);
+    await tx_withdraw_employer.send();
+
+    // check if the employer has been paid
+    Mina.getBalance(zkAppAddress).assertEquals(UInt64.from(0));
+    Mina.getBalance(employer_pk).assertEquals(
+      UInt64.from(
+        balance_initial -
+          amount_payment -
+          amount_arbitration_reward_employer_share
+      )
+    );
+    Mina.getBalance(contractor_pk).assertEquals(
+      UInt64.from(
+        balance_initial +
+          amount_payment -
+          amount_arbitration_reward_contractor_share
+      )
+    );
+    Mina.getBalance(arbiter_pk).assertEquals(
+      UInt64.from(
+        balance_initial +
+          amount_arbitration_reward_employer_share +
+          amount_arbitration_reward_contractor_share
+      )
+    );
   });
 });
