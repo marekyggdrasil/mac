@@ -56,9 +56,9 @@ export function makeDummyPreimage(
 
   outcome_success = new Outcome(
     CircuitString.fromString('The contractor successfully did the job'),
-    UInt64.from(6000000),
-    UInt64.from(12000000),
-    UInt64.from(6000000),
+    UInt64.from(5000000),
+    UInt64.from(11000000),
+    UInt64.from(8000000),
     UInt32.from(5),
     UInt32.from(15)
   );
