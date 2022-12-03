@@ -138,7 +138,9 @@ describe('Mac tests', () => {
     zkAppAddress: PublicKey,
     zkAppPrivateKey: PrivateKey;
 
-  // let local: Mina;
+  let zkAppInstance: Mac;
+
+  let local: ReturnType<typeof Mina.LocalBlockchain>;
 
   beforeEach(async () => {
     await isReady;
@@ -146,20 +148,8 @@ describe('Mac tests', () => {
 
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
-  });
 
-  afterAll(async () => {
-    setTimeout(shutdown, 0);
-  });
-
-  it('should correctly deploy Mac contract, approve and withdraw but only at correct stages', async () => {
-    const balance_initial = 1000000000000;
-    const amount_payment = 6000000;
-    const amount_deposit = 6000000;
-    const amount_arbitration_reward_employer_share = 1000000;
-    const amount_arbitration_reward_contractor_share = 1000000;
-
-    const local = Mina.LocalBlockchain();
+    local = Mina.LocalBlockchain();
     Mina.setActiveInstance(local);
     local.setBlockchainLength(UInt32.from(0));
 
@@ -184,7 +174,7 @@ describe('Mac tests', () => {
     ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk);
 
     // deploy the contract
-    const zkAppInstance = new Mac(zkAppAddress);
+    zkAppInstance = new Mac(zkAppAddress);
     await localDeploy(
       zkAppInstance,
       zkAppPrivateKey,
@@ -194,6 +184,18 @@ describe('Mac tests', () => {
       contractor_sk,
       arbiter_sk
     );
+  });
+
+  afterAll(async () => {
+    setTimeout(shutdown, 0);
+  });
+
+  it('should correctly deploy Mac contract, approve and withdraw but only at correct stages', async () => {
+    const balance_initial = 1000000000000;
+    const amount_payment = 6000000;
+    const amount_deposit = 6000000;
+    const amount_arbitration_reward_employer_share = 1000000;
+    const amount_arbitration_reward_contractor_share = 1000000;
 
     // initial balance of the contract is zero
     assertBalance(
