@@ -45,6 +45,48 @@ async function withdraw(
   await tx.send();
 }
 
+async function success(
+  mac_contract: Preimage,
+  zkAppInstance: Mac,
+  actor_sk: PrivateKey
+) {
+  const actor_pk: PublicKey = actor_sk.toPublicKey();
+  const tx = await Mina.transaction(actor_sk, () => {
+    zkAppInstance.success(mac_contract, actor_sk);
+  });
+  await tx.prove();
+  await tx.sign([actor_sk]);
+  await tx.send();
+}
+
+async function failure(
+  mac_contract: Preimage,
+  zkAppInstance: Mac,
+  actor_sk: PrivateKey
+) {
+  const actor_pk: PublicKey = actor_sk.toPublicKey();
+  const tx = await Mina.transaction(actor_sk, () => {
+    zkAppInstance.failure(mac_contract, actor_sk);
+  });
+  await tx.prove();
+  await tx.sign([actor_sk]);
+  await tx.send();
+}
+
+async function cancel(
+  mac_contract: Preimage,
+  zkAppInstance: Mac,
+  actor_sk: PrivateKey
+) {
+  const actor_pk: PublicKey = actor_sk.toPublicKey();
+  const tx = await Mina.transaction(actor_sk, () => {
+    zkAppInstance.cancel(mac_contract, actor_sk);
+  });
+  await tx.prove();
+  await tx.sign([actor_sk]);
+  await tx.send();
+}
+
 function assertBalance(keys: PublicKey[], balances: number[]) {
   for (let i = 0; i < keys.length; ++i) {
     Mina.getBalance(keys[i]).assertEquals(UInt64.from(balances[i]));
@@ -218,13 +260,17 @@ describe('Mac tests', () => {
     local.setBlockchainLength(UInt32.from(5));
 
     // now the arbitrator approves the job done by the employee
-    const tx_approval = await Mina.transaction(arbiter_sk, () => {
-      zkAppInstance.success(mac_contract, arbiter_sk);
-    });
-    await tx_approval.prove();
-    await tx_approval.sign([arbiter_sk]);
-    await tx_approval.send();
+    await success(mac_contract, zkAppInstance, arbiter_sk);
     local.setBlockchainLength(UInt32.from(5));
+
+    // at this stage, cancel and failure attempts must not succeed
+    await expect(async () => {
+      await cancel(mac_contract, zkAppInstance, arbiter_sk);
+    }).rejects.toThrow();
+
+    await expect(async () => {
+      await failure(mac_contract, zkAppInstance, arbiter_sk);
+    }).rejects.toThrow();
 
     // let the contractor do the withdrawal
     await withdraw(mac_contract, zkAppInstance, contractor_sk);
