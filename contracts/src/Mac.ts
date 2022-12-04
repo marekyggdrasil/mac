@@ -257,7 +257,7 @@ export class Mac extends SmartContract {
     this.memory.set(new_memory);
   }
 
-  @method success(contract_preimage: Preimage, actor_sk: PrivateKey) {
+  @method success(contract_preimage: Preimage, actor_pk: PublicKey) {
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
 
@@ -276,13 +276,16 @@ export class Mac extends SmartContract {
     blockchain_length.assertLt(contract_preimage.success.finish_before);
 
     // make sure the caller is a party in the contract
-    contract_preimage.isParty(actor_sk.toPublicKey()).assertTrue();
+    contract_preimage.isParty(actor_pk).assertTrue();
+
+    // make sure that the caller is approving this method
+    AccountUpdate.create(actor_pk).requireSignature();
 
     // state must be deposited
     automaton_state.assertEquals(Field(state_deposited));
 
     // ensure caller is the arbiter
-    contract_preimage.isArbiter(actor_sk.toPublicKey()).assertTrue();
+    contract_preimage.isArbiter(actor_pk).assertTrue();
 
     // update the state to "succeeded"
     this.automaton_state.set(Field(state_succeeded));
@@ -291,7 +294,7 @@ export class Mac extends SmartContract {
     this.memory.set(Field(0));
   }
 
-  @method failure(contract_preimage: Preimage, actor_sk: PrivateKey) {
+  @method failure(contract_preimage: Preimage, actor_pk: PublicKey) {
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
 
@@ -310,13 +313,16 @@ export class Mac extends SmartContract {
     blockchain_length.assertLt(contract_preimage.failure.finish_before);
 
     // make sure the caller is a party in the contract
-    contract_preimage.isParty(actor_sk.toPublicKey()).assertTrue();
+    contract_preimage.isParty(actor_pk).assertTrue();
+
+    // make sure that the caller is approving this method
+    AccountUpdate.create(actor_pk).requireSignature();
 
     // state must be deposited
     automaton_state.assertEquals(Field(state_deposited));
 
     // ensure caller is the arbiter
-    contract_preimage.isArbiter(actor_sk.toPublicKey()).assertTrue();
+    contract_preimage.isArbiter(actor_pk).assertTrue();
 
     // update the state to "canceled"
     this.automaton_state.set(Field(state_failed));
@@ -325,7 +331,7 @@ export class Mac extends SmartContract {
     this.memory.set(Field(0));
   }
 
-  @method cancel(contract_preimage: Preimage, actor_sk: PrivateKey) {
+  @method cancel(contract_preimage: Preimage, actor_pk: PublicKey) {
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
 
@@ -343,7 +349,10 @@ export class Mac extends SmartContract {
     commitment.assertEquals(contract_preimage.getCommitment());
 
     // make sure the caller is a party in the contract
-    contract_preimage.isParty(actor_sk.toPublicKey()).assertTrue();
+    contract_preimage.isParty(actor_pk).assertTrue();
+
+    // make sure that the caller is approving this method
+    AccountUpdate.create(actor_pk).requireSignature();
 
     // before deposit deadline anyone can cancel
     const is_in_deposit: Bool = contract_preimage.deposited.start_after
@@ -364,7 +373,7 @@ export class Mac extends SmartContract {
     // if it is after the initial stage, caller must be employee
     const is_caller_correct: Bool = Circuit.if(
       is_within_deadline,
-      contract_preimage.isEmployer(actor_sk.toPublicKey()),
+      contract_preimage.isEmployer(actor_pk),
       Bool(true)
     );
 

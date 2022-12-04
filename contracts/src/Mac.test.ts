@@ -52,7 +52,7 @@ async function success(
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
   const tx = await Mina.transaction(actor_sk, () => {
-    zkAppInstance.success(mac_contract, actor_sk);
+    zkAppInstance.success(mac_contract, actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
@@ -66,7 +66,7 @@ async function failure(
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
   const tx = await Mina.transaction(actor_sk, () => {
-    zkAppInstance.failure(mac_contract, actor_sk);
+    zkAppInstance.failure(mac_contract, actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
@@ -80,7 +80,7 @@ async function cancel(
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
   const tx = await Mina.transaction(actor_sk, () => {
-    zkAppInstance.cancel(mac_contract, actor_sk);
+    zkAppInstance.cancel(mac_contract, actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
