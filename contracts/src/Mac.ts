@@ -367,13 +367,14 @@ export class Mac extends SmartContract {
       contract_preimage.isEmployer(actor_sk.toPublicKey()),
       Bool(true)
     );
+
     is_caller_correct.assertTrue();
 
     // update the state to "canceled" or "canceled early"
     const next_state: Field = Circuit.if(
       is_within_deadline,
       Field(state_canceled),
-      Field(state_canceled)
+      Field(state_canceled_early)
     );
     this.automaton_state.set(next_state);
 

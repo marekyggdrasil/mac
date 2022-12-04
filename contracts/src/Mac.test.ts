@@ -332,4 +332,84 @@ describe('Mac tests', () => {
       ]
     );
   });
+
+  it('should allow the withdrawal with no consequences to those who deposited after early cancellation', async () => {
+    const balance_initial = 1000000000000;
+    const amount_payment = 6000000;
+    const amount_deposit = 6000000;
+    const amount_arbitration_reward_employer_share = 1000000;
+    const amount_arbitration_reward_contractor_share = 1000000;
+
+    // initial balance of the contract is zero
+    assertBalance(
+      [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
+      [0, balance_initial, balance_initial, balance_initial]
+    );
+    local.setBlockchainLength(UInt32.from(1));
+
+    // let the employer do the deposit
+    await deposit(mac_contract, zkAppInstance, employer_sk);
+
+    // check balances after the employer deposit
+    assertBalance(
+      [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
+      [
+        amount_payment + amount_deposit,
+        balance_initial - amount_payment - amount_deposit,
+        balance_initial,
+        balance_initial,
+      ]
+    );
+    local.setBlockchainLength(UInt32.from(2));
+
+    // let the contractor do the deposit
+    await deposit(mac_contract, zkAppInstance, contractor_sk);
+
+    // check balances after the contractor deposit
+    assertBalance(
+      [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
+      [
+        amount_payment + 2 * amount_deposit,
+        balance_initial - amount_payment - amount_deposit,
+        balance_initial - amount_deposit,
+        balance_initial,
+      ]
+    );
+
+    // THIS LINE IS CAUSING TESTS TO FAIL
+    local.setBlockchainLength(UInt32.from(3));
+    // the arbiter did not do the deposit yet, contractor decides to cancel
+    await cancel(mac_contract, zkAppInstance, contractor_sk);
+    local.setBlockchainLength(UInt32.from(4));
+
+    // now we test if everyone who deposited can withdraw what has been deposited
+    // let the contractor do the withdrawal
+    await withdraw(mac_contract, zkAppInstance, contractor_sk);
+
+    assertBalance(
+      [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
+      [
+        amount_payment + amount_deposit,
+        balance_initial - amount_payment - amount_deposit,
+        balance_initial,
+        balance_initial,
+      ]
+    );
+
+    // now the arbiter will try to withdraw, this must fail as the arbiter
+    // did not do any deposit
+    await expect(async () => {
+      await withdraw(mac_contract, zkAppInstance, arbiter_sk);
+    }).rejects.toThrow();
+
+    // now the employer successfully withdraws own deposit
+    await withdraw(mac_contract, zkAppInstance, employer_sk);
+
+    // check if the balances returned to their original state
+
+    assertBalance(
+      [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
+      [0, balance_initial, balance_initial, balance_initial]
+    );
+  });
 });
