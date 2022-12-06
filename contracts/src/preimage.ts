@@ -12,6 +12,27 @@ import {
   Bool,
 } from 'snarkyjs';
 
+import bs58 from 'bs58';
+import byteify from 'byteify';
+
+function Uint8ArrayConcat(arrays: Uint8Array[]): Uint8Array {
+  let t: number[] = [];
+  for (let j = 0; j < arrays.length; ++j) {
+    for (let i = 0; i < arrays[j].length; ++i) {
+      t.push(arrays[j][i]);
+    }
+  }
+  return new Uint8Array(t);
+}
+
+function Uint8ArrayToNumbers(input: Uint8Array): number[] {
+  let t: number[] = [];
+  for (let i = 0; i < input.length; ++i) {
+    t.push(input[i]);
+  }
+  return t;
+}
+
 export class Participant extends CircuitValue {
   @prop participant_address: PublicKey;
 
@@ -43,6 +64,15 @@ export class Participant extends CircuitValue {
       serialized.slice(0, len)
     );
     return [deserialized, serialized.slice(len, tot)];
+  }
+
+  toBytes(): Uint8Array {
+    const bytes = bs58.decode(this.participant_address.toBase58());
+    return bytes;
+  } // 40 bytes
+
+  static fromBytes(bytes: Uint8Array): Participant {
+    return new Participant(PublicKey.fromBase58(bs58.encode(bytes)));
   }
 }
 
@@ -93,6 +123,72 @@ export class Outcome extends CircuitValue {
     const tot: number = serialized.length;
     const deserialized: Outcome = Outcome.deserialize(serialized.slice(0, len));
     return [deserialized, serialized.slice(len, tot)];
+  }
+
+  toBytes(): Uint8Array {
+    const bytes_text: Uint8Array = Buffer.from(this.description.toString());
+    const bytes_text_length: Uint8Array = Uint8Array.from(
+      byteify.serializeUint8(bytes_text.length)
+    );
+    const bytes_employer: Uint8Array = Uint8Array.from(
+      byteify.serializeUint64(this.payment_employer.toBigInt())
+    );
+    const bytes_contractor: Uint8Array = Uint8Array.from(
+      byteify.serializeUint64(this.payment_contractor.toBigInt())
+    );
+    const bytes_arbiter: Uint8Array = Uint8Array.from(
+      byteify.serializeUint64(this.payment_arbiter.toBigInt())
+    );
+    const bytes_start_after: Uint8Array = Uint8Array.from(
+      byteify.serializeUint64(this.start_after.toUInt64().toBigInt())
+    );
+    const bytes_finish_before: Uint8Array = Uint8Array.from(
+      byteify.serializeUint64(this.finish_before.toUInt64().toBigInt())
+    );
+    return Uint8ArrayConcat([
+      bytes_employer,
+      bytes_contractor,
+      bytes_arbiter,
+      bytes_start_after,
+      bytes_finish_before,
+      bytes_text_length,
+      bytes_text,
+    ]);
+  }
+
+  static fromBytes(bytes: Uint8Array): Outcome {
+    const payment_employer: UInt64 = UInt64.from(
+      byteify.deserializeUint64(Uint8ArrayToNumbers(bytes.slice(0, 8)))
+    );
+    const payment_contractor: UInt64 = UInt64.from(
+      byteify.deserializeUint64(Uint8ArrayToNumbers(bytes.slice(8, 16)))
+    );
+    const payment_arbiter: UInt64 = UInt64.from(
+      byteify.deserializeUint64(Uint8ArrayToNumbers(bytes.slice(16, 24)))
+    );
+    const start_after: UInt32 = UInt32.from(
+      byteify.deserializeUint64(Uint8ArrayToNumbers(bytes.slice(24, 32)))
+    );
+    const finish_before: UInt32 = UInt32.from(
+      byteify.deserializeUint64(Uint8ArrayToNumbers(bytes.slice(32, 40)))
+    );
+
+    const text_length: number = byteify.deserializeUint8(
+      Uint8ArrayToNumbers(bytes.slice(40, 41))
+    );
+
+    const text: string = Buffer.from(
+      bytes.slice(41, 41 + text_length)
+    ).toString();
+    const description: CircuitString = CircuitString.fromString(text);
+    return new Outcome(
+      description,
+      payment_employer,
+      payment_contractor,
+      payment_arbiter,
+      start_after,
+      finish_before
+    );
   }
 }
 
@@ -273,4 +369,8 @@ export class Preimage extends CircuitValue {
     // TODO
     return 'BEGINMACPACK. . ENDMACPACK.';
   }
+
+  //  static fromMacPack(macpac: string): Preimage {
+  //
+  //  }
 }

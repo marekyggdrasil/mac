@@ -45,7 +45,7 @@ describe('Preimage tests', () => {
     setTimeout(shutdown, 0);
   });
 
-  it('should correctly serialize/deserialize a participant', () => {
+  it('should correctly serialize/deserialize a participant to list of fields', () => {
     const serialized: Field[] = employer.serialize();
     const deserialized: Participant = Participant.deserialize(serialized);
     const [d, l]: [Participant, Field[]] =
@@ -53,11 +53,28 @@ describe('Preimage tests', () => {
     expect(l.length).toEqual(0);
   });
 
-  it('should correctly serialize/deserialize an outcome', () => {
+  it('should correctly serialize/deserialize a participant to bytes', () => {
+    const serialized: Uint8Array = employer.toBytes();
+    console.log(serialized.length);
+    const deserialized: Participant = Participant.fromBytes(serialized);
+    expect(deserialized).toEqual(employer);
+  });
+
+  it('should correctly serialize/deserialize an outcome to list of fields', () => {
     const serialized: Field[] = outcome_success.serialize();
     const deserialized: Outcome = Outcome.deserialize(serialized);
     const [d, l]: [Outcome, Field[]] = Outcome.deserializeBuffer(serialized);
     expect(l.length).toEqual(0);
+  });
+
+  it('should correctly serialize/deserialize an outcome to bytes', () => {
+    const sample: string = 'hello world hehe';
+    const bytes_text: Uint8Array = Buffer.from(sample);
+    const resample: string = Buffer.from(bytes_text).toString();
+    expect(resample).toEqual(sample);
+    const serialized: Uint8Array = outcome_success.toBytes();
+    const deserialized: Outcome = Outcome.fromBytes(serialized);
+    expect(deserialized).toEqual(outcome_success);
   });
 
   /*
