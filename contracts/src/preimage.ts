@@ -354,23 +354,176 @@ export class Preimage extends CircuitValue {
   }
 
   getCommitment(): Field {
-    //const [serialized, contract_string]: [Field[], string] = this.serialize();
     const serialized: Field[] = this.serialize();
     serialized.concat(this.contract.hash());
-    //const params_hash: Field = Poseidon.hash(serialized);
-    // const contract: CircuitString = CircuitString.fromString(contract_string);
-    //  const contract_hash: Field = contract.hash();
-    //return Poseidon.hash([params_hash, contract_hash]);
     return Poseidon.hash(serialized);
   }
 
-  // shareable contract
-  getMacPack(): String {
-    // TODO
-    return 'BEGINMACPACK. . ENDMACPACK.';
+  toBytes(): Uint8Array {
+    // protocol version and format version
+    const bytes_header = Uint8Array.from([1, 1]); // contract version, format version
+
+    const bytes_contract_text: Uint8Array = Buffer.from(
+      this.contract.toString()
+    );
+
+    const bytes_contract_text_length: Uint8Array = Uint8Array.from(
+      byteify.serializeUint8(bytes_contract_text.length)
+    );
+
+    const bytes_employer: Uint8Array = this.employer.toBytes();
+    const bytes_contractor: Uint8Array = this.contractor.toBytes();
+    const bytes_arbiter: Uint8Array = this.arbiter.toBytes();
+
+    const bytes_deposited: Uint8Array = this.deposited.toBytes();
+    const bytes_deposited_length: Uint8Array = Uint8Array.from(
+      byteify.serializeUint8(bytes_deposited.length)
+    );
+
+    const bytes_success: Uint8Array = this.success.toBytes();
+    const bytes_success_length: Uint8Array = Uint8Array.from(
+      byteify.serializeUint8(bytes_success.length)
+    );
+
+    const bytes_failure: Uint8Array = this.failure.toBytes();
+    const bytes_failure_length: Uint8Array = Uint8Array.from(
+      byteify.serializeUint8(bytes_failure.length)
+    );
+
+    const bytes_cancel: Uint8Array = this.cancel.toBytes();
+    const bytes_cancel_length: Uint8Array = Uint8Array.from(
+      byteify.serializeUint8(bytes_cancel.length)
+    );
+
+    return Uint8ArrayConcat([
+      bytes_header,
+      bytes_employer,
+      bytes_contractor,
+      bytes_arbiter,
+      bytes_deposited_length,
+      bytes_deposited,
+      bytes_success_length,
+      bytes_success,
+      bytes_failure_length,
+      bytes_failure,
+      bytes_cancel_length,
+      bytes_cancel,
+      bytes_contract_text_length,
+      bytes_contract_text,
+    ]);
   }
 
-  //  static fromMacPack(macpac: string): Preimage {
-  //
-  //  }
+  static fromBytes(bytes: Uint8Array): Preimage {
+    // for now ignore the protocol version and format version...
+    let i = 2;
+
+    const employer: Participant = Participant.fromBytes(bytes.slice(i, i + 40));
+    i += 40;
+    const contractor: Participant = Participant.fromBytes(
+      bytes.slice(i, i + 40)
+    );
+    i += 40;
+    const arbiter: Participant = Participant.fromBytes(bytes.slice(i, i + 40));
+    i += 40;
+
+    let length: number = 0;
+
+    length = byteify.deserializeUint8(
+      Uint8ArrayToNumbers(bytes.slice(i, i + 1))
+    );
+    i += 1;
+    const outcome_deposited: Outcome = Outcome.fromBytes(
+      bytes.slice(i, i + length)
+    );
+    i += length;
+
+    length = byteify.deserializeUint8(
+      Uint8ArrayToNumbers(bytes.slice(i, i + 1))
+    );
+    i += 1;
+    const outcome_success: Outcome = Outcome.fromBytes(
+      bytes.slice(i, i + length)
+    );
+    i += length;
+
+    length = byteify.deserializeUint8(
+      Uint8ArrayToNumbers(bytes.slice(i, i + 1))
+    );
+    i += 1;
+    const outcome_failure: Outcome = Outcome.fromBytes(
+      bytes.slice(i, i + length)
+    );
+    i += length;
+
+    length = byteify.deserializeUint8(
+      Uint8ArrayToNumbers(bytes.slice(i, i + 1))
+    );
+    i += 1;
+    const outcome_cancel: Outcome = Outcome.fromBytes(
+      bytes.slice(i, i + length)
+    );
+    i += length;
+
+    length = byteify.deserializeUint8(
+      Uint8ArrayToNumbers(bytes.slice(i, i + 1))
+    );
+    i += 1;
+    const contract: string = Buffer.from(bytes.slice(i, i + length)).toString();
+
+    return new Preimage(
+      CircuitString.fromString(contract),
+      employer,
+      contractor,
+      arbiter,
+      outcome_deposited,
+      outcome_success,
+      outcome_failure,
+      outcome_cancel
+    );
+  }
+
+  // shareable contract
+  getMacPack(): string {
+    const bytes: Uint8Array = this.toBytes();
+    let encoded: string = bs58.encode(bytes);
+
+    const wordlen: number = 13; // number of characters per word
+    const linelen: number = 4; // number of words per line
+    // console.log(encoded.match(/.{1,13}/g));
+
+    let macpack: string = 'BEGINMACPACK.';
+    let line: number = 1;
+
+    while (encoded.length > 0) {
+      let word: string = '';
+      if (encoded.length < wordlen) {
+        word = encoded;
+        encoded = '';
+      } else {
+        word = encoded.slice(0, wordlen);
+        encoded = encoded.slice(13, encoded.length);
+      }
+      if (line < linelen) {
+        macpack += ' ' + word;
+        line += 1;
+      } else {
+        line = 1;
+        macpack += '\n' + word;
+      }
+    }
+
+    macpack += '. ENDMACPACK.';
+    return macpack.toString();
+  }
+
+  static fromMacPack(macpack: string): Preimage {
+    let extracted: string = macpack.substring(
+      macpack.indexOf('BEGINMACPACK.') + 13,
+      macpack.lastIndexOf('. ENDMACPACK.')
+    );
+    extracted = extracted.replace(/[\n\r\s]/g, '');
+
+    const bytes = bs58.decode(extracted);
+    return this.fromBytes(bytes);
+  }
 }

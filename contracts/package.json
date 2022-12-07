@@ -44,5 +44,9 @@
   },
   "peerDependencies": {
     "snarkyjs": "0.7.1"
+  },
+  "dependencies": {
+    "bs58": "^5.0.0",
+    "byteify": "^4.0.0"
   }
 }

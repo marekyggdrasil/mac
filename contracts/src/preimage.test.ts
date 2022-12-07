@@ -55,7 +55,6 @@ describe('Preimage tests', () => {
 
   it('should correctly serialize/deserialize a participant to bytes', () => {
     const serialized: Uint8Array = employer.toBytes();
-    console.log(serialized.length);
     const deserialized: Participant = Participant.fromBytes(serialized);
     expect(deserialized).toEqual(employer);
   });
@@ -72,21 +71,11 @@ describe('Preimage tests', () => {
     const bytes_text: Uint8Array = Buffer.from(sample);
     const resample: string = Buffer.from(bytes_text).toString();
     expect(resample).toEqual(sample);
+
     const serialized: Uint8Array = outcome_success.toBytes();
     const deserialized: Outcome = Outcome.fromBytes(serialized);
     expect(deserialized).toEqual(outcome_success);
   });
-
-  /*
-  it('should correctly serialize/deserialize a whole contract', () => {
-    const [serialized, contract_string]: [Field[], string] =
-      mac_contract.serialize();
-    const deserialized: Preimage = Preimage.deserialize(
-      serialized,
-      contract_string
-    );
-  });
-  */
 
   it('should correctly identify the participants by their keys', () => {
     Circuit.runAndCheck(() => {
@@ -106,5 +95,17 @@ describe('Preimage tests', () => {
       mac_contract.isParty(contractor.pk()).assertEquals(Bool(true));
       mac_contract.isParty(arbiter.pk()).assertEquals(Bool(true));
     });
+  });
+
+  it('should correctly serialize/deserialize a whole contract to bytes', () => {
+    const serialized: Uint8Array = mac_contract.toBytes();
+    const deserialized: Preimage = Preimage.fromBytes(serialized);
+    expect(deserialized).toEqual(mac_contract);
+  });
+
+  it('should correctly import/export a whole contract using macpacs', () => {
+    const macpack: string = mac_contract.getMacPack();
+    const deserialized: Preimage = Preimage.fromMacPack(macpack);
+    expect(deserialized).toEqual(mac_contract);
   });
 });
