@@ -16,7 +16,8 @@ import { Participant, Outcome, Preimage } from './preimage';
 export function makeDummyPreimage(
   employer_sk: PrivateKey,
   contractor_sk: PrivateKey,
-  arbiter_sk: PrivateKey
+  arbiter_sk: PrivateKey,
+  zkAppAddress: PublicKey
 ): [
   Participant,
   Participant,
@@ -87,6 +88,7 @@ export function makeDummyPreimage(
     CircuitString.fromString(
       'The contractor will do the job and arbiter will verify it'
     ),
+    zkAppAddress,
     employer,
     contractor,
     arbiter,

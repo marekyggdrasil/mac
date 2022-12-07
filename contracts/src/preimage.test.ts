@@ -23,8 +23,13 @@ describe('Preimage tests', () => {
     outcome_cancel: Outcome,
     mac_contract: Preimage;
 
+  let zkAppAddress: PublicKey, zkAppPrivateKey: PrivateKey;
+
   beforeEach(async () => {
     await isReady;
+
+    zkAppPrivateKey = PrivateKey.random();
+    zkAppAddress = zkAppPrivateKey.toPublicKey();
 
     const employer_sk: PrivateKey = PrivateKey.random();
     const contractor_sk: PrivateKey = PrivateKey.random();
@@ -38,7 +43,7 @@ describe('Preimage tests', () => {
       outcome_failure,
       outcome_cancel,
       mac_contract,
-    ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk);
+    ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk, zkAppAddress);
   });
 
   afterAll(async () => {

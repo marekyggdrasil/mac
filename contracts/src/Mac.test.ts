@@ -17,6 +17,13 @@ import { Participant, Outcome, Preimage } from './preimage';
 import { makeDummyPreimage } from './dummy';
 import { Mac } from './Mac';
 
+const state_initial: number = 0;
+const state_deposited: number = 1;
+const state_canceled_early: number = 2;
+const state_canceled: number = 3;
+const state_succeeded: number = 4;
+const state_failed: number = 5;
+
 async function deposit(
   mac_contract: Preimage,
   zkAppInstance: Mac,
@@ -95,7 +102,7 @@ function assertBalance(keys: PublicKey[], balances: number[]) {
 
 async function localDeploy(
   zkAppInstance: Mac,
-  zkAppPrivatekey: PrivateKey,
+  zkAppPrivateKey: PrivateKey,
   deployerAccount: PrivateKey,
   mac_contract: Preimage,
   employer_sk: PrivateKey,
@@ -104,17 +111,17 @@ async function localDeploy(
 ) {
   const tx_deploy = await Mina.transaction(deployerAccount, () => {
     AccountUpdate.fundNewAccount(deployerAccount);
-    zkAppInstance.deploy({ zkappKey: zkAppPrivatekey });
+    zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
   });
   await tx_deploy.prove();
-  await tx_deploy.sign([zkAppPrivatekey]);
+  await tx_deploy.sign([zkAppPrivateKey]);
   await tx_deploy.send();
 
   const tx_init = await Mina.transaction(deployerAccount, () => {
     zkAppInstance.initialize(mac_contract.getCommitment());
   });
   await tx_init.prove();
-  await tx_init.sign([zkAppPrivatekey]);
+  await tx_init.sign([zkAppPrivateKey]);
   await tx_init.send();
 }
 
@@ -171,7 +178,7 @@ describe('Mac tests', () => {
       outcome_failure,
       outcome_cancel,
       mac_contract,
-    ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk);
+    ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk, zkAppAddress);
 
     // deploy the contract
     zkAppInstance = new Mac(zkAppAddress);
@@ -376,7 +383,6 @@ describe('Mac tests', () => {
       ]
     );
 
-    // THIS LINE IS CAUSING TESTS TO FAIL
     local.setBlockchainLength(UInt32.from(3));
     // the arbiter did not do the deposit yet, contractor decides to cancel
     await cancel(mac_contract, zkAppInstance, contractor_sk);
@@ -406,7 +412,6 @@ describe('Mac tests', () => {
     await withdraw(mac_contract, zkAppInstance, employer_sk);
 
     // check if the balances returned to their original state
-
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
       [0, balance_initial, balance_initial, balance_initial]

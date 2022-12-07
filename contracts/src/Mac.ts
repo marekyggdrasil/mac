@@ -94,12 +94,8 @@ export class Mac extends SmartContract {
     const actions: Bool[] = memory.toBits(3);
     const acted: Bool = Circuit.if(
       contract_preimage.isEmployer(actor),
-      actions[0],
-      Circuit.if(
-        contract_preimage.isContractor(actor),
-        actions[1],
-        Circuit.if(contract_preimage.isArbiter(actor), actions[2], Bool(false))
-      )
+      actions[2],
+      Circuit.if(contract_preimage.isContractor(actor), actions[1], actions[0])
     );
     const has_not_acted: Bool = acted.not();
     has_not_acted.assertTrue();
@@ -124,20 +120,20 @@ export class Mac extends SmartContract {
     payerUpdate.send({ to: this.address, amount: amount });
 
     // update the memory
-    actions[0] = Circuit.if(
+    actions[2] = Circuit.if(
       contract_preimage.isEmployer(actor),
       Bool(true),
-      actions[0]
+      actions[2]
     );
     actions[1] = Circuit.if(
       contract_preimage.isContractor(actor),
       Bool(true),
       actions[1]
     );
-    actions[2] = Circuit.if(
+    actions[0] = Circuit.if(
       contract_preimage.isArbiter(actor),
       Bool(true),
-      actions[2]
+      actions[0]
     );
 
     // check if everyone acted
@@ -181,11 +177,11 @@ export class Mac extends SmartContract {
     const actions: Bool[] = memory.toBits(3);
     const acted: Bool = Circuit.if(
       contract_preimage.isEmployer(actor),
-      actions[0],
+      actions[2],
       Circuit.if(
         contract_preimage.isContractor(actor),
         actions[1],
-        Circuit.if(contract_preimage.isArbiter(actor), actions[2], Bool(false))
+        Circuit.if(contract_preimage.isArbiter(actor), actions[0], Bool(false))
       )
     );
     const has_not_acted: Bool = acted.not();
@@ -237,20 +233,20 @@ export class Mac extends SmartContract {
     this.send({ to: actor, amount: amount });
 
     // update the memory
-    actions[0] = Circuit.if(
+    actions[2] = Circuit.if(
       contract_preimage.isEmployer(actor),
-      actions[0].not(),
-      actions[0]
+      actions[2].not(),
+      actions[2]
     );
     actions[1] = Circuit.if(
       contract_preimage.isContractor(actor),
       actions[1].not(),
       actions[1]
     );
-    actions[2] = Circuit.if(
+    actions[0] = Circuit.if(
       contract_preimage.isArbiter(actor),
-      actions[2].not(),
-      actions[2]
+      actions[0].not(),
+      actions[0]
     );
 
     const new_memory: Field = Field.fromBits(actions);

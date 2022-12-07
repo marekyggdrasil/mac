@@ -196,6 +196,7 @@ export class Preimage extends CircuitValue {
   @prop protocol_version: Field;
 
   @prop contract: CircuitString;
+  @prop address: PublicKey;
 
   @prop employer: Participant;
   @prop contractor: Participant;
@@ -208,6 +209,7 @@ export class Preimage extends CircuitValue {
 
   constructor(
     contract: CircuitString,
+    address: PublicKey,
     employer: Participant,
     contractor: Participant,
     arbiter: Participant,
@@ -221,6 +223,7 @@ export class Preimage extends CircuitValue {
     this.protocol_version = Field(0);
 
     this.contract = contract;
+    this.address = address;
 
     this.employer = employer;
     this.contractor = contractor;
@@ -276,6 +279,7 @@ export class Preimage extends CircuitValue {
   serialize(): Field[] {
     // [Field[], string] {
     let serialized: Field[] = [this.protocol_version];
+    serialized = serialized.concat(this.address.toFields());
     serialized = serialized.concat(this.employer.serialize());
     serialized = serialized.concat(this.contractor.serialize());
     serialized = serialized.concat(this.arbiter.serialize());
@@ -293,6 +297,8 @@ export class Preimage extends CircuitValue {
     const protocol_version: Field = serialized[0];
     protocol_version.assertEquals(Field(0));
 
+    let address: PublicKey;
+
     let employer: Participant;
     let contractor: Participant;
     let arbiter: Participant;
@@ -303,7 +309,9 @@ export class Preimage extends CircuitValue {
     let outcome_cancel: Outcome;
 
     let mac_contract: Preimage;
-    let rem: Field[] = serialized.slice(1, serialized.length);
+    address = PublicKey.fromFields(serialized.slice(1, 41));
+
+    let rem: Field[] = serialized.slice(41, serialized.length);
 
     [employer, rem] = Participant.deserializeBuffer(rem);
     if (employer === null) {
@@ -342,6 +350,7 @@ export class Preimage extends CircuitValue {
 
     mac_contract = new Preimage(
       CircuitString.fromString(contract_string),
+      address,
       employer,
       contractor,
       arbiter,
@@ -371,6 +380,8 @@ export class Preimage extends CircuitValue {
       byteify.serializeUint8(bytes_contract_text.length)
     );
 
+    const bytes_address: Uint8Array = bs58.decode(this.address.toBase58());
+
     const bytes_employer: Uint8Array = this.employer.toBytes();
     const bytes_contractor: Uint8Array = this.contractor.toBytes();
     const bytes_arbiter: Uint8Array = this.arbiter.toBytes();
@@ -397,6 +408,7 @@ export class Preimage extends CircuitValue {
 
     return Uint8ArrayConcat([
       bytes_header,
+      bytes_address,
       bytes_employer,
       bytes_contractor,
       bytes_arbiter,
@@ -414,8 +426,12 @@ export class Preimage extends CircuitValue {
   }
 
   static fromBytes(bytes: Uint8Array): Preimage {
-    // for now ignore the protocol version and format version...
-    let i = 2;
+    // for now ignore the protocol version and format version and contract address...
+    const address: PublicKey = PublicKey.fromBase58(
+      bs58.encode(bytes.slice(2, 42))
+    );
+
+    let i = 2 + 40;
 
     const employer: Participant = Participant.fromBytes(bytes.slice(i, i + 40));
     i += 40;
@@ -472,6 +488,7 @@ export class Preimage extends CircuitValue {
 
     return new Preimage(
       CircuitString.fromString(contract),
+      address,
       employer,
       contractor,
       arbiter,
