@@ -1,21 +1,37 @@
-import Link from 'next/link'
+import Link from 'next/link';
 
 const CircuitCompileButton = ( {state, setState} ) => {
-    const isCompiled = state.isLoggedIn;
-    if (state.compiled == 0) {
+    console.log(state.comp_button_state);
+    if (state.comp_button_state == 0) {
+        console.log('state is 0');
+        return <button className="btn" onClick={() => {
+            state.runLoadSnarkyJS(state, setState);
+        }}>
+            Load SnarkyJS
+        </button>;
+    } else if (state.comp_button_state == 1) {
+        console.log('state is 1');
+        return <button className="btn btn-disabled animate-pulse">
+            Loading SnarkyJS...
+        </button>;
+    } else if (state.comp_button_state == 2) {
+        console.log('state is 2');
         return <button className="btn" onClick={() => {
             state.runCompile(state, setState);
         }}>
-            Compile
+            Compile circuit
         </button>;
-    } else if (state.compiled == 1) {
+    } else if (state.comp_button_state == 3) {
+        console.log('state is 3');
         return <button className="btn btn-disabled animate-pulse">
             Compiling...
         </button>;
+    } else if (state.comp_button_state == 4) {
+        console.log('state is 4');
+        return <button className="btn btn-disabled">
+            Circuit compiled!
+        </button>;
     }
-    return <button className="btn btn-disabled">
-        Compiled!
-    </button>;
 }
 
 
