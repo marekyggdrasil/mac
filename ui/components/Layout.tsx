@@ -1,14 +1,14 @@
 import Navbar from './navbar'
 import Head from 'next/head';
 
-const Layout = ( {state, children} ) => {
+const Layout = ( {state, setState, children} ) => {
     return (
         <div>
             <Head>
                 <title>MAC</title>
             </Head>
             <section className="flex flex-row-reverse">
-                <Navbar state={state} />
+                <Navbar state={state} setState={setState} />
             </section>
             <section className="min-h-full">
                 { children }

@@ -1,7 +1,10 @@
-const CircuitCompileButton = ( {state} ) => {
+const CircuitCompileButton = ( {state, setState} ) => {
     const isCompiled = state.isLoggedIn;
     if (state.compiled == 0) {
-        return <button className="btn">
+        return <button className="btn" onClick={() => {
+            console.log(typeof(setState));
+            state.runCompile(state, setState);
+        }}>
             Compile
         </button>;
     } else if (state.compiled == 1) {
@@ -15,7 +18,7 @@ const CircuitCompileButton = ( {state} ) => {
 }
 
 
-const Navbar = ( {state} ) => {
+const Navbar = ( {state, setState} ) => {
     return (
         <ul className="menu menu-vertical lg:menu-horizontal bg-base-100 rounded-box">
             <li><a href="/">MAC</a></li>
@@ -40,7 +43,7 @@ const Navbar = ( {state} ) => {
             </li>
             <li><a href="/about">About</a></li>
             <li>
-                <CircuitCompileButton state={state} />
+                <CircuitCompileButton state={state} setState={setState} />
             </li>
             <li>
                 <select className="select w-28">
