@@ -32,7 +32,7 @@ async function runLoadSnarkyJS(state: FrontendState, setState) {
 async function runCompile(state, setState) {
     console.log('runCompile')
     setState({ ...state, comp_button_state: 3 });
-    try{
+    try {
         console.log('loading contract')
         await state.zkappWorkerClient.loadContract();
         console.log('compiling')
@@ -45,12 +45,40 @@ async function runCompile(state, setState) {
     }
 }
 
+async function connectWallet(state, setState) {
+    console.log('connectWallet')
+    setState({ ...state, connect_button_state: 1 });
+    setTimeout(async () => {
+        setState({ ...state, connect_button_state: 1 });
+        try {
+            console.log('connecting')
+            await state.zkappWorkerClient.setActiveInstanceToBerkeley();
+            const mina = (window as any).mina;
+            if (mina == null) {
+                setState({ ...state, hasWallet: false });
+                return;
+            }
+            const publicKeyBase58 : string = (await mina.requestAccounts())[0];
+            const publicKey = PublicKey.fromBase58(publicKeyBase58);
+            console.log('using key', publicKey.toBase58());
+            console.log('checking if account exists...');
+            const res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
+            console.log('connected')
+        } catch (e:any) {
+            setState({ ...state, connect_button_state: 0 });
+        } finally {
+            setState({ ...state, connect_button_state: 2 });
+        }
+    }, 2000)
+}
+
 function MyApp({ Component, pageProps }: AppProps) {
 
     let [state, setState] = useState({
         zkappWorkerClient: null as null | ZkappWorkerClient,
         hasWallet: null as null | boolean,
         comp_button_state: 0,
+        connect_button_state: 0,
         hasBeenSetup: false,
         accountExists: false,
         currentNum: null as null | Field,
@@ -58,26 +86,27 @@ function MyApp({ Component, pageProps }: AppProps) {
         zkappPublicKey: null as null | PublicKey,
         creatingTransaction: false,
         runLoadSnarkyJS: runLoadSnarkyJS,
-        runCompile: runCompile
+        runCompile: runCompile,
+        connectWallet: connectWallet
     });
 
 
     // -------------------------------------------------------
     // Do Setup
     /*
-    useEffect(() => {
-        (async () => {
-            if (!state.hasBeenSetup) {
-                const zkappWorkerClient = new ZkappWorkerClient();
-                console.log('Loading SnarkyJS...');
-                await zkappWorkerClient.loadSnarkyJS();
-                console.log('done');
-                await zkappWorkerClient.setActiveInstanceToBerkeley();
-                // TODO
-            }
-        })();
-    }, []);
-    */
+       useEffect(() => {
+       (async () => {
+       if (!state.hasBeenSetup) {
+       const zkappWorkerClient = new ZkappWorkerClient();
+       console.log('Loading SnarkyJS...');
+       await zkappWorkerClient.loadSnarkyJS();
+       console.log('done');
+       await zkappWorkerClient.setActiveInstanceToBerkeley();
+       // TODO
+       }
+       })();
+       }, []);
+     */
     // -------------------------------------------------------
 
     return (
