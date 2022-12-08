@@ -77,7 +77,7 @@ const Navbar = ( {state, setState} ) => {
                         <span>Interact</span>
                     </li>
                     <li><Link href="/current">Current</Link></li>
-                    <li>Close</li>
+                    <li><Link href="/close">Close</Link></li>
                     <li className="menu-title">
                         <span>IO</span>
                     </li>
