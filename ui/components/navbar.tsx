@@ -22,7 +22,7 @@ const CircuitCompileButton = () => {
     } else if (context.state.comp_button_state == 2) {
         console.log('state is 2');
         return <button className="btn" onClick={() => {
-            context.state.runCompile(state, setState);
+            context.state.runCompile(context.state, context.setState);
         }}>
             Compile circuit
         </button>;
