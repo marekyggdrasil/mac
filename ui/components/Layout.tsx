@@ -18,7 +18,7 @@ const Layout = ( {children} ) => {
             <section className="flex flex-row-reverse">
                 <Navbar />
             </section>
-            <section className="min-h-full mb-12">
+            <section className="container min-h-full mb-16">
                 { children }
             </section>
             <section className="fixed inset-x-0 bottom-0">
