@@ -1,32 +1,37 @@
 import Link from 'next/link';
 
-const CircuitCompileButton = ( {state, setState} ) => {
-    console.log(state.comp_button_state);
-    if (state.comp_button_state == 0) {
+import { useContext } from 'react';
+import AppContext from './AppContext'
+
+
+const CircuitCompileButton = () => {
+    const context = useContext(AppContext);
+    console.log(context.state.comp_button_state);
+    if (context.state.comp_button_state == 0) {
         console.log('state is 0');
         return <button className="btn" onClick={() => {
-            state.runLoadSnarkyJS(state, setState);
+            context.state.runLoadSnarkyJS(context.state, context.setState);
         }}>
             Load SnarkyJS
         </button>;
-    } else if (state.comp_button_state == 1) {
+    } else if (context.state.comp_button_state == 1) {
         console.log('state is 1');
         return <button className="btn btn-disabled animate-pulse">
             Loading SnarkyJS...
         </button>;
-    } else if (state.comp_button_state == 2) {
+    } else if (context.state.comp_button_state == 2) {
         console.log('state is 2');
         return <button className="btn" onClick={() => {
-            state.runCompile(state, setState);
+            context.state.runCompile(state, setState);
         }}>
             Compile circuit
         </button>;
-    } else if (state.comp_button_state == 3) {
+    } else if (context.state.comp_button_state == 3) {
         console.log('state is 3');
         return <button className="btn btn-disabled animate-pulse">
             Compiling...
         </button>;
-    } else if (state.comp_button_state == 4) {
+    } else if (context.state.comp_button_state == 4) {
         console.log('state is 4');
         return <button className="btn btn-disabled">
             Circuit compiled!
@@ -35,25 +40,26 @@ const CircuitCompileButton = ( {state, setState} ) => {
 }
 
 
-const ConnectButton = ( {state, setState} ) => {
-    console.log(state.connect_button_state);
-    if (state.comp_button_state < 2) {
+const ConnectButton = () => {
+    const context = useContext(AppContext);
+    console.log(context.state.connect_button_state);
+    if (context.state.comp_button_state < 2) {
         return <button className="btn btn-disabled">
             Connect
         </button>;
-    } else if (state.connect_button_state == 0) {
+    } else if (context.state.connect_button_state == 0) {
         console.log('state is 0');
         return <button className="btn" onClick={() => {
-            state.connectWallet(state, setState);
+            context.state.connectWallet(context.state, context.setState);
         }}>
             Connect
         </button>;
-    } else if (state.connect_button_state == 1) {
+    } else if (context.state.connect_button_state == 1) {
         console.log('state is 1');
         return <button className="btn btn-disabled animate-pulse">
             Connecting...
         </button>;
-    } else if (state.connect_button_state == 2) {
+    } else if (context.state.connect_button_state == 2) {
         console.log('state is 2');
         return <button className="btn btn-disabled">
             Connected!
@@ -62,7 +68,7 @@ const ConnectButton = ( {state, setState} ) => {
 }
 
 
-const Navbar = ( {state, setState} ) => {
+const Navbar = () => {
     return (
         <ul className="menu menu-vertical lg:menu-horizontal bg-base-100 rounded-box">
             <li><Link href="/">MAC</Link></li>
@@ -87,12 +93,12 @@ const Navbar = ( {state, setState} ) => {
             </li>
             <li><Link href="/about">About</Link></li>
             <li>
-                <CircuitCompileButton state={state} setState={setState} />
+                <CircuitCompileButton />
             </li>
             <li>
-                <ConnectButton state={state} setState={setState} />
+                <ConnectButton />
             </li>
         </ul>
 )}
 
-export default Navbar
+export default Navbar;

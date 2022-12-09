@@ -1,8 +1,10 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
+
+import AppContext from '../components/AppContext';
 import Layout from '../components/Layout';
 
-import { useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import type { Mac } from '../../contracts/src/Mac';
 import {
     Mina,
@@ -110,9 +112,11 @@ function MyApp({ Component, pageProps }: AppProps) {
     // -------------------------------------------------------
 
     return (
-        <Layout state={state} setState={setState}>
-            <Component {...pageProps} />
-        </Layout>
+        <AppContext.Provider value={{ state, setState }}>
+            <Layout>
+                <Component {...pageProps} />
+            </Layout>
+        </AppContext.Provider>
     )
 }
 
