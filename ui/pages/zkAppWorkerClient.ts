@@ -41,6 +41,19 @@ export default class ZkappWorkerClient {
     return Field.fromJSON(JSON.parse(result as string));
   }
 
+  async getBlockchainLength(): Promise<Field> {
+        const result = await this._call('getBlockchainLength', {});
+        return Field.fromJSON(JSON.parse(result as string));
+  }
+
+    async deploy(privateKey: PrivateKey) {
+      await this._call('deploy', { privateKey58: privateKey.toBase58()});
+  }
+
+    async initialize(commitment: Field) {
+      await this._call('initialize', { commitment: commitment.toJSON()});
+  }
+
   createUpdateTransaction() {
     return this._call('createUpdateTransaction', {});
   }
