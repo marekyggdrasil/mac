@@ -43,7 +43,7 @@ const CircuitCompileButton = () => {
 const ConnectButton = () => {
     const context = useContext(AppContext);
     console.log(context.state.connect_button_state);
-    if (context.state.comp_button_state < 2) {
+    if (context.state.connect_button_state < 2) {
         return <button className="btn btn-disabled">
             Connect
         </button>;
