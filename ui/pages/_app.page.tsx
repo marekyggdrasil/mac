@@ -47,14 +47,18 @@ async function runCompile(state, setState) {
     }
 }
 
+async function handleMinaAccount(publicKeyBase58: string) {
+    const publicKey = PublicKey.fromBase58(publicKeyBase58);
+    return await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
+}
+
 async function connectWallet(state, setState) {
     console.log('connectWallet')
     setState({ ...state, connect_button_state: 1 });
     setTimeout(async () => {
         setState({ ...state, connect_button_state: 1 });
         try {
-            console.log('connecting')
-            await state.zkappWorkerClient.setActiveInstanceToBerkeley();
+                await state.zkappWorkerClient.setActiveInstanceToBerkeley();
             const mina = (window as any).mina;
             if (mina == null) {
                 setState({ ...state, hasWallet: false });
@@ -62,14 +66,20 @@ async function connectWallet(state, setState) {
             }
             const publicKeyBase58 : string = (await mina.requestAccounts())[0];
             const publicKey = PublicKey.fromBase58(publicKeyBase58);
-            console.log('using key', publicKey.toBase58());
-            console.log('checking if account exists...');
-            const res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
-            console.log('connected')
+            console.log('setting the public key');
+            console.log(publicKey);
+            let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
+            setState({ ...state, connect_button_state: 2, publicKey: publicKey });
+            window.mina.on('accountsChanged', async (accounts: string[]) => {
+                const publicKeyBase58 : string = accounts[0];
+                const publicKey = PublicKey.fromBase58(publicKeyBase58);
+                console.log('setting the public key');
+                console.log(publicKey);
+                let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
+                setState({ ...state, connect_button_state: 2, publicKey: publicKey });
+            });
         } catch (e:any) {
             setState({ ...state, connect_button_state: 0 });
-        } finally {
-            setState({ ...state, connect_button_state: 2 });
         }
     }, 2000)
 }

@@ -11,7 +11,7 @@ export default function Create( {state, setState } ) {
                 <li className="step">Share!</li>
                 <li className="step">Interact!</li>
             </ul>
-            <Editor state={state} setState={setState} />
+            <Editor />
         </article>
     )
 }
