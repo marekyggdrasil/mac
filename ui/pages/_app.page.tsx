@@ -26,7 +26,10 @@ async function runLoadSnarkyJS(state: FrontendState, setState) {
         console.log('loading SnarkyJS');
         await zkappWorkerClient.loadSnarkyJS();
         await zkappWorkerClient.setActiveInstanceToBerkeley();
-        console.log('SnarkyJS loaded')
+        console.log('SnarkyJS loaded');
+        //console.log('blockchain length');
+        //const length = await zkappWorkerClient.getBlockchainLength();
+        //console.log(length);
         setState({ ...state, comp_button_state: 2, zkappWorkerClient: zkappWorkerClient });
     }, 2000)
 }
@@ -47,9 +50,22 @@ async function runCompile(state, setState) {
     }
 }
 
-async function handleMinaAccount(publicKeyBase58: string) {
-    const publicKey = PublicKey.fromBase58(publicKeyBase58);
-    return await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
+async function runDeploy(state, setState) {
+    if (state.comp_button_state < 4) {
+        return false;
+    }
+    // deploying the contract
+    console.log('deploying the contract')
+    await state.zkappWorkerClient.deploy(state.zkappPrivateKey);
+    setState({ ...state, deployed: true });
+    console.log('contract deployed')
+
+    // initializing the contract
+    console.log('initializing the contract')
+    await state.zkappWorkerClient.initialize(state.mac_contract.getCommitment());
+    setState({ ...state, initialized: true });
+    console.log('contract initialized and ready to interact')
+    return true;
 }
 
 async function connectWallet(state, setState) {
@@ -66,15 +82,11 @@ async function connectWallet(state, setState) {
             }
             const publicKeyBase58 : string = (await mina.requestAccounts())[0];
             const publicKey = PublicKey.fromBase58(publicKeyBase58);
-            console.log('setting the public key');
-            console.log(publicKey);
             let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
             setState({ ...state, connect_button_state: 2, publicKey: publicKey });
             window.mina.on('accountsChanged', async (accounts: string[]) => {
                 const publicKeyBase58 : string = accounts[0];
                 const publicKey = PublicKey.fromBase58(publicKeyBase58);
-                console.log('setting the public key');
-                console.log(publicKey);
                 let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
                 setState({ ...state, connect_button_state: 2, publicKey: publicKey });
             });
@@ -95,11 +107,16 @@ function MyApp({ Component, pageProps }: AppProps) {
         accountExists: false,
         currentNum: null as null | Field,
         publicKey: null as null | PublicKey,
+        zkappPrivateKey: null as null | PrivateKey,
         zkappPublicKey: null as null | PublicKey,
         creatingTransaction: false,
         runLoadSnarkyJS: runLoadSnarkyJS,
         runCompile: runCompile,
-        connectWallet: connectWallet
+        connectWallet: connectWallet,
+        loaded: false,
+        deployed: false,
+        initialized: false,
+        preimage: null as null | Preimage
     });
 
 

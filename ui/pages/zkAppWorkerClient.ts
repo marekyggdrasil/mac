@@ -54,6 +54,10 @@ export default class ZkappWorkerClient {
       await this._call('initialize', { commitment: commitment.toJSON()});
   }
 
+    async fromMacPack(macpack: string) {
+      await this._call('fromMacPack', { macpack: macpack});
+  }
+
   createUpdateTransaction() {
     return this._call('createUpdateTransaction', {});
   }

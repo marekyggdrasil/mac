@@ -6,10 +6,6 @@ import Head from 'next/head';
 
 const Layout = ( {children} ) => {
     const context = useContext(AppContext);
-    console.log('layout');
-    console.log(context);
-    //console.log(context.state);
-    //console.log(context.setState);
     return (
         <div>
             <Head>

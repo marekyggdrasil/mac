@@ -4,9 +4,6 @@ import AppContext from './AppContext';
 
 const InteractionCases = () => {
     const context = useContext(AppContext);
-    console.log('editor');
-    console.log(context.state);
-    console.log(context.setState);
     if (context.state.comp_button_state < 2) {
         return (<div>Make sure you load the SnarkyJS library!</div>);
     } else if (context.state.connect_button_state < 2) {

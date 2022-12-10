@@ -4,9 +4,6 @@ import AppContext from './AppContext';
 
 const Editor = () => {
     const context = useContext(AppContext);
-    console.log('editor');
-    console.log(context.state);
-    console.log(context.setState);
     return (
         <form>
             <div className="break-inside-avoid">

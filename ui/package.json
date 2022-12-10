@@ -16,6 +16,8 @@
     "@types/node": "18.11.9",
     "@types/react": "18.0.25",
     "@types/react-dom": "18.0.8",
+    "bs58": "^5.0.0",
+    "byteify": "^4.0.0",
     "coi-serviceworker": "^0.1.6",
     "daisyui": "^2.42.1",
     "eslint": "8.27.0",
