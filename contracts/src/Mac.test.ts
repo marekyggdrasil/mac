@@ -13,8 +13,10 @@ import {
   AccountUpdate,
 } from 'snarkyjs';
 
-import { Participant, Outcome, Preimage } from './preimage';
-import { makeDummyPreimage } from './dummy';
+//import { Participant, Outcome, Preimage } from './preimage';
+//import { makeDummyPreimage } from './dummy';
+import { Outcome, Preimage } from './strpreim';
+import { makeDummyPreimage } from './strdummy';
 import { Mac } from './Mac';
 
 const state_initial: number = 0;
@@ -118,7 +120,7 @@ async function localDeploy(
   await tx_deploy.send();
 
   const tx_init = await Mina.transaction(deployerAccount, () => {
-    zkAppInstance.initialize(mac_contract.getCommitment());
+    zkAppInstance.initialize(Preimage.hash(mac_contract));
   });
   await tx_init.prove();
   await tx_init.sign([zkAppPrivateKey]);
@@ -126,9 +128,9 @@ async function localDeploy(
 }
 
 describe('Mac tests', () => {
-  let employer: Participant,
-    contractor: Participant,
-    arbiter: Participant,
+  let employer: PublicKey,
+    contractor: PublicKey,
+    arbiter: PublicKey,
     outcome_deposited: Outcome,
     outcome_success: Outcome,
     outcome_failure: Outcome,
@@ -250,7 +252,6 @@ describe('Mac tests', () => {
     // let the arbiter do the deposit
     await deposit(mac_contract, zkAppInstance, arbiter_sk);
     local.setBlockchainLength(UInt32.from(4));
-
     // check balances after the arbiter deposit
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
