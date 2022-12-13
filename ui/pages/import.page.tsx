@@ -10,9 +10,7 @@ async function runImport(context) {
     try {
         await context.state.zkappWorkerClient.fromMacPack(macpack);
         console.log('imported correctly');
-        const exmacpack = await context.state.zkappWorkerClient.toMacPack();
-        console.log('exmacpack');
-        console.log(exmacpack);
+        context.setState({ ...context.state, loaded: true, macpack: macpack });
     } catch (e:any) {
         console.log('failed to import');
         console.log(e);
@@ -21,6 +19,9 @@ async function runImport(context) {
 
 const ImportCases = () => {
     const context = useContext(AppContext);
+    if (context.state.comp_button_state < 2) {
+        return (<div><p>You need to load the SnarkyJS library first!</p></div>);
+    }
     if (context.state.loaded) {
         return (<div><p>You already have a loaded MAC! contract. Before you import another one make sure you <Link href="/close">close</Link> is first.</p></div>);
     }

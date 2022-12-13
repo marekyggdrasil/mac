@@ -117,7 +117,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         loaded: false,
         deployed: false,
         initialized: false,
-        preimage: null as null | Preimage
+        macpack: 'Your MacPack will be here...'
     });
 
 
