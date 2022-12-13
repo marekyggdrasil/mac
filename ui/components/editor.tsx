@@ -2,17 +2,34 @@ import { useContext } from 'react';
 import AppContext from './AppContext';
 
 
+async function handleSubmit(event) {
+    event.preventDefault();
+    const context = useContext(AppContext);
+    console.log(event);
+    // context.setState({ ...context.state, loaded: false, macpack: 'Your MacPack will be here...' });
+}
+
 const Editor = () => {
     const context = useContext(AppContext);
     return (
-        <form>
+        <form onSubmit={async (event) => {
+            event.preventDefault();
+            console.log(event);
+            console.log(event.target[0].value);
+            console.log(event.target[1].value);
+            console.log(event.target[2].value);
+            console.log(event.target[3].value);
+            console.log(event.target[4].value);
+            console.log(event.target[5].value);
+            // await handleSubmit(contect);
+        }}>
             <div className="break-inside-avoid">
                 <h2>Participants</h2>
                 <div className="form-control">
                     <label className="label">
                         Employer
                     </label>
-                    <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                    <input type="text" name="employer-address" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
                     <label className="label">
                         <span className="label-text-alt">Employer is one who requests some work to be done...</span>
                     </label>
@@ -256,7 +273,7 @@ const Editor = () => {
             </div>
 
             <div className="btn-group btn-group-vertical lg:btn-group-horizontal break-inside-avoid">
-                <button className="btn btn-active">Next</button>
+                <button type="submit" className="btn btn-active">Next</button>
             </div>
         </form>
 )};
