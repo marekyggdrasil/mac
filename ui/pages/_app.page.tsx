@@ -38,12 +38,7 @@ async function runLoadSnarkyJS(state: FrontendState, setState) {
             ...state,
             comp_button_state: 2,
             zkappWorkerClient: zkappWorkerClient,
-            blockchainLenght: length,
-
-            // whatever happens now is just temporary...
-            contract_employer: PrivateKey.random().toPublicKey(),
-            contract_contractor: PrivateKey.random().toPublicKey(),
-            contract_arbiter: PrivateKey.random().toPublicKey() });
+            blockchainLenght: length});
     }, 2000)
 }
 
@@ -95,8 +90,7 @@ async function connectWallet(state, setState) {
             // let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
             setState({ ...state, connect_button_state: 2, publicKey: publicKey });
             window.mina.on('accountsChanged', async (accounts: string[]) => {
-                const publicKeyBase58 : string = accounts[0];
-                const publicKey = PublicKey.fromBase58(publicKeyBase58);
+                const publicKey = PublicKey.fromBase58(accounts[0]);
                 let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
                 setState({ ...state, connect_button_state: 2, publicKey: publicKey });
             });
@@ -127,29 +121,28 @@ function MyApp({ Component, pageProps }: AppProps) {
         deployed: false,
         initialized: false,
         macpack: 'Your MacPack will be here...',
-        blockchainLenght: null,
-        contract_employer: null as null | PublicKey,
+        blockchainLength: null,
         contract_contractor: null as null | PublicKey,
         contract_arbiter: null as null | PublicKey,
         contract_description: 'this is a description that is of the maximum length',
         contract_outcome_deposit_description: '',
         contract_outcome_deposit_after: 32984,
         contract_outcome_deposit_before: 32984,
-        contract_outcome_deposit_employer: 1001000000,
-        contract_outcome_deposit_contractor: 1000000000,
-        contract_outcome_deposit_arbiter: 1000000000,
+        contract_outcome_deposit_employer: -1001000000,
+        contract_outcome_deposit_contractor: -1000000000,
+        contract_outcome_deposit_arbiter: -1000000000,
         contract_outcome_success_description: 'this is a description that is of the maximum length',
         contract_outcome_success_after: 32984,
         contract_outcome_success_before: 32984,
-        contract_outcome_success_employer: -1100000000,
+        contract_outcome_success_employer: 1100000000,
         contract_outcome_success_contractor: 1200000000,
-        contract_outcome_success_arbiter: -2100000000,
+        contract_outcome_success_arbiter: 2100000000,
         contract_outcome_failure_description: 'this is a description that is of the maximum length',
         contract_outcome_failure_after: 32984,
         contract_outcome_failure_before: 32984,
-        contract_outcome_failure_employer: -1000000000,
-        contract_outcome_failure_contractor: -1000000000,
-        contract_outcome_failure_arbiter: -1000000000,
+        contract_outcome_failure_employer: 1000000000,
+        contract_outcome_failure_contractor: 1000000000,
+        contract_outcome_failure_arbiter: 1000000000,
         contract_outcome_cancel_description: 'this is a description that is of the maximum length',
         contract_outcome_cancel_after: 32984,
         contract_outcome_cancel_before: 32984,

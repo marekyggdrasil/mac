@@ -172,6 +172,16 @@ export const RenderOutcomesDescriptions = () => {
         </div>);
 }
 
+function safeAddressRender(address) {
+    if (!address) {
+        return "";
+    }
+    if (address.toBase58) {
+        return address.toBase58();
+    }
+    return "";
+}
+
 export const RenderInvolvedParties = () => {
     const context = useContext(AppContext);
     return (
@@ -188,7 +198,7 @@ export const RenderInvolvedParties = () => {
                         <th>Employer</th>
                         <td>
                             <MinaValue>
-                                { context.state.contract_employer.toBase58() }
+                                { safeAddressRender(context.state.publicKey) }
                             </MinaValue>
                         </td>
                     </tr>
@@ -196,7 +206,7 @@ export const RenderInvolvedParties = () => {
                         <th>Contractor</th>
                         <td>
                             <MinaValue>
-                                { context.state.contract_contractor.toBase58() }
+                                { safeAddressRender(context.state.contract_contractor) }
                             </MinaValue>
                         </td>
                     </tr>
@@ -204,7 +214,7 @@ export const RenderInvolvedParties = () => {
                         <th>Arbiter</th>
                         <td>
                             <MinaValue>
-                                { context.state.contract_arbiter.toBase58() }
+                                { safeAddressRender(context.state.contract_arbiter) }
                             </MinaValue>
                         </td>
                     </tr>

@@ -9,7 +9,7 @@ async function finalizeContract(context) {
     // instantiate preimage via worker and compute macpack
     context.state.zkappWorkerClient.definePreimage(
         context.state.zkappPublicKey.toBase58(),
-        context.state.contract_employer.toBase58(),
+        context.state.publicKey.toBase58(),
         context.state.contract_contractor.toBase58(),
         context.state.contract_arbiter.toBase58(),
         context.state.contract_description,
