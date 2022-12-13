@@ -61,7 +61,7 @@ const functions = {
   fetchBlockchainLength: async (args: {}) => {
     let block = await fetchLastBlock(
             "https://proxy.berkeley.minaexplorer.com/graphql");
-    return block.blockchainLength.toString();
+    return block.blockchainLength.toJSON();
   },
   compileContract: async (args: {}) => {
     await state.Mac!.compile();
@@ -70,13 +70,17 @@ const functions = {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
     return await fetchAccount({ publicKey });
   },
+    generatePrivateKey: async (args: {}) => {
+        const privateKey: PrivateKey = PrivateKey.random();
+        return privateKey.toBase58();
+    },
   initZkappInstance: async (args: { publicKey58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
       state.zkapp = new state.Mac!(publicKey);
   },
     getBlockchainLength: async (args: {}) => {
         const network_state = await Mina.getNetworkState();
-        return JSON.stringify(network_state.blockchainLength.toJSON());
+        return network_state.blockchainLength.toString();
     },
     deploy: async (args: { privateKey58: string }) => {
         const pk: PrivateKey = PrivateKey.fromBase58(args.privateKey58);

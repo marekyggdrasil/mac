@@ -31,9 +31,9 @@ async function runLoadSnarkyJS(state: FrontendState, setState) {
         await zkappWorkerClient.loadContract();
         console.log('contract loaded');
         //console.log('blockchain length');
-        //const length = await zkappWorkerClient.getBlockchainLength();
-        //console.log(length);
-        setState({ ...state, comp_button_state: 2, zkappWorkerClient: zkappWorkerClient });
+        const length = await zkappWorkerClient.fetchBlockchainLength();
+        console.log(length);
+        setState({ ...state, comp_button_state: 2, zkappWorkerClient: zkappWorkerClient, blockchainLenght: length });
     }, 2000)
 }
 
@@ -81,9 +81,9 @@ async function connectWallet(state, setState) {
                 setState({ ...state, hasWallet: false });
                 return;
             }
-            const publicKeyBase58 : string = (await mina.requestAccounts())[0];
-            const publicKey = PublicKey.fromBase58(publicKeyBase58);
-            let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
+            const publicKeyBase58: string = await mina.requestAccounts();
+            const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
+            // let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
             setState({ ...state, connect_button_state: 2, publicKey: publicKey });
             window.mina.on('accountsChanged', async (accounts: string[]) => {
                 const publicKeyBase58 : string = accounts[0];
@@ -117,7 +117,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         loaded: false,
         deployed: false,
         initialized: false,
-        macpack: 'Your MacPack will be here...'
+        macpack: 'Your MacPack will be here...',
+        blockchainLenght: null
     });
 
 

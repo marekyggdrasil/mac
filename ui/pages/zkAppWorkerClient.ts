@@ -2,7 +2,7 @@ import {
   fetchAccount,
   PublicKey,
   PrivateKey,
-  Field,
+    Field
 } from 'snarkyjs'
 
 import type { ZkappWorkerRequest, ZkappWorkerReponse, WorkerFunctions } from './zkappWorker';
@@ -27,8 +27,13 @@ export default class ZkappWorkerClient {
     return this._call('compileContract', {});
   }
 
+    async generatePrivateKey(): Promise<PrivateKey> {
+        const result: string = await this._call('generatePrivateKey', {});
+        return PrivateKey.fromBase58(result);
+    }
+
   fetchAccount({ publicKey }: { publicKey: PublicKey }): ReturnType<typeof fetchAccount> {
-    const result = this._call('fetchAccount', { publicKey58: publicKey.toBase58() });
+      const result = this._call('fetchAccount', { publicKey58: publicKey.toBase58() });
     return (result as ReturnType<typeof fetchAccount>);
   }
 
@@ -41,9 +46,9 @@ export default class ZkappWorkerClient {
     return Field.fromJSON(JSON.parse(result as string));
   }
 
-  async getBlockchainLength(): Promise<Field> {
-        const result = await this._call('getBlockchainLength', {});
-        return Field.fromJSON(JSON.parse(result as string));
+    async fetchBlockchainLength(): Promise<number> {
+        const value: string = await this._call('fetchBlockchainLength', {});
+        return parseInt(value);
   }
 
     async deploy(privateKey: PrivateKey) {

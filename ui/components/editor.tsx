@@ -1,12 +1,34 @@
 import { useContext } from 'react';
-import AppContext from './AppContext';
 
+import {
+    PublicKey,
+    PrivateKey
+} from 'snarkyjs';
+
+import AppContext from './AppContext';
+import { MinaValue, MinaBlockchainLength, MinaSecretValue } from './highlights';
 
 async function handleSubmit(event) {
     event.preventDefault();
     const context = useContext(AppContext);
     console.log(event);
     // context.setState({ ...context.state, loaded: false, macpack: 'Your MacPack will be here...' });
+}
+
+async function generateKeyPair(context) {
+    const sk: PrivateKey = await context.state.zkappWorkerClient.generatePrivateKey();
+    const pk: PublicKey = sk.toPublicKey();
+    context.setState({ ...context.state, zkappPrivateKey: sk, zkappPublicKey: pk });
+}
+
+const KeyGenerator = () => {
+    const context = useContext(AppContext);
+    if (!context.state.zkappPrivateKey) {
+        return <p>Your MAC! contract does not have a private key. Click on <button className="btn" onClick={async () => {
+            await generateKeyPair(context);
+        }}>Generate</button> to prepare a new key pair.</p>;
+    }
+    return <p>Your MAC! contract public key and address is <MinaValue>{ context.state.zkappPublicKey.toBase58() }</MinaValue> and corresponding private key is <MinaSecretValue>{ context.state.zkappPrivateKey.toBase58() }</MinaSecretValue></p>;
 }
 
 const Editor = () => {
@@ -23,6 +45,13 @@ const Editor = () => {
             console.log(event.target[5].value);
             // await handleSubmit(contect);
         }}>
+        <div className="break-inside-avoid">
+            <h2>Contract</h2>
+            <p>As your are the contract creator, you <MinaValue>{ context.state.publicKey.toBase58() }</MinaValue> will take the Employer role. You will still need to define Contractor and Arbiter by providing their Mina base58 account addresses.</p>
+            <p>The time reference for all the deadlines is current blockchain length <MinaBlockchainLength>{ context.state.blockchainLenght }</MinaBlockchainLength>.</p>
+            <KeyGenerator />
+        </div>
+        <div className="columns-2">
             <div className="break-inside-avoid">
                 <h2>Participants</h2>
                 <div className="form-control">
@@ -275,6 +304,7 @@ const Editor = () => {
             <div className="btn-group btn-group-vertical lg:btn-group-horizontal break-inside-avoid">
                 <button type="submit" className="btn btn-active">Next</button>
             </div>
+        </div>
         </form>
 )};
 

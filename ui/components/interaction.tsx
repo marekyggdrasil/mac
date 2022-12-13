@@ -1,6 +1,7 @@
 import { useContext } from 'react';
-import AppContext from './AppContext';
 
+import AppContext from './AppContext';
+import { MinaValue } from '../components/highlights';
 
 const InteractionCases = () => {
     const context = useContext(AppContext);
@@ -12,11 +13,9 @@ const InteractionCases = () => {
         console.log('context public key');
         console.log(context.state.publicKey);
         // {context.state.publicKey.toBase58()}
-        return (<div>Interacting as <code className="rounded-md bg-primary p-1">{context.state.publicKey.toBase58()}</code>. If you wish to use different account, open your AURO wallet and simply switch the account. Simple as that!</div>);
+        return (<div>Interacting as <MinaValue>{ context.state.publicKey.toBase58() }</MinaValue>. If you wish to use different account, open your AURO wallet and simply switch the account. Simple as that!</div>);
     }
 }
-
-
 
 const Interaction = () => {
     return (

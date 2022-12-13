@@ -1,11 +1,12 @@
 import { useContext } from 'react';
-import AppContext from './AppContext'
+import AppContext from './AppContext';
+import { MinaValue } from './highlights';
 
 import Navbar from './navbar';
 import Head from 'next/head';
 
-const Layout = ( {children} ) => {
-    const context = useContext(AppContext);
+            const Layout = ( {children} ) => {
+                const context = useContext(AppContext);
     return (
         <div>
             <Head>
@@ -33,6 +34,6 @@ const Layout = ( {children} ) => {
             </section>
         </div>
     )
-}
+            }
 
 export default Layout

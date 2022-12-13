@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 import { useContext } from 'react';
-import AppContext from '../components/AppContext';
 
+import AppContext from '../components/AppContext';
 
 
 const MacPackContent = () => {
