@@ -118,7 +118,32 @@ function MyApp({ Component, pageProps }: AppProps) {
         deployed: false,
         initialized: false,
         macpack: 'Your MacPack will be here...',
-        blockchainLenght: null
+        blockchainLenght: null,
+        contract_description: 'this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is ',
+        contract_outcome_deposit_description: '',
+        contract_outcome_deposit_after: 32984,
+        contract_outcome_deposit_before: 32984,
+        contract_outcome_deposit_employer: 1001000000,
+        contract_outcome_deposit_contractor: 1000000000,
+        contract_outcome_deposit_arbiter: 1000000000,
+        contract_outcome_success_description: 'this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is ',
+        contract_outcome_success_after: 32984,
+        contract_outcome_success_before: 32984,
+        contract_outcome_success_employer: -1100000000,
+        contract_outcome_success_contractor: 1200000000,
+        contract_outcome_success_arbiter: -2100000000,
+        contract_outcome_failure_description: 'this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is ',
+        contract_outcome_failure_after: 32984,
+        contract_outcome_failure_before: 32984,
+        contract_outcome_failure_employer: -1000000000,
+        contract_outcome_failure_contractor: -1000000000,
+        contract_outcome_failure_arbiter: -1000000000,
+        contract_outcome_cancel_description: 'this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is ',
+        contract_outcome_cancel_after: 32984,
+        contract_outcome_cancel_before: 32984,
+        contract_outcome_cancel_employer: 1000000000,
+        contract_outcome_cancel_contractor: 1000000000,
+        contract_outcome_cancel_arbiter: 1000000000
     });
 
 

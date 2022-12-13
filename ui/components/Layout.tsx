@@ -1,5 +1,3 @@
-import Image from 'next/image'
-
 import { useContext } from 'react';
 import AppContext from './AppContext';
 
