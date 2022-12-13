@@ -96,6 +96,80 @@ const functions = {
     toMacPack: (args: {}) => {
         return state.toMacPack(state.preimage);
     },
+    definePreimage: (args: {
+        address: string,
+        employer: string,
+        contractor: string,
+        arbiter: string,
+        contract_description: string,
+        contract_outcome_deposit_description: string,
+        contract_outcome_deposit_after: number,
+        contract_outcome_deposit_before: number,
+        contract_outcome_deposit_employer: number,
+        contract_outcome_deposit_contractor: number,
+        contract_outcome_deposit_arbiter: number,
+        contract_outcome_success_description: string,
+        contract_outcome_success_after: number,
+        contract_outcome_success_before: number,
+        contract_outcome_success_employer: number,
+        contract_outcome_success_contractor: number,
+        contract_outcome_success_arbiter: number,
+        contract_outcome_failure_description: string,
+        contract_outcome_failure_after: number,
+        contract_outcome_failure_before: number,
+        contract_outcome_failure_employer: number,
+        contract_outcome_failure_contractor: number,
+        contract_outcome_failure_arbiter: number,
+        contract_outcome_cancel_description: string,
+        contract_outcome_cancel_after: number,
+        contract_outcome_cancel_before: number,
+        contract_outcome_cancel_employer: number,
+        contract_outcome_cancel_contractor: number,
+        contract_outcome_cancel_arbiter: number
+    }) => {
+        const outcome_deposited: Outcome = new state.Outcome({
+            description: CircuitString.fromString(args.contract_outcome_deposit_description),
+            payment_employer: UInt64.from(args.contract_outcome_deposit_employer),
+            payment_contractor: UInt64.from(args.contract_outcome_deposit_contractor),
+            payment_arbiter: UInt64.from(args.contract_outcome_deposit_arbiter),
+            start_after: UInt32.from(args.contract_outcome_deposit_after),
+            finish_before: UInt32.from(args.contract_outcome_deposit_before)});
+
+        const outcome_success: Outcome = new state.Outcome({
+            description: CircuitString.fromString(args.contract_outcome_success_description),
+            payment_employer: UInt64.from(args.contract_outcome_success_employer),
+            payment_contractor: UInt64.from(args.contract_outcome_success_contractor),
+            payment_arbiter: UInt64.from(args.contract_outcome_success_arbiter),
+            start_after: UInt32.from(args.contract_outcome_success_after),
+            finish_before: UInt32.from(args.contract_outcome_success_before)});
+
+        const outcome_failure: Outcome = new state.Outcome({
+            description: CircuitString.fromString(args.contract_outcome_failure_description),
+            payment_employer: UInt64.from(args.contract_outcome_failure_employer),
+            payment_contractor: UInt64.from(args.contract_outcome_failure_contractor),
+            payment_arbiter: UInt64.from(args.contract_outcome_failure_arbiter),
+            start_after: UInt32.from(args.contract_outcome_failure_after),
+            finish_before: UInt32.from(args.contract_outcome_failure_before)});
+
+        const outcome_cancel: Outcome = new state.Outcome({
+            description: CircuitString.fromString(args.contract_outcome_cancel_description),
+            payment_employer: UInt64.from(args.contract_outcome_cancel_employer),
+            payment_contractor: UInt64.from(args.contract_outcome_cancel_contractor),
+            payment_arbiter: UInt64.from(args.contract_outcome_cancel_arbiter),
+            start_after: UInt32.from(args.contract_outcome_cancel_after),
+            finish_before: UInt32.from(args.contract_outcome_cancel_before)});
+
+        state.preimage = new state.Preimage({
+            contract: CircuitString.fromString(args.contract_description),
+            address: PublicKey.fromBase58(args.address),
+            employer: PublicKey.fromBase58(args.employer),
+            contractor: PublicKey.fromBase58(args.contractor),
+            arbiter: PublicKey.fromBase58(args.arbiter),
+            deposited: outcome_deposited,
+            success: outcome_success,
+            failure: outcome_failure,
+            cancel: outcome_cancel});
+    },
   getNum: async (args: {}) => {
     const currentNum = await state.zkapp!.num.get();
     return JSON.stringify(currentNum.toJSON());

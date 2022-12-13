@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import AppContext from './AppContext';
-import { MinaBlockchainLength } from './highlights';
+import { MinaValue, MinaBlockchainLength } from './highlights';
 
 function minaValue(v) {
     let text = '';
@@ -172,15 +172,58 @@ export const RenderOutcomesDescriptions = () => {
         </div>);
 }
 
+export const RenderInvolvedParties = () => {
+    const context = useContext(AppContext);
+    return (
+        <div className="overflow-x-auto">
+            <table className="table w-full">
+                <thead>
+                    <tr>
+                        <th>Party</th>
+                        <th>MINA Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>Employer</th>
+                        <td>
+                            <MinaValue>
+                                { context.state.contract_employer.toBase58() }
+                            </MinaValue>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Contractor</th>
+                        <td>
+                            <MinaValue>
+                                { context.state.contract_contractor.toBase58() }
+                            </MinaValue>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Arbiter</th>
+                        <td>
+                            <MinaValue>
+                                { context.state.contract_arbiter.toBase58() }
+                            </MinaValue>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>);
+}
+
 export const RenderContractDescription = () => {
     const context = useContext(AppContext);
     return (
         <div>
             <h2>Contract description</h2>
+            <h3>Involved parties</h3>
+            <RenderInvolvedParties/>
             <h3>Outcomes</h3>
             <RenderOutcomes/>
             <h3>Contract subject description</h3>
-            <blockquote class="text-xl italic font-semibold">
+            <blockquote className="text-xl italic font-semibold">
                 <p>{context.state.contract_description}</p>
             </blockquote>
             <h3>Outcomes descriptions</h3>

@@ -10,6 +10,7 @@ import {
     Mina,
     Field,
     isReady,
+    PrivateKey,
     PublicKey,
     fetchAccount,
 } from 'snarkyjs';
@@ -33,7 +34,16 @@ async function runLoadSnarkyJS(state: FrontendState, setState) {
         //console.log('blockchain length');
         const length = await zkappWorkerClient.fetchBlockchainLength();
         console.log(length);
-        setState({ ...state, comp_button_state: 2, zkappWorkerClient: zkappWorkerClient, blockchainLenght: length });
+        setState({
+            ...state,
+            comp_button_state: 2,
+            zkappWorkerClient: zkappWorkerClient,
+            blockchainLenght: length,
+
+            // whatever happens now is just temporary...
+            contract_employer: PrivateKey.random().toPublicKey(),
+            contract_contractor: PrivateKey.random().toPublicKey(),
+            contract_arbiter: PrivateKey.random().toPublicKey() });
     }, 2000)
 }
 
@@ -44,10 +54,9 @@ async function runCompile(state, setState) {
         console.log('compiling')
         await state.zkappWorkerClient.compileContract();
         console.log('compiled')
+        setState({ ...state, comp_button_state: 4 });
     } catch (e:any) {
         setState({ ...state, comp_button_state: 2 });
-    } finally {
-        setState({ ...state, comp_button_state: 4 });
     }
 }
 
@@ -119,26 +128,29 @@ function MyApp({ Component, pageProps }: AppProps) {
         initialized: false,
         macpack: 'Your MacPack will be here...',
         blockchainLenght: null,
-        contract_description: 'this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is ',
+        contract_employer: null as null | PublicKey,
+        contract_contractor: null as null | PublicKey,
+        contract_arbiter: null as null | PublicKey,
+        contract_description: 'this is a description that is of the maximum length',
         contract_outcome_deposit_description: '',
         contract_outcome_deposit_after: 32984,
         contract_outcome_deposit_before: 32984,
         contract_outcome_deposit_employer: 1001000000,
         contract_outcome_deposit_contractor: 1000000000,
         contract_outcome_deposit_arbiter: 1000000000,
-        contract_outcome_success_description: 'this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is ',
+        contract_outcome_success_description: 'this is a description that is of the maximum length',
         contract_outcome_success_after: 32984,
         contract_outcome_success_before: 32984,
         contract_outcome_success_employer: -1100000000,
         contract_outcome_success_contractor: 1200000000,
         contract_outcome_success_arbiter: -2100000000,
-        contract_outcome_failure_description: 'this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is ',
+        contract_outcome_failure_description: 'this is a description that is of the maximum length',
         contract_outcome_failure_after: 32984,
         contract_outcome_failure_before: 32984,
         contract_outcome_failure_employer: -1000000000,
         contract_outcome_failure_contractor: -1000000000,
         contract_outcome_failure_arbiter: -1000000000,
-        contract_outcome_cancel_description: 'this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is accepted for the contract description this is a description that is of the maximum length that is ',
+        contract_outcome_cancel_description: 'this is a description that is of the maximum length',
         contract_outcome_cancel_after: 32984,
         contract_outcome_cancel_before: 32984,
         contract_outcome_cancel_employer: 1000000000,

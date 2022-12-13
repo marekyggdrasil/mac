@@ -65,7 +65,69 @@ export default class ZkappWorkerClient {
 
     async toMacPack() {
       return await this._call('toMacPack', {});
-  }
+    }
+
+    async definePreimage(
+        address: string,
+        employer: string,
+        contractor: string,
+        arbiter: string,
+        contract_description: string,
+        contract_outcome_deposit_description: string,
+        contract_outcome_deposit_after: number,
+        contract_outcome_deposit_before: number,
+        contract_outcome_deposit_employer: number,
+        contract_outcome_deposit_contractor: number,
+        contract_outcome_deposit_arbiter: number,
+        contract_outcome_success_description: string,
+        contract_outcome_success_after: number,
+        contract_outcome_success_before: number,
+        contract_outcome_success_employer: number,
+        contract_outcome_success_contractor: number,
+        contract_outcome_success_arbiter: number,
+        contract_outcome_failure_description: string,
+        contract_outcome_failure_after: number,
+        contract_outcome_failure_before: number,
+        contract_outcome_failure_employer: number,
+        contract_outcome_failure_contractor: number,
+        contract_outcome_failure_arbiter: number,
+        contract_outcome_cancel_description: string,
+        contract_outcome_cancel_after: number,
+        contract_outcome_cancel_before: number,
+        contract_outcome_cancel_employer: number,
+        contract_outcome_cancel_contractor: number,
+        contract_outcome_cancel_arbiter: number) {
+        await this._call('definePreimage', {
+            address: address,
+            employer: employer,
+            contractor: contractor,
+            arbiter: arbiter,
+            contract_description: contract_description,
+            contract_outcome_deposit_description: contract_outcome_deposit_description,
+            contract_outcome_deposit_after: contract_outcome_deposit_after,
+            contract_outcome_deposit_before: contract_outcome_deposit_before,
+            contract_outcome_deposit_employer: contract_outcome_deposit_employer,
+            contract_outcome_deposit_contractor: contract_outcome_deposit_contractor,
+            contract_outcome_deposit_arbiter: contract_outcome_deposit_arbiter,
+            contract_outcome_success_description: contract_outcome_success_description,
+            contract_outcome_success_after: contract_outcome_success_after,
+            contract_outcome_success_before: contract_outcome_success_before,
+            contract_outcome_success_employer: contract_outcome_success_employer,
+            contract_outcome_success_contractor: contract_outcome_success_contractor,
+            contract_outcome_success_arbiter: contract_outcome_success_arbiter,
+            contract_outcome_failure_description: contract_outcome_failure_description,
+            contract_outcome_failure_after: contract_outcome_failure_after,
+            contract_outcome_failure_before: contract_outcome_failure_before,
+            contract_outcome_failure_employer: contract_outcome_failure_employer,
+            contract_outcome_failure_contractor: contract_outcome_failure_contractor,
+            contract_outcome_failure_arbiter: contract_outcome_failure_arbiter,
+            contract_outcome_cancel_description: contract_outcome_cancel_description,
+            contract_outcome_cancel_after: contract_outcome_cancel_after,
+            contract_outcome_cancel_before: contract_outcome_cancel_before,
+            contract_outcome_cancel_employer: contract_outcome_cancel_employer,
+            contract_outcome_cancel_contractor: contract_outcome_cancel_contractor,
+            contract_outcome_cancel_arbiter: contract_outcome_cancel_arbiter});
+    }
 
   createUpdateTransaction() {
     return this._call('createUpdateTransaction', {});
