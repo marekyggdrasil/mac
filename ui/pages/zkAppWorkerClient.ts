@@ -58,6 +58,10 @@ export default class ZkappWorkerClient {
       await this._call('fromMacPack', { macpack: macpack});
   }
 
+    async toMacPack() {
+      return await this._call('toMacPack', {});
+  }
+
   createUpdateTransaction() {
     return this._call('createUpdateTransaction', {});
   }

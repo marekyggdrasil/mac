@@ -27,6 +27,9 @@ async function runLoadSnarkyJS(state: FrontendState, setState) {
         await zkappWorkerClient.loadSnarkyJS();
         await zkappWorkerClient.setActiveInstanceToBerkeley();
         console.log('SnarkyJS loaded');
+        console.log('loading contract')
+        await zkappWorkerClient.loadContract();
+        console.log('contract loaded');
         //console.log('blockchain length');
         //const length = await zkappWorkerClient.getBlockchainLength();
         //console.log(length);
@@ -38,8 +41,6 @@ async function runCompile(state, setState) {
     console.log('runCompile')
     setState({ ...state, comp_button_state: 3 });
     try {
-        console.log('loading contract')
-        await state.zkappWorkerClient.loadContract();
         console.log('compiling')
         await state.zkappWorkerClient.compileContract();
         console.log('compiled')

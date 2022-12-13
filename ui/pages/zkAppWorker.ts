@@ -16,19 +16,21 @@ type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 // ---------------------------------------------------------------------------------------
 
 import type { Mac } from '../../contracts/src/Mac';
-// import type { Participant, Outcome, Preimage } from '../../contracts/src/preimage';
+import type { Outcome, Preimage } from '../../contracts/src/strpreim';
+import type { fromMacPack, toMacPack } from '../../contracts/src/helpers';
 
-import bs58 from 'bs58';
-import byteify from 'byteify';
+//import bs58 from 'bs58';
+//import byteify from 'byteify';
 
 const state = {
-    Mac: null as null | typeof Mac,
-    //Participant: null as null | typeof Participant,
-    //Outcome: null as null | typeof Outcome,
-    //Preimage: null as null | typeof Preimage,
+  Mac: null as null | typeof Mac,
+  Outcome: null as null | typeof Outcome,
+  Preimage: null as null | typeof Preimage,
   zkapp: null as null | Mac,
-  transaction: null as null | Transaction
-  //preimage: null as null | Preimage
+  preimage: null as null | Preimage,
+  transaction: null as null | Transaction,
+  fromMacPack: null as null | fromMacPack,
+  toMacPack: null as null | toMacPack
 }
 
 // ---------------------------------------------------------------------------------------
@@ -41,34 +43,31 @@ const functions = {
     const Berkeley = Mina.BerkeleyQANet(
       "https://proxy.berkeley.minaexplorer.com/graphql"
     );
-      Mina.setActiveInstance(Berkeley);
-      // console.log(Berkeley.getNetworkState());
-      console.log(Mina);
-      let block = await fetchLastBlock(
-          "https://proxy.berkeley.minaexplorer.com/graphql");
-      console.log(block.blockchainLength.toString());
-      // console.log(typeof(block.blockchainLength.value[1]));
+    Mina.setActiveInstance(Berkeley);
   },
-  loadContract: async (args: {}) => {
-      const { Mac } = await import('../../contracts/build/src/Mac.js');
-      // const { Preimage } = await import('../../contracts/src/preimage');
-      state.Mac = Mac;
-      //state.Participant = Participant;
-      //state.Outcome = Outcome;
-      state.Preimage = Preimage;
+    loadContract: async (args: {}) => {
+    const { Mac } = await import(
+          '../../contracts/build/src/Mac.js');
+    state.Mac = Mac;
+    const { Outcome, Preimage } = await import(
+          '../../contracts/build/src/strpreim.js');
+    state.Outcome = Outcome;
+    state.Preimage = Preimage;
+    const { fromMacPack, toMacPack } = await import(
+        '../../contracts/build/src/helpers.js');
+    state.fromMacPack = fromMacPack;
+      state.toMacPack = toMacPack;
   },
-    fetchBlockchainLength: async (args: {}) => {
-        let block = await fetchLastBlock(
+  fetchBlockchainLength: async (args: {}) => {
+    let block = await fetchLastBlock(
             "https://proxy.berkeley.minaexplorer.com/graphql");
-        return block.blockchainLength.toString();
-    },
+    return block.blockchainLength.toString();
+  },
   compileContract: async (args: {}) => {
-      await state.Mac!.compile();
+    await state.Mac!.compile();
   },
   fetchAccount: async (args: { publicKey58: string }) => {
-      const publicKey = PublicKey.fromBase58(args.publicKey58);
-      //const p: Participant = new Participant(publicKey);
-      //console.log(p);
+    const publicKey = PublicKey.fromBase58(args.publicKey58);
     return await fetchAccount({ publicKey });
   },
   initZkappInstance: async (args: { publicKey58: string }) => {
@@ -87,8 +86,11 @@ const functions = {
         const _commitment: Field = Field.fromJSON(args.commitment);
         await state.zkapp!.initialize(_commitment);
     },
-    fromMacPack: async (args: { macpack: string }) => {
-        state.preimage = state.Preimage!.fromMacPack(args.macpack);
+    fromMacPack: (args: { macpack: string }) => {
+        state.preimage = state.fromMacPack(args.macpack);
+    },
+    toMacPack: (args: {}) => {
+        return state.toMacPack(state.preimage);
     },
   getNum: async (args: {}) => {
     const currentNum = await state.zkapp!.num.get();

@@ -8,8 +8,11 @@ async function runImport(context) {
     let macpack = (element.innerText || element.textContent);
     console.log(macpack);
     try {
-        context.state.zkappWorkerClient.fromMacPack(macpack);
+        await context.state.zkappWorkerClient.fromMacPack(macpack);
         console.log('imported correctly');
+        const exmacpack = await context.state.zkappWorkerClient.toMacPack();
+        console.log('exmacpack');
+        console.log(exmacpack);
     } catch (e:any) {
         console.log('failed to import');
         console.log(e);
