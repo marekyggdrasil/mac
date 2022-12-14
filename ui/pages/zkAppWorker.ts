@@ -96,6 +96,39 @@ const functions = {
     toMacPack: (args: {}) => {
         return state.toMacPack(state.preimage);
     },
+    getPreimageData: (args: {}) => {
+        return JSON.stringify({
+            address: state.preimage.address.toBase58(),
+            employer: state.preimage.employer.toBase58(),
+            contractor: state.preimage.contractor.toBase58(),
+            arbiter: state.preimage.arbiter.toBase58(),
+            contract_description: state.preimage.contract.toString(),
+            contract_outcome_deposit_description: state.preimage.deposited.description.toString(),
+            contract_outcome_deposit_after: parseInt(state.preimage.deposited.start_after.toString()),
+            contract_outcome_deposit_before: parseInt(state.preimage.deposited.finish_before.toString()),
+            contract_outcome_deposit_employer: parseInt(state.preimage.deposited.payment_employer.toString()),
+            contract_outcome_deposit_contractor: parseInt(state.preimage.deposited.payment_contractor.toString()),
+            contract_outcome_deposit_arbiter: parseInt(state.preimage.deposited.payment_arbiter.toString()),
+            contract_outcome_success_description: state.preimage.success.description.toString(),
+            contract_outcome_success_after: parseInt(state.preimage.success.start_after.toString()),
+            contract_outcome_success_before: parseInt(state.preimage.success.finish_before.toString()),
+            contract_outcome_success_employer: parseInt(state.preimage.success.payment_employer.toString()),
+        contract_outcome_success_contractor: parseInt(state.preimage.success.payment_contractor.toString()),
+            contract_outcome_success_arbiter: parseInt(state.preimage.success.payment_arbiter.toString()),
+            contract_outcome_failure_description: state.preimage.failure.description.toString(),
+            contract_outcome_failure_after: parseInt(state.preimage.failure.start_after.toString()),
+            contract_outcome_failure_before: parseInt(state.preimage.failure.finish_before.toString()),
+            contract_outcome_failure_employer: parseInt(state.preimage.failure.payment_employer.toString()),
+    contract_outcome_failure_contractor: parseInt(state.preimage.failure.payment_contractor.toString()),
+            contract_outcome_failure_arbiter: parseInt(state.preimage.failure.payment_arbiter.toString()),
+            contract_outcome_cancel_description: state.preimage.cancel.description.toString(),
+            contract_outcome_cancel_after: parseInt(state.preimage.cancel.start_after.toString()),
+            contract_outcome_cancel_before: parseInt(state.preimage.cancel.finish_before.toString()),
+            contract_outcome_cancel_employer: parseInt(state.preimage.cancel.payment_employer.toString()),
+contract_outcome_cancel_contractor: parseInt(state.preimage.cancel.payment_contractor.toString()),
+    contract_outcome_cancel_arbiter: parseInt(state.preimage.cancel.payment_arbiter.toString())
+        });
+    },
     definePreimage: (args: {
         address: string,
         employer: string,

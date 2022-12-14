@@ -9,7 +9,7 @@ async function finalizeContract(context) {
     // instantiate preimage via worker and compute macpack
     context.state.zkappWorkerClient.definePreimage(
         context.state.zkappPublicKey.toBase58(),
-        context.state.publicKey.toBase58(),
+        context.state.contract_employer.toBase58(),
         context.state.contract_contractor.toBase58(),
         context.state.contract_arbiter.toBase58(),
         context.state.contract_description,
@@ -80,10 +80,9 @@ const InteractionCases = () => {
         return (<div>Make sure you load the SnarkyJS library!</div>);
     } else if (context.state.connect_button_state < 2) {
         return (<div>Make sure you connect your AuroWallet!</div>);
+    } else if (!context.state.loaded) {
+        return (<div>Now you may <Link href="/create">create a new contract</Link> or <Link href="/import">import an existing contract</Link>.</div>);
     } else {
-        console.log('context public key');
-        console.log(context.state.publicKey);
-        // {context.state.publicKey.toBase58()}
         return (
             <div>
                 <InteractionEditor/>

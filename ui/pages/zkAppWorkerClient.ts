@@ -67,6 +67,11 @@ export default class ZkappWorkerClient {
       return await this._call('toMacPack', {});
     }
 
+    async getPreimageData() {
+        const result = await this._call('getPreimageData', {});
+        return JSON.parse(result);
+    }
+
     async definePreimage(
         address: string,
         employer: string,

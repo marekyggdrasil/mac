@@ -43,7 +43,7 @@ const CreateCases = () => {
         return (
             <article className="container prose">
                 <h1>Create a new MAC contract</h1>
-                <div><p>You already have a loaded MAC! contract. Before you import another one make sure you <Link href="/close">close</Link> is first.</p></div>
+                <div><p>You already have a loaded MAC! contract. You may <Link href="/current">deploy it or interact with it</Link>, <Link href="/close">close it</Link> or <Link href="/export">export it</Link>.</p></div>
             </article>);
     }
     if (context.state.connect_button_state < 2) {

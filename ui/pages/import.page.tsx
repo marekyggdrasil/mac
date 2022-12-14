@@ -3,6 +3,10 @@ import Link from 'next/link';
 import { useContext } from 'react';
 import AppContext from '../components/AppContext';
 
+import {
+    PublicKey
+} from 'snarkyjs'
+
 async function runImport(context) {
     let element = document.getElementById('import-macpack');
     let macpack = (element.innerText || element.textContent);
@@ -10,7 +14,47 @@ async function runImport(context) {
     try {
         await context.state.zkappWorkerClient.fromMacPack(macpack);
         console.log('imported correctly');
-        context.setState({ ...context.state, loaded: true, macpack: macpack });
+        // get the preimage to app state for the display
+        const r = await context.state.zkappWorkerClient.getPreimageData();
+        console.log('preimage data');
+        console.log(r);
+        console.log(r.address);
+        // context.setState({ ...context.state, loaded: true, macpack: macpack });
+
+        // set the state
+            context.setState({
+                ...context.state,
+                loaded: true,
+                macpack: macpack,
+                contract_employer: PublicKey.fromBase58(r.employer),
+                contract_contractor: PublicKey.fromBase58(r.contractor),
+                contract_arbiter: PublicKey.fromBase58(r.arbiter),
+                contract_outcome_deposit_after: r.contract_outcome_deposit_after,
+                contract_outcome_deposit_before: r.contract_outcome_deposit_before,
+                contract_outcome_success_after: r.contract_outcome_success_after,
+                contract_outcome_success_before: r.contract_outcome_success_before,
+                contract_outcome_failure_after: r.contract_outcome_failure_after,
+                contract_outcome_failure_before: r.contract_outcome_failure_before,
+                contract_outcome_cancel_after: r.contract_outcome_cancel_after,
+                contract_outcome_cancel_before: r.contract_outcome_cancel_before,
+                contract_description: r.contract_description,
+                contract_outcome_deposit_description: r.contract_outcome_deposit_description,
+                contract_outcome_success_description: r.contract_outcome_success_description,
+                contract_outcome_failure_description: r.contract_outcome_failure_description,
+                contract_outcome_cancel_description: r.contract_outcome_cancel_description,
+                contract_outcome_deposit_employer: r.contract_outcome_deposit_employer,
+                contract_outcome_deposit_contractor: r.contract_outcome_deposit_contractor,
+                contract_outcome_deposit_arbiter: r.contract_outcome_deposit_arbiter,
+                contract_outcome_success_employer: r.contract_outcome_success_employer,
+                contract_outcome_success_contractor: r.contract_outcome_success_contractor,
+                contract_outcome_success_arbiter: r.contract_outcome_success_arbiter,
+                contract_outcome_failure_employer: r.contract_outcome_failure_employer,
+                contract_outcome_failure_contractor: r.contract_outcome_failure_contractor,
+                contract_outcome_failure_arbiter: r.contract_outcome_failure_arbiter,
+                contract_outcome_cancel_employer: r.contract_outcome_cancel_employer,
+                contract_outcome_cancel_contractor: r.contract_outcome_cancel_contractor,
+                contract_outcome_cancel_arbiter: r.contract_outcome_cancel_arbiter
+            });
     } catch (e:any) {
         console.log('failed to import');
         console.log(e);
