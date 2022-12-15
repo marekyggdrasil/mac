@@ -82,13 +82,61 @@ const functions = {
         const network_state = await Mina.getNetworkState();
         return network_state.blockchainLength.toString();
     },
-    deploy: async (args: { privateKey58: string }) => {
-        const pk: PrivateKey = PrivateKey.fromBase58(args.privateKey58);
-        await state.zkapp!.deploy(_commitment);
+    createDeployTransaction: async (args: { privateKey58: string }) => {
+        const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(args.privateKey58);
+        const _commitment: Field = state.Preimage.hash(state.preimage);
+        const transaction = await Mina.transaction(() => {
+            state.zkapp!.deploy({ zkappKey: zkAppPrivateKey });
+            state.zkapp!.initialize(_commitment);
+        });
+        state.transaction = transaction;
     },
-    initialize: async (args: { commitment: string }) => {
-        const _commitment: Field = Field.fromJSON(args.commitment);
-        await state.zkapp!.initialize(_commitment);
+    createDepositTransaction: async (args: { publicKey58: string }) => {
+        const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
+        const transaction = await Mina.transaction(() => {
+            state.zkapp!.deposit(state.preimage, actor);
+        });
+        state.transaction = transaction;
+    },
+    createWithdrawTransaction: async (args: { publicKey58: string }) => {
+        const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
+        const transaction = await Mina.transaction(() => {
+            state.zkapp!.withdraw(state.preimage, actor);
+        });
+        state.transaction = transaction;
+    },
+    createSuccessTransaction: async (args: { publicKey58: string }) => {
+        const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
+        const transaction = await Mina.transaction(() => {
+            state.zkapp!.success(state.preimage, actor);
+        });
+        state.transaction = transaction;
+    },
+    createFailureTransaction: async (args: { publicKey58: string }) => {
+        const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
+        const transaction = await Mina.transaction(() => {
+            state.zkapp!.failure(state.preimage, actor);
+        });
+        state.transaction = transaction;
+    },
+    createCancelTransaction: async (args: { publicKey58: string }) => {
+        const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
+        const transaction = await Mina.transaction(() => {
+            state.zkapp!.cancel(state.preimage, actor);
+        });
+        state.transaction = transaction;
+    },
+    getContractState: async (args: {}) => {
+        const automaton_state: Field = await state.zkapp!.automaton_state.get();
+        const memory: Field = await state.zkapp!.memory.get();
+        return JSON.stringify({
+            'acted': {
+                'employer': false,
+                'contractor': false,
+                'arbiter': false
+            },
+            'automaton_state': 'initial'
+        });
     },
     fromMacPack: (args: { macpack: string }) => {
         state.preimage = state.fromMacPack(args.macpack);
@@ -203,18 +251,7 @@ contract_outcome_cancel_contractor: parseInt(state.preimage.cancel.payment_contr
             failure: outcome_failure,
             cancel: outcome_cancel});
     },
-  getNum: async (args: {}) => {
-    const currentNum = await state.zkapp!.num.get();
-    return JSON.stringify(currentNum.toJSON());
-  },
-  createUpdateTransaction: async (args: {}) => {
-    const transaction = await Mina.transaction(() => {
-        state.zkapp!.update();
-      }
-    );
-    state.transaction = transaction;
-  },
-  proveUpdateTransaction: async (args: {}) => {
+  proveTransaction: async (args: {}) => {
     await state.transaction!.prove();
   },
   getTransactionJSON: async (args: {}) => {

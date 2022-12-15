@@ -55,24 +55,6 @@ async function runCompile(state, setState) {
     }
 }
 
-async function runDeploy(state, setState) {
-    if (state.comp_button_state < 4) {
-        return false;
-    }
-    // deploying the contract
-    console.log('deploying the contract')
-    await state.zkappWorkerClient.deploy(state.zkappPrivateKey);
-    setState({ ...state, deployed: true });
-    console.log('contract deployed')
-
-    // initializing the contract
-    console.log('initializing the contract')
-    await state.zkappWorkerClient.initialize(state.mac_contract.getCommitment());
-    setState({ ...state, initialized: true });
-    console.log('contract initialized and ready to interact')
-    return true;
-}
-
 async function connectWallet(state, setState) {
     console.log('connectWallet')
     setState({ ...state, connect_button_state: 1 });
@@ -85,14 +67,20 @@ async function connectWallet(state, setState) {
                 setState({ ...state, hasWallet: false });
                 return;
             }
-            const publicKeyBase58: string = await mina.requestAccounts();
+            const publicKeyBase58: string[] = await mina.requestAccounts();
+            console.log('auro connected');
+            console.log(publicKeyBase58);
             const publicKey = PublicKey.fromBase58(publicKeyBase58[0]);
             // let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
             setState({ ...state, connect_button_state: 2, publicKey: publicKey });
             window.mina.on('accountsChanged', async (accounts: string[]) => {
-                const publicKey = PublicKey.fromBase58(accounts[0]);
-                let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
-                setState({ ...state, connect_button_state: 2, publicKey: publicKey });
+                console.log('accountsChanged');
+                console.log(accounts);
+                if (accounts.length > 0) {
+                    const publicKey = PublicKey.fromBase58(accounts[0]);
+                    setState({ ...state, connect_button_state: 2, publicKey: publicKey });
+                }
+                // let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
             });
         } catch (e:any) {
             setState({ ...state, connect_button_state: 0 });
@@ -111,6 +99,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         accountExists: false,
         currentNum: null as null | Field,
         publicKey: null as null | PublicKey,
+        zkappPrivateKeyCandidate: null as null | PrivateKey,
+        zkappPublicKeyCandidate: null as null | PublicKey,
         zkappPrivateKey: null as null | PrivateKey,
         zkappPublicKey: null as null | PublicKey,
         creatingTransaction: false,
@@ -122,6 +112,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         initialized: false,
         macpack: 'Your MacPack will be here...',
         blockchainLength: null,
+        tx_building_state: '',
+        employerBase58: '',
         contract_employer: null as null | PublicKey,
         contract_contractor: null as null | PublicKey,
         contract_arbiter: null as null | PublicKey,

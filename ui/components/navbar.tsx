@@ -51,9 +51,8 @@ const ConnectButton = () => {
             Connecting...
         </button>;
     } else if (context.state.connect_button_state == 2) {
-        return <button className="btn btn-disabled">
-            Connected!
-        </button>;
+        const address = context.state.publicKey.toBase58();
+        return <button className="btn btn-disabled">Connected!</button>;
     }
 }
 

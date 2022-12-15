@@ -31,6 +31,7 @@ export const RenderOutcomes = () => {
                         <th>Employer</th>
                         <th>Contractor</th>
                         <th>Arbiter</th>
+                        <th>Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,6 +59,12 @@ export const RenderOutcomes = () => {
                             {minaValue(
                                 context.state.contract_outcome_deposit_arbiter)}
                         </td>
+                        <td>
+                            {minaValue(
+                                context.state.contract_outcome_deposit_employer
+                                + context.state.contract_outcome_deposit_contractor
+                                + context.state.contract_outcome_deposit_arbiter)}
+                        </td>
                     </tr>
                     <tr>
                         <th>Success</th>
@@ -82,6 +89,12 @@ export const RenderOutcomes = () => {
                         <td>
                             {minaValue(
                                 context.state.contract_outcome_success_arbiter)}
+                        </td>
+                        <td>
+                            {minaValue(
+                                context.state.contract_outcome_success_employer
+                                + context.state.contract_outcome_success_contractor
+                                + context.state.contract_outcome_success_arbiter)}
                         </td>
                     </tr>
                     <tr>
@@ -108,6 +121,12 @@ export const RenderOutcomes = () => {
                             {minaValue(
                                 context.state.contract_outcome_failure_arbiter)}
                         </td>
+                        <td>
+                            {minaValue(
+                                context.state.contract_outcome_failure_employer
+                                + context.state.contract_outcome_failure_contractor
+                                + context.state.contract_outcome_failure_arbiter)}
+                        </td>
                     </tr>
                     <tr>
                         <th>Cancel</th>
@@ -118,7 +137,7 @@ export const RenderOutcomes = () => {
                         </td>
                         <td>
                             <MinaBlockchainLength>
-                            {context.state.contract_outcome_cancel_before}
+                                {context.state.contract_outcome_cancel_before}
                             </MinaBlockchainLength>
                         </td>
                         <td>
@@ -132,6 +151,12 @@ export const RenderOutcomes = () => {
                         <td>
                             {minaValue(
                                 context.state.contract_outcome_cancel_arbiter)}
+                        </td>
+                        <td>
+                            {minaValue(
+                                context.state.contract_outcome_cancel_employer
+                                + context.state.contract_outcome_cancel_contractor
+                                + context.state.contract_outcome_cancel_arbiter)}
                         </td>
                     </tr>
                 </tbody>

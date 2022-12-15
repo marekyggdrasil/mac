@@ -8,22 +8,29 @@ import {
 import AppContext from './AppContext';
 import { MinaValue, MinaBlockchainLength, MinaSecretValue } from './highlights';
 
+async function setCurrentEmployer(context) {
+    context.setState({
+        ...context.state,
+        employerBase58: context.state.publicKey.toBase58()
+    });
+}
+
 async function generateKeyPair(context) {
     const sk: PrivateKey = await context.state.zkappWorkerClient.generatePrivateKey();
     const pk: PublicKey = sk.toPublicKey();
-    context.setState({ ...context.state, zkappPrivateKey: sk, zkappPublicKey: pk });
+    context.setState({ ...context.state, zkappPrivateKeyCandidate: sk, zkappPublicKeyCandidate: pk });
 }
 
 const KeyGenerator = () => {
     const context = useContext(AppContext);
-    if (!context.state.zkappPrivateKey) {
+    if (!context.state.zkappPublicKeyCandidate) {
         return <p>Your MAC! contract does not have a private key. Click on <button className="btn" onClick={async (event) => {
             event.preventDefault();
             await generateKeyPair(context);
             return;
         }}>Generate</button> to prepare a new key pair.</p>;
     }
-    return <p>Your MAC! contract public key and address is <MinaValue>{ context.state.zkappPublicKey.toBase58() }</MinaValue> and corresponding private key is <MinaSecretValue>{ context.state.zkappPrivateKey.toBase58() }</MinaSecretValue></p>;
+    return <p>Your MAC! contract public key and address is <MinaValue>{ context.state.zkappPublicKeyCandidate.toBase58() }</MinaValue> and corresponding private key is <MinaSecretValue>{ context.state.zkappPrivateKeyCandidate.toBase58() }</MinaSecretValue></p>;
 }
 
 const Editor = () => {
@@ -36,53 +43,65 @@ const Editor = () => {
             const t = 1 // 2520 is a week, time unit
             const m = 1000000000 // mina denomination
 
-            // key generation
-            if (!context.state.zkappPrivateKey) {
-                return alert('Smart contract key pair not generated');
-            }
             // addresses
-            const contractor = event.target[0].value;
+            const private_key = event.target[1].value;
+            console.log(private_key);
+            try {
+                PrivateKey.fromBase58(private_key);
+            } catch (e:any) {
+                return alert('Invalid private key');
+            }
+
+            // addresses
+            const employer = event.target[2].value;
+            try {
+                PublicKey.fromBase58(employer);
+            } catch (e:any) {
+                return alert('Invalid employer address');
+            }
+
+            const contractor = event.target[4].value;
             try {
                 PublicKey.fromBase58(contractor);
             } catch (e:any) {
                 return alert('Invalid contractor address');
             }
 
-            const arbiter = event.target[1].value;
+            const arbiter = event.target[5].value;
             try {
                 PublicKey.fromBase58(arbiter);
             } catch (e:any) {
                 return alert('Invalid arbiter address');
             }
 
-            const contract_subject = event.target[2].value;
+            const contract_subject = event.target[6].value;
 
             // contractor
-            const contractor_payment = parseFloat(event.target[3].value);
-            const contractor_deposit = parseFloat(event.target[4].value);
-            const contracor_penalty_failure_percent = event.target[5].value;
-            const contracor_penalty_cancel_percent = event.target[6].value;
+            const contractor_payment = Math.round(parseFloat(event.target[7].value)*m);
+            const contractor_deposit = Math.round(parseFloat(event.target[8].value)*m);
+            const contracor_penalty_failure_percent = parseInt(event.target[9].value);
+            const contracor_penalty_cancel_percent = parseInt(event.target[10].value);
 
             // employer
-            const employer_deposit = parseFloat(event.target[7].value);
-            const employer_arbitration_fee_percent = event.target[8].value;
+            const employer_deposit = Math.round(parseFloat(event.target[11].value)*m);
+            const employer_arbitration_fee_percent = parseInt(event.target[12].value);
 
             // arbiter
-            const arbiter_payment = parseFloat(event.target[9].value);
-            const arbiter_deposit = parseFloat(event.target[10].value);
-            const arbiter_penalty_non_acting_percent = event.target[11].value;
+            const arbiter_payment = Math.round(parseFloat(event.target[13].value)*m);
+            const arbiter_deposit = Math.round(parseFloat(event.target[14].value)*m);
+            const arbiter_penalty_non_acting_percent = parseInt(event.target[15].value);
 
             // deadlines
-            const deadline_warmup = event.target[12].value;
-            const deadline_deposit = event.target[13].value;
-            const deadline_execution = event.target[14].value;
-            const deadline_failure = event.target[15].value;
+            const deadline_warmup = event.target[16].value;
+            const deadline_deposit = event.target[17].value;
+            const deadline_execution = event.target[18].value;
+            const deadline_failure = event.target[19].value;
 
-            // descriptions
-            const subject_deposit = event.target[16].value;
-            const subject_success = event.target[17].value;
-            const subject_failure = event.target[18].value;
-            const subject_cancel = event.target[19].value;
+            // description
+            const subject_deposit = event.target[20].value;
+            const subject_success = event.target[21].value;
+            const subject_failure = event.target[22].value;
+            const subject_cancel = event.target[23].value;
 
             // compute the values
             const l = context.state.blockchainLenght;
@@ -125,57 +144,102 @@ const Editor = () => {
             console.log(con_cancel);
 
             console.log('outcomes amounts')
-            const contract_outcome_deposit_employer = Math.round((
-                contractor_payment
-                + employer_deposit
-                + emp_arb)*m);
-            const contract_outcome_deposit_contractor = Math.round((
-                contractor_deposit + con_arb)*m);
-            const contract_outcome_deposit_arbiter = Math.round((
-                arbiter_deposit)*m);
+            const contract_outcome_deposit_employer = contractor_payment
+                                                    + employer_deposit
+                                                    + emp_arb;
+            const contract_outcome_deposit_contractor = contractor_deposit + con_arb;
+            const contract_outcome_deposit_arbiter = arbiter_deposit;
 
-            const contract_outcome_success_employer = Math.round((
-                employer_deposit)*m);
-            const contract_outcome_success_contractor = Math.round((
-                contractor_payment + contractor_deposit)*m);
-            const contract_outcome_success_arbiter = Math.round((
-                arbiter_payment)*m);
+            const contract_outcome_success_employer = employer_deposit;
+            const contract_outcome_success_contractor = contractor_payment
+                                                      + contractor_deposit;
+            const contract_outcome_success_arbiter = arbiter_payment + arbiter_deposit;
 
-            const contract_outcome_failure_employer = Math.round((
-                contractor_payment + employer_deposit + con_fail)*m);
-            const contract_outcome_failure_contractor = Math.round((
-                contractor_deposit - con_fail)*m);
-            const contract_outcome_failure_arbiter = Math.round((
-                arbiter_payment)*m);
+            const contract_outcome_failure_employer = contractor_payment
+                                                    + employer_deposit
+                                                    + con_fail;
+            const contract_outcome_failure_contractor = contractor_deposit
+                                                      - con_fail;
+            const contract_outcome_failure_arbiter = arbiter_payment + arbiter_deposit;
 
-            const contract_outcome_cancel_employer = Math.round((
-                contractor_payment + employer_deposit + con_cancel)*m);
-            const contract_outcome_cancel_contractor = Math.round((
-                contractor_deposit - con_cancel)*m);
-            const contract_outcome_cancel_arbiter = Math.round((
-                arbiter_payment)*m);
+            const contract_outcome_cancel_employer = contractor_payment
+                                                   + employer_deposit
+                                                   + con_cancel;
+            const contract_outcome_cancel_contractor = contractor_deposit
+                                                     - con_cancel;
+            const contract_outcome_cancel_arbiter = arbiter_payment + arbiter_deposit;
 
-            console.log(contract_outcome_deposit_employer);
-            console.log(contract_outcome_deposit_contractor);
-            console.log(contract_outcome_deposit_arbiter);
-            console.log(contract_outcome_success_employer);
-            console.log(contract_outcome_success_contractor);
-            console.log(contract_outcome_success_arbiter);
-            console.log(contract_outcome_failure_employer);
-            console.log(contract_outcome_failure_contractor);
-            console.log(contract_outcome_failure_arbiter);
-            console.log(contract_outcome_cancel_employer);
-            console.log(contract_outcome_cancel_contractor);
-            console.log(contract_outcome_cancel_arbiter);
-
+            // validate values positive
+            const all_values = [
+                contract_outcome_deposit_employer,
+                contract_outcome_deposit_contractor,
+                contract_outcome_deposit_arbiter,
+                contract_outcome_success_employer,
+                contract_outcome_success_contractor,
+                contract_outcome_success_arbiter,
+                contract_outcome_failure_employer,
+                contract_outcome_failure_contractor,
+                contract_outcome_failure_arbiter,
+                contract_outcome_cancel_employer,
+                contract_outcome_cancel_contractor,
+                contract_outcome_cancel_arbiter
+            ];
+            if (all_values.some(v => v < 0)) {
+                return alert('One of the contract values ends up negative...');
+            }
             // set the participants
+            const contract_employer = PublicKey.fromBase58(employer);
             const contract_contractor = PublicKey.fromBase58(contractor);
             const contract_arbiter = PublicKey.fromBase58(arbiter);
 
+            const sk = PrivateKey.fromBase58(private_key);
+            const pk = sk.toPublicKey();
+            console.log('sk');
+            console.log(sk);
+            console.log(pk);
+
+            // set the preimage
+            await context.state.zkappWorkerClient.definePreimage(
+                pk.toBase58(),
+                employer,
+                contractor,
+                arbiter,
+                contract_subject,
+                contract_outcome_deposit_description,
+                contract_outcome_deposit_after,
+                contract_outcome_deposit_before,
+                contract_outcome_deposit_employer,
+                contract_outcome_deposit_contractor,
+                contract_outcome_deposit_arbiter,
+                contract_outcome_success_description,
+                contract_outcome_success_after,
+                contract_outcome_success_before,
+                contract_outcome_success_employer,
+                contract_outcome_success_contractor,
+                contract_outcome_success_arbiter,
+                contract_outcome_failure_description,
+                contract_outcome_failure_after,
+                contract_outcome_failure_before,
+                contract_outcome_failure_employer,
+                contract_outcome_failure_contractor,
+                contract_outcome_failure_arbiter,
+                contract_outcome_cancel_description,
+                contract_outcome_cancel_after,
+                contract_outcome_cancel_before,
+                contract_outcome_cancel_employer,
+                contract_outcome_cancel_contractor,
+                contract_outcome_cancel_arbiter);
+
+            // now get its macpack
+            const macpack = await context.state.zkappWorkerClient.toMacPack();
+
             // set the state
-            context.setState({
+            await context.setState({
                 ...context.state,
                 loaded: true,
+                macpack: macpack,
+                zkappPrivateKey: sk,
+                zkappPublicKey: pk,
                 contract_employer: context.state.publicKey,
                 contract_contractor: contract_contractor,
                 contract_arbiter: contract_arbiter,
@@ -192,9 +256,9 @@ const Editor = () => {
                 contract_outcome_success_description: contract_outcome_success_description,
                 contract_outcome_failure_description: contract_outcome_failure_description,
                 contract_outcome_cancel_description: contract_outcome_cancel_description,
-                contract_outcome_deposit_employer: contract_outcome_deposit_employer,
-                contract_outcome_deposit_contractor: contract_outcome_deposit_contractor,
-                contract_outcome_deposit_arbiter: contract_outcome_deposit_arbiter,
+                contract_outcome_deposit_employer: -contract_outcome_deposit_employer,
+                contract_outcome_deposit_contractor: -contract_outcome_deposit_contractor,
+                contract_outcome_deposit_arbiter: -contract_outcome_deposit_arbiter,
                 contract_outcome_success_employer: contract_outcome_success_employer,
                 contract_outcome_success_contractor: contract_outcome_success_contractor,
                 contract_outcome_success_arbiter: contract_outcome_success_arbiter,
@@ -214,7 +278,31 @@ const Editor = () => {
             </div>
             <div className="columns-2">
                 <div className="break-inside-avoid">
+                    <h2>Contract</h2>
+                    <div className="form-control">
+                        <label className="label">
+                            Contract private key
+                        </label>
+                        <input type="password" className="input input-bordered w-full max-w-xs" />
+                        <label className="label">
+                            <span className="label-text-alt">Required for deployment</span>
+                        </label>
+                    </div>
+                </div>
+                <div className="break-inside-avoid">
                     <h2>Participants</h2>
+                    <div className="form-control">
+                        <label className="label">
+                            Employer
+                        </label>
+                        <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" value={context.state.employerBase58} /><button className="btn" onClick={async (event) => {
+                            event.preventDefault();
+                            await setCurrentEmployer(context);
+                        }}>Set Current</button>
+                        <label className="label">
+                            <span className="label-text-alt">Employer is one who needs the service and pays for it.</span>
+                        </label>
+                    </div>
                     <div className="form-control">
                         <label className="label">
                             Contractor

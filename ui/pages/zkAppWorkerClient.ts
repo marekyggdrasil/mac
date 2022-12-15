@@ -51,14 +51,6 @@ export default class ZkappWorkerClient {
         return parseInt(value);
   }
 
-    async deploy(privateKey: PrivateKey) {
-      await this._call('deploy', { privateKey58: privateKey.toBase58()});
-  }
-
-    async initialize(commitment: Field) {
-      await this._call('initialize', { commitment: commitment.toJSON()});
-  }
-
     async fromMacPack(macpack: string) {
       await this._call('fromMacPack', { macpack: macpack});
   }
@@ -134,12 +126,36 @@ export default class ZkappWorkerClient {
             contract_outcome_cancel_arbiter: contract_outcome_cancel_arbiter});
     }
 
-  createUpdateTransaction() {
-    return this._call('createUpdateTransaction', {});
-  }
+    async createDeployTransaction(privateKey: PrivateKey) {
+        return await this._call('createDeployTransaction', {privateKey58: privateKey.toBase58()});
+    }
 
-  proveUpdateTransaction() {
-    return this._call('proveUpdateTransaction', {});
+    async createDepositTransaction() {
+        return await this._call('createDepositTransaction', {});
+    }
+
+    async createWithdrawTransaction() {
+        return await this._call('createWithdrawTransaction', {});
+    }
+
+    async createSuccessTransaction() {
+        return await this._call('createSuccessTransaction', {});
+    }
+
+    async createFailureTransaction() {
+        return await this._call('createFailureTransaction', {});
+    }
+
+    async createCancelTransaction() {
+        return await this._call('createCancelTransaction', {});
+    }
+
+    async getContractState() {
+        return await this._call('getContractState', {});
+    }
+
+  async proveTransaction() {
+    return await this._call('proveTransaction', {});
   }
 
   async getTransactionJSON() {
