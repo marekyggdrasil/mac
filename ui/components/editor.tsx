@@ -9,7 +9,7 @@ import AppContext from './AppContext';
 import { MinaValue, MinaBlockchainLength, MinaSecretValue } from './highlights';
 
 async function generateKeyPair(context) {
-    const sk: PrivateKey = await context.state.zkappWorkerClient.generatePrivateKey();
+    const sk: PrivateKey = PrivateKey.random();
     const pk: PublicKey = sk.toPublicKey();
     context.setState({ ...context.state, zkappPrivateKeyCandidate: sk, zkappPublicKeyCandidate: pk });
 }
@@ -43,6 +43,13 @@ const Editor = () => {
                 PrivateKey.fromBase58(private_key);
             } catch (e:any) {
                 return alert('Invalid private key');
+            }
+            const deployer_private_key = event.target.base58deployersk.value;
+            console.log(deployer_private_key);
+            try {
+                PrivateKey.fromBase58(deployer_private_key);
+            } catch (e:any) {
+                return alert('Invalid deployer private key');
             }
 
             // addresses
@@ -191,6 +198,9 @@ const Editor = () => {
             console.log(sk);
             console.log(pk);
 
+            const deployer_sk = PrivateKey.fromBase58(deployer_private_key);
+            const deployer_pk = sk.toPublicKey();
+
             // set the preimage
             /*
                await context.state.zkappWorkerClient.definePreimage(
@@ -232,9 +242,12 @@ const Editor = () => {
             await context.setState({
                 ...context.state,
                 loaded: true,
+                deployed: false,
                 finalized: false,
                 zkappPrivateKey: sk,
                 zkappPublicKey: pk,
+                deployerPrivateKey: deployer_sk,
+                deployerPublicKey: deployer_pk,
                 contract_employer: contract_employer,
                 contract_contractor: contract_contractor,
                 contract_arbiter: contract_arbiter,
@@ -273,12 +286,21 @@ const Editor = () => {
             </div>
             <div className="columns-2">
                 <div className="break-inside-avoid">
-                    <h2>Contract</h2>
+                    <h2>Deployment</h2>
                     <div className="form-control">
                         <label className="label">
-                            Contract private key
+                            zkApp private key
                         </label>
                         <input type="password" name="base58sk" className="input input-bordered w-full max-w-xs" />
+                        <label className="label">
+                            <span className="label-text-alt">Required for deployment</span>
+                        </label>
+                    </div>
+                    <div className="form-control">
+                        <label className="label">
+                            Deployer private key
+                        </label>
+                        <input type="password" name="base58deployersk" className="input input-bordered w-full max-w-xs" />
                         <label className="label">
                             <span className="label-text-alt">Required for deployment</span>
                         </label>

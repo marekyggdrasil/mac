@@ -21,12 +21,25 @@ async function runImport(context) {
         console.log(r.address);
         // context.setState({ ...context.state, loaded: true, macpack: macpack });
 
+        let zkAppPublicKey: PublicKey = PublicKey.fromBase58(r.address);
+        await context.state.zkappWorkerClient.initZkappInstance(zkAppPublicKey);
+        const account = await context.state.zkappWorkerClient.fetchAccount(
+            { publicKey: zkAppPublicKey });
+        let is_deployed = false;
+        if (account.account !== undefined) {
+            is_deployed = true;
+            const on_chain_state = await context.state.zkappWorkerClient.getContractState();
+            console.log(on_chain_state);
+        }
+
         // set the state
-            context.setState({
+        context.setState({
                 ...context.state,
                 loaded: true,
                 finalized: true,
+                deployed: is_deployed,
                 macpack: macpack,
+                zkappPublicKey: zkAppPublicKey,
                 contract_employer: PublicKey.fromBase58(r.employer),
                 contract_contractor: PublicKey.fromBase58(r.contractor),
                 contract_arbiter: PublicKey.fromBase58(r.arbiter),

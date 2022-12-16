@@ -25,6 +25,21 @@ async function runExport(context) {
     }
 }
 
+const FinalizeButton = () => {
+    const context = useContext(AppContext);
+    if (context.compilationButtonState == 3) {
+        return <button className="btn btn-disabled">
+            Finalize
+        </button>;
+    } else {
+        return <button className="btn btn-disabled" onClick={async () => {
+            await runExport(context);
+        }}>
+            Finalize
+        </button>;
+    }
+}
+
 
 const ExportCases = () => {
     const context = useContext(AppContext);
@@ -40,9 +55,7 @@ const ExportCases = () => {
     if (!context.state.finalized) {
         return (
             <div>
-                <p>You have a loaded MAC! contract but it is not finalized. You may <button className="btn" onClick={async () => {
-                    await runExport(context);
-                }}>finalize</button> it.</p>
+                <p>You have a loaded MAC! contract but it is not finalized. You may <FinalizeButton /> it.</p>
             </div>);
     }
     return (

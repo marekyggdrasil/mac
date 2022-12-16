@@ -126,8 +126,16 @@ export default class ZkappWorkerClient {
             contract_outcome_cancel_arbiter: contract_outcome_cancel_arbiter});
     }
 
-    async createDeployTransaction(privateKey: PrivateKey) {
-        return await this._call('createDeployTransaction', {privateKey58: privateKey.toBase58()});
+    async createDeployTransaction(privateKey: PrivateKey, deployerPrivateKey: PrivateKey) {
+        return await this._call('createDeployTransaction', {
+            privateKey58: privateKey.toBase58(),
+            deployerPrivateKey58: deployerPrivateKey.toBase58()
+        });
+    }
+
+    async sendDeployTransaction() {
+        const result = await this._call('sendDeployTransaction', {});
+        return JSON.parse(result);
     }
 
     async createDepositTransaction() {

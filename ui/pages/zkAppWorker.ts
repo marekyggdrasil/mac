@@ -9,7 +9,8 @@ import {
   UInt64,
     CircuitString,
     fetchLastBlock,
-    VerificationKey
+    VerificationKey,
+    AccountUpdate
 } from 'snarkyjs'
 
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
@@ -20,8 +21,10 @@ import type { Mac } from '../../contracts/src/Mac';
 import type { Outcome, Preimage } from '../../contracts/src/strpreim';
 import type { fromMacPack, toMacPack } from '../../contracts/src/helpers';
 
-//import bs58 from 'bs58';
-//import byteify from 'byteify';
+interface VerificationKeyData {
+    data: string;
+    hash: string;
+}
 
 const state = {
   Mac: null as null | typeof Mac,
@@ -32,7 +35,7 @@ const state = {
   transaction: null as null | Transaction,
   fromMacPack: null as null | fromMacPack,
     toMacPack: null as null | toMacPack,
-    vKey: null as nulle | VerificationKey
+    vKey: null as null | VerificationKeyData
 }
 
 // ---------------------------------------------------------------------------------------
@@ -66,8 +69,8 @@ const functions = {
     return block.blockchainLength.toJSON();
   },
   compileContract: async (args: {}) => {
-      const {vKey} = await state.Mac!.compile();
-      state.vKey = vKey;
+      let { verificationKey } = await state.Mac!.compile();
+      state.vKey = verificationKey;
   },
   fetchAccount: async (args: { publicKey58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
@@ -85,15 +88,27 @@ const functions = {
         const network_state = await Mina.getNetworkState();
         return network_state.blockchainLength.toString();
     },
-    createDeployTransaction: async (args: { privateKey58: string }) => {
+    createDeployTransaction: async (args: { privateKey58: string, deployerPrivateKey58: string }) => {
         const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(args.privateKey58);
+        const deployerPrivateKey: PrivateKey = PrivateKey.fromBase58(args.deployerPrivateKey58);
+        let transactionFee = 100_000_000;
         const _commitment: Field = state.Preimage.hash(state.preimage);
-        const vKey: VerificationKey = state.vKey;
-        const transaction = await Mina.transaction(() => {
-            state.zkapp!.deploy({ zkappKey: zkAppPrivateKey, vKey });
-            // state.zkapp!.initialize(_commitment);
+        let verificationKey: VerificationKeyData = state.vKey;
+        const transaction = await Mina.transaction(
+            { feePayerKey: deployerPrivateKey, fee: transactionFee },
+            () => {
+            AccountUpdate.fundNewAccount(deployerPrivateKey);
+            state.zkapp!.deploy({ zkappKey: zkAppPrivateKey, verificationKey });
+            state.zkapp!.initialize(_commitment);
         });
         state.transaction = transaction;
+    },
+    sendDeployTransaction: async (args: {}) => {
+        const res = await state.transaction.send();
+        const hash = await res.hash();
+        return JSON.stringify({
+            'hash': hash
+        });
     },
     createDepositTransaction: async (args: { publicKey58: string }) => {
         const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
@@ -133,13 +148,38 @@ const functions = {
     getContractState: async (args: {}) => {
         const automaton_state: Field = await state.zkapp!.automaton_state.get();
         const memory: Field = await state.zkapp!.memory.get();
+        const actions: Bool[] = memory.toBits(3);
+        let st = 'initial';
+        switch (parseInt(automaton_state.toString())) {
+            case 0:
+                st = 'initial';
+                break;
+            case 1:
+                st = 'deposited';
+                break;
+            case 2:
+                st = 'canceled_early';
+                break;
+            case 3:
+                st = 'canceled';
+                break;
+            case 4:
+                st = 'succeeded';
+                break;
+            case 5:
+                st = 'failed';
+                break;
+            default:
+                st = 'unknown';
+                break
+        }
         return JSON.stringify({
             'acted': {
-                'employer': false,
-                'contractor': false,
-                'arbiter': false
+                'employer': actions[2].toBoolean(),
+                'contractor': actions[1].toBoolean(),
+                'arbiter': actions[0].toBoolean()
             },
-            'automaton_state': 'initial'
+            'automaton_state': st
         });
     },
     fromMacPack: (args: { macpack: string }) => {

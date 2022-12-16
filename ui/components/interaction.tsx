@@ -63,7 +63,7 @@ async function contractDeploy(context) {
         context.state.zkappPublicKey);
     console.log('createDeployTransaction');
     await context.state.zkappWorkerClient!.createDeployTransaction(
-        context.state.zkappPrivateKey);
+        context.state.zkappPrivateKey, context.state.deployerPrivateKey);
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -77,6 +77,7 @@ async function contractDeploy(context) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
+    /*
     const transactionJSON = await context.state.zkappWorkerClient!.getTransactionJSON();
     console.log('sendTransaction');
     console.log(transactionJSON);
@@ -86,7 +87,10 @@ async function contractDeploy(context) {
             memo: '',
         },
     });
+    */
+    const { hash } = await context.state.zkappWorkerClient!.sendDeployTransaction();
     console.log('done');
+    console.log(hash);
     context.setState({
         ...context.state,
         creatingTransaction: false,
@@ -103,7 +107,7 @@ async function contractDeposit(context) {
         tx_building_state: 'Preparing...'
     });
     await context.state.zkappWorkerClient!.fetchAccount(
-        { publicKey: context.state.publicKey! });
+        { publicKey: context.connectedAddress! });
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     await context.state.zkappWorkerClient!.createDepositTransaction();
@@ -138,7 +142,7 @@ async function contractWithdraw(context) {
     const transactionFee = 0.1;
     context.setState({ ...context.state, creatingTransaction: true });
     await context.state.zkappWorkerClient!.fetchAccount(
-        { publicKey: context.state.publicKey! });
+        { publicKey: context.connectedAddress! });
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     await context.state.zkappWorkerClient!.createWithdrawTransaction();
@@ -159,7 +163,7 @@ async function contractCancel(context) {
     const transactionFee = 0.1;
     context.setState({ ...context.state, creatingTransaction: true });
     await context.state.zkappWorkerClient!.fetchAccount(
-        { publicKey: context.state.publicKey! });
+        { publicKey: context.connectedAddress! });
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     await context.state.zkappWorkerClient!.createCancelTransaction();
@@ -180,7 +184,7 @@ async function contractSuccess(context) {
     const transactionFee = 0.1;
     context.setState({ ...context.state, creatingTransaction: true });
     await context.state.zkappWorkerClient!.fetchAccount(
-        { publicKey: context.state.publicKey! });
+        { publicKey: context.connectedAddress! });
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     await context.state.zkappWorkerClient!.createSuccessTransaction();
@@ -201,7 +205,7 @@ async function contractFailure(context) {
     const transactionFee = 0.1;
     context.setState({ ...context.state, creatingTransaction: true });
     await context.state.zkappWorkerClient!.fetchAccount(
-        { publicKey: context.state.publicKey! });
+        { publicKey: context.connectedAddress! });
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     await context.state.zkappWorkerClient!.createFailureTransaction();
@@ -218,38 +222,245 @@ async function contractFailure(context) {
         { ...context.state, creatingTransaction: false, deployed: true });
 }
 
+async function contractRefreshState(context) {
+    const contract_state = await context.state.zkappWorkerClient!.getContractState();
+    context.setState(
+        { ...context.state,
+          employerActed: contract_state['acted']['employer'],
+          contractorActed: contract_state['acted']['contractor'],
+          arbiterActed: contract_state['acted']['arbiter'],
+          automatonState: contract_state['automatonState'] });
+
+}
+
 const DeployButton = () => {
     const context = useContext(AppContext);
-    if (context.state.tx_building_state == '') {
-        return (<button className="btn" onClick={async () => {
+    if (context.state.deployed) {
+        return (<button className="btn btn-primary btn-disabled">Deploy</button>);
+    } else if (context.state.tx_building_state == '') {
+        return (<button className="btn btn-primary" onClick={async () => {
             await contractDeploy(context);
         }}>Deploy</button>);
     }
-    return (<button className="btn btn-disabled animate-pulse">{ context.state.tx_building_state }</button>)
+    return (<button className="btn btn-primary btn-disabled animate-pulse">{ context.state.tx_building_state }</button>);
+}
+
+
+const DepositButton = () => {
+    const context = useContext(AppContext);
+    if (
+        (context.state.contract_outcome_deposit_after <= context.blockchainLength) &&
+        (context.blockchainLength < context.state.contract_outcome_deposit_before)) {
+        return (<button className="btn" onClick={async () => {
+            await contractDeposit(context);
+        }}>Deposit</button>);
+    }
+    return (<button className="btn btn-primary btn-disabled">Deposit</button>);
+}
+
+
+const WithdrawButton = () => {
+    const context = useContext(AppContext);
+    if ((context.connectedAddress === null) || (context.blockchainLength < context.state.contract_outcome_deposit_after)) {
+        return (<button className="btn btn-primary btn-disabled">Withdraw</button>);
+    }
+    return (<button className="btn btn-primary" onClick={async () => {
+        await contractWithdraw(context);
+    }}>Withdraw</button>);
+}
+
+
+const SuccessButton = () => {
+    const context = useContext(AppContext);
+    if (context.connectedAddress === null) {
+        return (<button className="btn btn-primary btn-disabled">Judge success</button>);
+    }
+    const actor: PublicKey = PublicKey.fromBase58(context.connectedAddress);
+    if (
+        (context.state.contract_outcome_success_after <= context.blockchainLength) &&
+        (context.blockchainLength < context.state.contract_outcome_success_before) &&
+        (actor == context.state.contract_arbiter)) {
+        return (<button className="btn" onClick={async () => {
+            await contractSuccess(context);
+        }}>Judge success</button>);
+    }
+    return (<button className="btn btn-primary btn-disabled">Judge success</button>);
+}
+
+
+const FailureButton = () => {
+    const context = useContext(AppContext);
+    if (context.connectedAddress === null) {
+        return (<button className="btn btn-primary btn-disabled">Judge failure</button>);
+    }
+    const actor: PublicKey = PublicKey.fromBase58(context.connectedAddress);
+    if (
+        (context.state.contract_outcome_failure_after <= context.blockchainLength) &&
+        (context.blockchainLength < context.state.contract_outcome_failure_before) &&
+        (actor == context.contract_arbiter)) {
+        return (<button className="btn" onClick={async () => {
+            await contractFailure(context);
+        }}>Judge failure</button>);
+    }
+    return (<button className="btn btn-primary btn-disabled">Judge failure</button>);
+}
+
+
+const CancelButton = () => {
+    const context = useContext(AppContext);
+    if (context.connectedAddress === null) {
+        return (<button className="btn btn-primary btn-disabled">Cancel for free</button>);
+    }
+    const actor: PublicKey = PublicKey.fromBase58(context.connectedAddress);
+    if (
+        (context.state.contract_outcome_deposit_after <= context.blockchainLength) &&
+        (context.blockchainLength < context.state.contract_outcome_deposit_before)) {
+        return (<button className="btn" onClick={async () => {
+            await contractCancel(context);
+        }}>Cancel for free</button>);
+    } else if (
+        (context.state.contract_outcome_cancel_after <= context.blockchainLength) &&
+        (context.blockchainLength < context.state.contract_outcome_cancel_before) &&
+        (actor == context.state.contract_contractor)) {
+        return (<button className="btn" onClick={async () => {
+            await contractCancel(context);
+        }}>Cancel for penalty</button>);
+    }
+    return (<button className="btn btn-primary btn-disabled">Cancel for penalty</button>);
+}
+
+
+const RefreshStateButton = () => {
+    const context = useContext(AppContext);
+    if (!context.state.deployer) {
+        return (<button className="btn btn-secondary btn-disabled">Refresh state</button>);
+    }
+    return (<button className="btn btn-secondary btn-disabled" onClick={async () => {
+        await contractRefreshState(context);
+    }}>Refresh state</button>);
+}
+
+
+const DeploymentInformation = () => {
+    const context = useContext(AppContext);
+    if (context.deployed) {
+        return (<p>The contract has been deployed.</p>);
+    } else if ((context.state.deploymentTxId == '') && (!context.deployed)) {
+        return (<p>The contract is pending deployment.<DeployButton /></p>);
+    } else {
+        const url = "https://berkeley.minaexplorer.com/transaction/" + context.deploymentTxId;
+        return (<p>Your contract deployment was submitted. Check the <a href={url} target="_blank" rel="noreferrer">{context.deploymentTxId}</a> hash.</p>);
+    }
+}
+
+const ConnectedAccount = () => {
+    const context = useContext(AppContext);
+    if (context.connectedAddress !== null) {
+        const employer = context.state.contract_employer.toBase58();
+        const contractor = context.state.contract_contractor.toBase58();
+        const arbiter = context.state.contract_arbiter.toBase58();
+        switch (context.connectedAddress) {
+            case employer:
+                return (<p>Interacting as <MinaValue>{ context.connectedAddress }</MinaValue>. You take <strong>employer</strong> role in this contract.</p>);
+                break;
+            case contractor:
+                return (<p>Interacting as <MinaValue>{ context.connectedAddress }</MinaValue>. You take <strong>contractor</strong> role in this contract.</p>);
+                break;
+            case arbiter:
+                return (<p>Interacting as <MinaValue>{ context.connectedAddress }</MinaValue>. You take <strong>arbiter</strong> role in this contract.</p>);
+                break;
+            default:
+                return (<p>Interacting as <MinaValue>{ context.connectedAddress }</MinaValue>. You take no role in this contract.</p>);
+                break;
+        }
+    }
+    return (<p>Failed to fetch your account from Auro wallet...</p>);
+}
+
+const CancelTimeLine = () => {
+    const context = useContext(AppContext);
+    if ((context.state.contract_outcome_cancel_after <= context.blockchainLength) &&
+        (context.blockchainLength < context.state.contract_outcome_cancel_before)) {
+        return (<p>It is possible to <strong>cancel</strong> at the current stage with a financial penalty.</p>);
+    } else if (context.blockchainLength < context.state.contract_outcome_cancel_before) {
+        return (<p>The option to <strong>cancel</strong> with a financial penalty has not opened yet.</p>);
+    }
+    return (<p>The option to <strong>cancel</strong> with a financial penalty has already closed.</p>);
+}
+
+const ContractTimeline = () => {
+    const context = useContext(AppContext);
+    if (context.blockchainLength !== null) {
+        if (context.blockchainLength < context.state.contract_outcome_deposit_after) {
+            return (<p>The contract is in the <strong>warm-up</strong> stage</p>);
+        } else if (
+            (context.state.contract_outcome_deposit_after <= context.blockchainLength) &&
+            (context.blockchainLength < context.state.contract_outcome_deposit_before)) {
+            return (<p>The contract is in the <strong>deposit</strong> stage. It is possible to <strong>cancel</strong> for free with no consequences.</p>);
+        } else if (
+            (context.state.contract_outcome_success_after <= context.blockchainLength) &&
+            (context.blockchainLength < context.state.contract_outcome_success_before)) {
+            return (<div><p>The contract is in the <strong>success declaration</strong> stage.</p><CancelTimeLine /></div>);
+        } else if (
+            (context.state.contract_outcome_failure_after <= context.blockchainLength) &&
+            (context.blockchainLength < context.state.contract_outcome_failure_before)) {
+            return (<div><p>The contract is in the <strong>failure declaration</strong> stage.</p><CancelTimeLine /></div>);
+        } else if (
+            (context.state.contract_outcome_failure_after <= context.blockchainLength) &&
+            (context.blockchainLength < context.state.contract_outcome_failure_before)) {
+            return (<div><p>The contract is in the <strong>failure declaration</strong> stage.</p><CancelTimeLine /></div>);
+        } else {
+            return (<div><p>All the contract stages have expired.</p><CancelTimeLine /></div>);
+        }
+    }
+    return (<p>Failed to fetch current blockchain length... It is not possible to establish in which stage current contract is.</p>);
+}
+
+const EmployerActed = () => {
+    const context = useContext(AppContext);
+    if (context.state.employerActed) {
+        return (<div>Employer has acted.</div>);
+    }
+    return (<div></div>);
+}
+
+const ContractorActed = () => {
+    const context = useContext(AppContext);
+    if (context.state.contractorActed) {
+        return (<div>Contractor has acted.</div>);
+    }
+    return (<div></div>);
+}
+
+const ArbiterActed = () => {
+    const context = useContext(AppContext);
+    if (context.state.arbiterActed) {
+        return (<div>Arbiter has acted.</div>);
+    }
+    return (<div></div>);
+}
+
+const WhoActed = () => {
+    return (<p>
+        <EmployerActed/>
+        <ContractorActed/>
+        <ArbiterActed/>
+    </p>)
 }
 
 const InteractionUI = () => {
+    const context = useContext(AppContext);
     return (<div>
-        <p>Your contract state is</p>
-        <p>Interacting as <MinaValue>{ context.connectedAddress }</MinaValue>. Your role in this contract is</p>
-        <button className="btn" onClick={async () => {
-            await contractDeploy(context);
-        }}>Deploy</button>
-        <button className="btn" onClick={async () => {
-            await contractDeposit(context);
-        }}>Deposit</button>
-        <button className="btn" onClick={async () => {
-            await contractWithdraw(context);
-        }}>Withdraw</button>
-        <button className="btn" onClick={async () => {
-            await contractCancel(context);
-        }}>Cancel</button>
-        <button className="btn" onClick={async () => {
-            await contractSuccess(context);
-        }}>Success</button>
-        <button className="btn" onClick={async () => {
-            await contractFailure(context);
-        }}>Failure</button>
+        <ConnectedAccount />
+        <ContractTimeline />
+        <WhoActed/>
+        <DeployButton/>
+        <DepositButton/>
+        <WithdrawButton/>
+        <SuccessButton/>
+        <FailureButton/>
+        <CancelButton/>
+        <RefreshStateButton/>
     </div>)
 }
 
@@ -261,15 +472,17 @@ const InteractionEditor = () => {
                 <div>Your contract is finalized and is is already possible to <Link href="/export">export</Link> it using MacPacks. However, it is not available on-chain. Make sure you compile the zk-SNARK circuit first and then you may deploy it. Compilation will take between 7 and 20 minutes so make sure you have some nice show to watch in the meantime.</div>);
         } else {
             return (
-                <div>Your contract is finalized and is is already possible to <Link href="/export">export</Link> it using MacPacks. However, it is not available on-chain. You may <button className="btn" onClick={async () => {
-                    await contractDeploy(context);
-                }}>Deploy</button> it now.</div>);
+                <div>
+                    <h2>Interaction</h2>
+                    <DeploymentInformation />
+                </div>);
         }
 
     }
     return (
         <div>
             <h2>Interaction</h2>
+            <DeploymentInformation />
             <InteractionUI />
         </div>);
 }
