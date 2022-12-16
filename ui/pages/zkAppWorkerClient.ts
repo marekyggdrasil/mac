@@ -125,36 +125,79 @@ export default class ZkappWorkerClient {
             contract_outcome_cancel_contractor: contract_outcome_cancel_contractor,
             contract_outcome_cancel_arbiter: contract_outcome_cancel_arbiter});
     }
-
+    async sendTransaction() {
+        const result = await this._call('sendTransaction', {});
+        return JSON.parse(result);
+    }
+    async sendTransactionSign(deployerPrivateKey: PrivateKey) {
+        const result = await this._call('sendTransactionSign', {
+            deployerPrivateKey58: deployerPrivateKey.toBase58()});
+        return JSON.parse(result);
+    }
     async createDeployTransaction(privateKey: PrivateKey, deployerPrivateKey: PrivateKey) {
         return await this._call('createDeployTransaction', {
             privateKey58: privateKey.toBase58(),
             deployerPrivateKey58: deployerPrivateKey.toBase58()
         });
     }
-
-    async sendDeployTransaction() {
-        const result = await this._call('sendDeployTransaction', {});
-        return JSON.parse(result);
+    async createDeployTransactionAuro(privateKey: PrivateKey) {
+        return await this._call('createDeployTransactionAuro', {
+            privateKey58: privateKey.toBase58()
+        });
     }
 
-    async createDepositTransaction() {
-        return await this._call('createDepositTransaction', {});
+    async createInitTransaction(deployerPrivateKey: PrivateKey) {
+        return await this._call('createInitTransaction', {
+            deployerPrivateKey58: deployerPrivateKey.toBase58()
+        });
+    }
+    async createInitTransactionAuro(actor: PrivateKey, deployerPrivateKey: PrivateKey) {
+        return false;
     }
 
-    async createWithdrawTransaction() {
+    async createDepositTransaction(actor: PublicKey, deployerPrivateKey: PrivateKey) {
+        return await this._call('createDepositTransaction', {
+            actorPublicKey58: actor.toBase58(),
+            deployerPrivateKey58: deployerPrivateKey.toBase58()});
+    }
+    async createDepositTransactionAuro(actor: PublicKey) {
+        return await this._call('createDepositTransaction', {
+            actorPublicKey58: actor.toBase58()});
+    }
+
+    async createWithdrawTransactionAuro() {
         return await this._call('createWithdrawTransaction', {});
     }
-
-    async createSuccessTransaction() {
-        return await this._call('createSuccessTransaction', {});
+    async createWithdrawTransaction(actor: PublicKey, deployerPrivateKey: PrivateKey) {
+        return await this._call('createWithdrawTransaction', {
+            actorPublicKey58: actor.toBase58(),
+            deployerPrivateKey58: deployerPrivateKey.toBase58()});
     }
 
-    async createFailureTransaction() {
+    async createSuccessTransactionAuro() {
+        return await this._call('createSuccessTransaction', {});
+    }
+    async createSuccessTransaction(actor: PublicKey, deployerPrivateKey: PrivateKey) {
+        return await this._call('createSuccessTransaction', {
+            actorPublicKey58: actor.toBase58(),
+            deployerPrivateKey58: deployerPrivateKey.toBase58()});
+    }
+
+    async createFailureTransaction(actor: PublicKey, deployerPrivateKey: PrivateKey) {
+        return await this._call('createFailureTransaction', {
+            actorPublicKey58: actor.toBase58(),
+            deployerPrivateKey58: deployerPrivateKey.toBase58()});
+    }
+    async createFailureTransactionAuro() {
         return await this._call('createFailureTransaction', {});
     }
 
-    async createCancelTransaction() {
+    async createCancelTransaction(actor: PublicKey, deployerPrivateKey: PrivateKey) {
+        return await this._call('createCancelTransaction', {
+            actorPublicKey58: actor.toBase58(),
+            deployerPrivateKey58: deployerPrivateKey.toBase58()});
+    }
+    async createCancelTransactionAuro() {
         return await this._call('createCancelTransaction', {});
     }
 

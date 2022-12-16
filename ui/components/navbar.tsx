@@ -86,7 +86,7 @@ const Navbar = () => {
                         <li><Link href="/about">About</Link></li>
                     </ul>
                 </div>
-                <Link className="btn btn-ghost normal-case text-xl" href="/">MAC!</Link>
+                <Link className="btn btn-ghost normal-case text-xl" href="/"><i>MAC!</i></Link>
             </div>
             <div className="navbar-center hidden lg:flex">
                 <ul className="menu menu-horizontal px-1">

@@ -88,13 +88,16 @@ function MyApp({ Component, pageProps }: AppProps) {
         zkappWorkerClient: null as null | ZkappWorkerClient,
         hasWallet: null as null | boolean,
         hasBeenSetup: false,
+        usingAuro: true,
         accountExists: false,
         currentNum: null as null | Field,
-        deploymentTxId: '',
+        lastTxId: '',
         zkappPrivateKeyCandidate: null as null | PrivateKey,
         zkappPublicKeyCandidate: null as null | PublicKey,
         zkappPrivateKey: null as null | PrivateKey,
         zkappPublicKey: null as null | PublicKey,
+        actorPrivateKey: null as null | PrivateKey,
+        actorPublicKey: null as null | PublicKey,
         creatingTransaction: false,
         runLoadSnarkyJS: runLoadSnarkyJS,
         runCompile: runCompile,
@@ -147,6 +150,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     let [connectionButtonState, setConnectionButtonState] = useState(0);
     let [blockchainLength, setBlockchainLength] = useState(null);
     let [connectedAddress, setConnectedAddress] = useState('');
+    let [txHash, setTxHash] = useState('');
 
     // -------------------------------------------------------
     // Do Setup
@@ -164,14 +168,12 @@ function MyApp({ Component, pageProps }: AppProps) {
 
             });
         const interval = setInterval(async () => {
-            console.log('tick!');
             const block = await fetchLastBlock(
                     "https://proxy.berkeley.minaexplorer.com/graphql");
             const length = parseInt(block.blockchainLength.toString());
             if (length) {
                 setBlockchainLength(length);
             }
-            console.log(length);
         }, 60000);
         // return () => clearInterval(interval);
     })();
@@ -185,7 +187,8 @@ function MyApp({ Component, pageProps }: AppProps) {
             compilationButtonState, setCompilationButtonState,
             connectionButtonState, setConnectionButtonState,
             blockchainLength, setBlockchainLength,
-            connectedAddress, setConnectedAddress }}>
+            connectedAddress, setConnectedAddress,
+            txHash, setTxHash}}>
             <Layout>
                 <Component {...pageProps} />
             </Layout>

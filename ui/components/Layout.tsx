@@ -22,7 +22,7 @@ const Layout = ( {children} ) => {
     return (
         <div>
             <Head>
-                <title>MAC</title>
+                <title>MAC!</title>
             </Head>
             <section className="flex flex-row-reverse">
                 <Navbar />

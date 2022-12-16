@@ -44,13 +44,6 @@ const Editor = () => {
             } catch (e:any) {
                 return alert('Invalid private key');
             }
-            const deployer_private_key = event.target.base58deployersk.value;
-            console.log(deployer_private_key);
-            try {
-                PrivateKey.fromBase58(deployer_private_key);
-            } catch (e:any) {
-                return alert('Invalid deployer private key');
-            }
 
             // addresses
             const employer = event.target.base58employer.value;
@@ -198,9 +191,6 @@ const Editor = () => {
             console.log(sk);
             console.log(pk);
 
-            const deployer_sk = PrivateKey.fromBase58(deployer_private_key);
-            const deployer_pk = sk.toPublicKey();
-
             // set the preimage
             /*
                await context.state.zkappWorkerClient.definePreimage(
@@ -246,8 +236,6 @@ const Editor = () => {
                 finalized: false,
                 zkappPrivateKey: sk,
                 zkappPublicKey: pk,
-                deployerPrivateKey: deployer_sk,
-                deployerPublicKey: deployer_pk,
                 contract_employer: contract_employer,
                 contract_contractor: contract_contractor,
                 contract_arbiter: contract_arbiter,
@@ -292,15 +280,6 @@ const Editor = () => {
                             zkApp private key
                         </label>
                         <input type="password" name="base58sk" className="input input-bordered w-full max-w-xs" />
-                        <label className="label">
-                            <span className="label-text-alt">Required for deployment</span>
-                        </label>
-                    </div>
-                    <div className="form-control">
-                        <label className="label">
-                            Deployer private key
-                        </label>
-                        <input type="password" name="base58deployersk" className="input input-bordered w-full max-w-xs" />
                         <label className="label">
                             <span className="label-text-alt">Required for deployment</span>
                         </label>
