@@ -8,7 +8,8 @@ import {
   UInt32,
   UInt64,
     CircuitString,
-    fetchLastBlock
+    fetchLastBlock,
+    VerificationKey
 } from 'snarkyjs'
 
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
@@ -30,7 +31,8 @@ const state = {
   preimage: null as null | Preimage,
   transaction: null as null | Transaction,
   fromMacPack: null as null | fromMacPack,
-  toMacPack: null as null | toMacPack
+    toMacPack: null as null | toMacPack,
+    vKey: null as nulle | VerificationKey
 }
 
 // ---------------------------------------------------------------------------------------
@@ -64,7 +66,8 @@ const functions = {
     return block.blockchainLength.toJSON();
   },
   compileContract: async (args: {}) => {
-    await state.Mac!.compile();
+      const {vKey} = await state.Mac!.compile();
+      state.vKey = vKey;
   },
   fetchAccount: async (args: { publicKey58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
@@ -85,9 +88,10 @@ const functions = {
     createDeployTransaction: async (args: { privateKey58: string }) => {
         const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(args.privateKey58);
         const _commitment: Field = state.Preimage.hash(state.preimage);
+        const vKey: VerificationKey = state.vKey;
         const transaction = await Mina.transaction(() => {
-            state.zkapp!.deploy({ zkappKey: zkAppPrivateKey });
-            state.zkapp!.initialize(_commitment);
+            state.zkapp!.deploy({ zkappKey: zkAppPrivateKey, vKey });
+            // state.zkapp!.initialize(_commitment);
         });
         state.transaction = transaction;
     },

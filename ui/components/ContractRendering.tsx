@@ -223,7 +223,7 @@ export const RenderInvolvedParties = () => {
                         <th>Employer</th>
                         <td>
                             <MinaValue>
-                                { safeAddressRender(context.state.publicKey) }
+                                { safeAddressRender(context.state.contract_employer) }
                             </MinaValue>
                         </td>
                     </tr>

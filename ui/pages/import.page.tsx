@@ -25,6 +25,7 @@ async function runImport(context) {
             context.setState({
                 ...context.state,
                 loaded: true,
+                finalized: true,
                 macpack: macpack,
                 contract_employer: PublicKey.fromBase58(r.employer),
                 contract_contractor: PublicKey.fromBase58(r.contractor),
@@ -42,9 +43,9 @@ async function runImport(context) {
                 contract_outcome_success_description: r.contract_outcome_success_description,
                 contract_outcome_failure_description: r.contract_outcome_failure_description,
                 contract_outcome_cancel_description: r.contract_outcome_cancel_description,
-                contract_outcome_deposit_employer: r.contract_outcome_deposit_employer,
-                contract_outcome_deposit_contractor: r.contract_outcome_deposit_contractor,
-                contract_outcome_deposit_arbiter: r.contract_outcome_deposit_arbiter,
+                contract_outcome_deposit_employer: -r.contract_outcome_deposit_employer,
+                contract_outcome_deposit_contractor: -r.contract_outcome_deposit_contractor,
+                contract_outcome_deposit_arbiter: -r.contract_outcome_deposit_arbiter,
                 contract_outcome_success_employer: r.contract_outcome_success_employer,
                 contract_outcome_success_contractor: r.contract_outcome_success_contractor,
                 contract_outcome_success_arbiter: r.contract_outcome_success_arbiter,
@@ -63,7 +64,7 @@ async function runImport(context) {
 
 const ImportCases = () => {
     const context = useContext(AppContext);
-    if (context.state.comp_button_state < 2) {
+    if (context.compilationButtonState < 2) {
         return (<div><p>You need to load the SnarkyJS library first!</p></div>);
     }
     if (context.state.loaded) {

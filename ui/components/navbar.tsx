@@ -6,56 +6,68 @@ import AppContext from './AppContext'
 
 const CircuitCompileButton = () => {
     const context = useContext(AppContext);
-    if (context.state.comp_button_state == 0) {
+    if (context.compilationButtonState == 0) {
         return <button className="btn" onClick={() => {
-            context.state.runLoadSnarkyJS(context.state, context.setState);
+            context.state.runLoadSnarkyJS(context);
         }}>
             Load SnarkyJS
         </button>;
-    } else if (context.state.comp_button_state == 1) {
+    } else if (context.compilationButtonState == 1) {
         return <button className="btn btn-disabled animate-pulse">
             Loading SnarkyJS...
         </button>;
-    } else if (context.state.comp_button_state == 2) {
+    } else if (
+        (context.compilationButtonState == 2) && (context.connectionButtonState <= 1)) {
+        return <button className="btn btn-disabled">
+            Compile circuit
+        </button>;
+    } else if (
+        (context.compilationButtonState == 2) && (context.connectionButtonState > 1)) {
         return <button className="btn" onClick={() => {
-            context.state.runCompile(context.state, context.setState);
+            context.state.runCompile(context);
         }}>
             Compile circuit
         </button>;
-    } else if (context.state.comp_button_state == 3) {
+    } else if (context.compilationButtonState == 3) {
         return <button className="btn btn-disabled animate-pulse">
             Compiling...
         </button>;
-    } else if (context.state.comp_button_state == 4) {
+    } else if (context.compilationButtonState == 4) {
         return <button className="btn btn-disabled">
             Circuit compiled!
         </button>;
     }
 }
 
+const currentBlock = (blockchainLength) => {
+    return "Block " + blockchainLength.toString();
+}
 
 const ConnectButton = () => {
     const context = useContext(AppContext);
-    if (context.state.comp_button_state < 2) {
+    if (context.compilationButtonState < 2) {
         return <button className="btn btn-disabled">
             Connect
         </button>;
-    } else if (context.state.connect_button_state == 0) {
+    } else if (context.connectionButtonState == 0) {
         return <button className="btn" onClick={() => {
-            context.state.connectWallet(context.state, context.setState);
+            context.state.connectWallet(context);
         }}>
             Connect
         </button>;
-    } else if (context.state.connect_button_state == 1) {
+    } else if (context.connectionButtonState == 1) {
         return <button className="btn btn-disabled animate-pulse">
             Connecting...
         </button>;
-    } else if (context.state.connect_button_state == 2) {
-        const address = context.state.publicKey.toBase58();
+    } else if (
+        (context.connectionButtonState == 2 && context.blockchainLength)) {
+        return <div className="tooltip tooltip-open tooltip-bottom tooltip-accent" data-tip={currentBlock(context.blockchainLength)}>
+            <button className="btn btn-disabled">Connected!</button>
+        </div>;
+    } else if (context.connectionButtonState == 2) {
         return <button className="btn btn-disabled">Connected!</button>;
     }
 }
-
 
 const Navbar = () => {
     return (

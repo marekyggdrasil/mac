@@ -4,10 +4,13 @@ import { useContext } from 'react';
 import AppContext from './AppContext';
 import { MinaValue } from './highlights';
 import { RenderContractDescription } from './ContractRendering';
+import {
+    PublicKey
+} from 'snarkyjs';
 
-async function finalizeContract(context) {
+export async function finalizeContract(context) {
     // instantiate preimage via worker and compute macpack
-    context.state.zkappWorkerClient.definePreimage(
+    await context.state.zkappWorkerClient.definePreimage(
         context.state.zkappPublicKey.toBase58(),
         context.state.contract_employer.toBase58(),
         context.state.contract_contractor.toBase58(),
@@ -16,9 +19,9 @@ async function finalizeContract(context) {
         context.state.contract_outcome_deposit_description,
         Math.abs(context.state.contract_outcome_deposit_after),
         Math.abs(context.state.contract_outcome_deposit_before),
-        -Math.abs(context.state.contract_outcome_deposit_employer),
-        -Math.abs(context.state.contract_outcome_deposit_contractor),
-        -Math.abs(context.state.contract_outcome_deposit_arbiter),
+        Math.abs(context.state.contract_outcome_deposit_employer),
+        Math.abs(context.state.contract_outcome_deposit_contractor),
+        Math.abs(context.state.contract_outcome_deposit_arbiter),
         context.state.contract_outcome_success_description,
         Math.abs(context.state.contract_outcome_success_after),
         Math.abs(context.state.contract_outcome_success_before),
@@ -49,11 +52,12 @@ async function contractDeploy(context) {
         creatingTransaction: true,
         tx_building_state: 'Preparing...'
     });
+    if (!context.state.finalized) {
+        await finalizeContract(context);
+    }
     console.log('fetchAccount');
     await context.state.zkappWorkerClient!.fetchAccount(
-        { publicKey: context.state.publicKey! });
-    console.log('finalizeContract');
-    await finalizeContract(context);
+        { publicKey: PublicKey.fromBase58(context.connectedAddress) });
     console.log('initZkappInstance');
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
@@ -75,10 +79,10 @@ async function contractDeploy(context) {
     console.log('getTransactionJSON');
     const transactionJSON = await context.state.zkappWorkerClient!.getTransactionJSON();
     console.log('sendTransaction');
+    console.log(transactionJSON);
     const { hash } = await (window as any).mina.sendTransaction({
         transaction: transactionJSON,
         feePayer: {
-            fee: transactionFee,
             memo: '',
         },
     });
@@ -227,7 +231,7 @@ const DeployButton = () => {
 const InteractionUI = () => {
     return (<div>
         <p>Your contract state is</p>
-        <p>Interacting as <MinaValue>{ context.state.publicKey.toBase58() }</MinaValue>. Your role in this contract is</p>
+        <p>Interacting as <MinaValue>{ context.connectedAddress }</MinaValue>. Your role in this contract is</p>
         <button className="btn" onClick={async () => {
             await contractDeploy(context);
         }}>Deploy</button>
@@ -252,7 +256,7 @@ const InteractionUI = () => {
 const InteractionEditor = () => {
     const context = useContext(AppContext);
     if (!context.state.deployed) {
-        if (context.state.comp_button_state < 4) {
+        if (context.compilationButtonState < 4) {
             return (
                 <div>Your contract is finalized and is is already possible to <Link href="/export">export</Link> it using MacPacks. However, it is not available on-chain. Make sure you compile the zk-SNARK circuit first and then you may deploy it. Compilation will take between 7 and 20 minutes so make sure you have some nice show to watch in the meantime.</div>);
         } else {
@@ -273,9 +277,9 @@ const InteractionEditor = () => {
 
 const InteractionCases = () => {
     const context = useContext(AppContext);
-    if (context.state.comp_button_state < 2) {
+    if (context.compilationButtonState < 2) {
         return (<div>Make sure you load the SnarkyJS library!</div>);
-    } else if (context.state.connect_button_state < 2) {
+    } else if (context.connectionButtonState < 2) {
         return (<div>Make sure you connect your AuroWallet!</div>);
     } else if (!context.state.loaded) {
         return (<div>Now you may <Link href="/create">create a new contract</Link> or <Link href="/import">import an existing contract</Link>.</div>);

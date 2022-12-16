@@ -8,9 +8,9 @@ import Head from 'next/head';
 
 const ConnectedAddress = () => {
     const context = useContext(AppContext);
-    if (context.state.publicKey) {
+    if (context.connectedAddress) {
         return <div className="flex flex-row-reverse text-sm font-normal">
-            <MinaValue>{context.state.publicKey.toBase58()}</MinaValue>
+            <MinaValue>{context.connectedAddress}</MinaValue>
         </div>
     }
     return <div></div>

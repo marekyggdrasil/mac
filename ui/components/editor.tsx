@@ -8,13 +8,6 @@ import {
 import AppContext from './AppContext';
 import { MinaValue, MinaBlockchainLength, MinaSecretValue } from './highlights';
 
-async function setCurrentEmployer(context) {
-    context.setState({
-        ...context.state,
-        employerBase58: context.state.publicKey.toBase58()
-    });
-}
-
 async function generateKeyPair(context) {
     const sk: PrivateKey = await context.state.zkappWorkerClient.generatePrivateKey();
     const pk: PublicKey = sk.toPublicKey();
@@ -44,7 +37,7 @@ const Editor = () => {
             const m = 1000000000 // mina denomination
 
             // addresses
-            const private_key = event.target[1].value;
+            const private_key = event.target.base58sk.value;
             console.log(private_key);
             try {
                 PrivateKey.fromBase58(private_key);
@@ -53,58 +46,58 @@ const Editor = () => {
             }
 
             // addresses
-            const employer = event.target[2].value;
+            const employer = event.target.base58employer.value;
             try {
                 PublicKey.fromBase58(employer);
             } catch (e:any) {
                 return alert('Invalid employer address');
             }
 
-            const contractor = event.target[4].value;
+            const contractor = event.target.base58contractor.value;
             try {
                 PublicKey.fromBase58(contractor);
             } catch (e:any) {
                 return alert('Invalid contractor address');
             }
 
-            const arbiter = event.target[5].value;
+            const arbiter = event.target.base58arbiter.value;
             try {
                 PublicKey.fromBase58(arbiter);
             } catch (e:any) {
                 return alert('Invalid arbiter address');
             }
 
-            const contract_subject = event.target[6].value;
+            const contract_subject = event.target.contract_subject.value;
 
             // contractor
-            const contractor_payment = Math.round(parseFloat(event.target[7].value)*m);
-            const contractor_deposit = Math.round(parseFloat(event.target[8].value)*m);
-            const contracor_penalty_failure_percent = parseInt(event.target[9].value);
-            const contracor_penalty_cancel_percent = parseInt(event.target[10].value);
+            const contractor_payment = Math.round(parseFloat(event.target.contractor_payment.value)*m);
+            const contractor_deposit = Math.round(parseFloat(event.target.contractor_deposit.value)*m);
+            const contracor_penalty_failure_percent = parseInt(event.target.contractor_failure_penalty.value);
+            const contracor_penalty_cancel_percent = parseInt(event.target.contractor_cancel_penalty.value);
 
             // employer
-            const employer_deposit = Math.round(parseFloat(event.target[11].value)*m);
-            const employer_arbitration_fee_percent = parseInt(event.target[12].value);
+            const employer_deposit = Math.round(parseFloat(event.target.employer_deposit.value)*m);
+            const employer_arbitration_fee_percent = parseInt(event.target.employer_arbitration_fee_percent.value);
 
             // arbiter
-            const arbiter_payment = Math.round(parseFloat(event.target[13].value)*m);
-            const arbiter_deposit = Math.round(parseFloat(event.target[14].value)*m);
-            const arbiter_penalty_non_acting_percent = parseInt(event.target[15].value);
+            const arbiter_payment = Math.round(parseFloat(event.target.arbiter_payment.value)*m);
+            const arbiter_deposit = Math.round(parseFloat(event.target.arbiter_deposit.value)*m);
+            const arbiter_penalty_non_acting_percent = parseInt(event.target.arbiter_penalty_non_acting_percent.value);
 
             // deadlines
-            const deadline_warmup = event.target[16].value;
-            const deadline_deposit = event.target[17].value;
-            const deadline_execution = event.target[18].value;
-            const deadline_failure = event.target[19].value;
+            const deadline_warmup = event.target.deadline_warmup.value;
+            const deadline_deposit = event.target.deadline_deposit.value;
+            const deadline_execution = event.target.deadline_execution.value;
+            const deadline_failure = event.target.deadline_failure.value;
 
             // description
-            const subject_deposit = event.target[20].value;
-            const subject_success = event.target[21].value;
-            const subject_failure = event.target[22].value;
-            const subject_cancel = event.target[23].value;
+            const subject_deposit = event.target.subject_deposit.value;
+            const subject_success = event.target.subject_success.value;
+            const subject_failure = event.target.subject_failure.value;
+            const subject_cancel = event.target.subject_cancel.value;
 
             // compute the values
-            const l = context.state.blockchainLenght;
+            const l = context.blockchainLength;
             const a = Math.round(deadline_warmup*t);
             const b = Math.round(deadline_deposit*t);
             const c = Math.round(deadline_execution*t);
@@ -199,48 +192,50 @@ const Editor = () => {
             console.log(pk);
 
             // set the preimage
-            await context.state.zkappWorkerClient.definePreimage(
-                pk.toBase58(),
-                employer,
-                contractor,
-                arbiter,
-                contract_subject,
-                contract_outcome_deposit_description,
-                contract_outcome_deposit_after,
-                contract_outcome_deposit_before,
-                contract_outcome_deposit_employer,
-                contract_outcome_deposit_contractor,
-                contract_outcome_deposit_arbiter,
-                contract_outcome_success_description,
-                contract_outcome_success_after,
-                contract_outcome_success_before,
-                contract_outcome_success_employer,
-                contract_outcome_success_contractor,
-                contract_outcome_success_arbiter,
-                contract_outcome_failure_description,
-                contract_outcome_failure_after,
-                contract_outcome_failure_before,
-                contract_outcome_failure_employer,
-                contract_outcome_failure_contractor,
-                contract_outcome_failure_arbiter,
-                contract_outcome_cancel_description,
-                contract_outcome_cancel_after,
-                contract_outcome_cancel_before,
-                contract_outcome_cancel_employer,
-                contract_outcome_cancel_contractor,
-                contract_outcome_cancel_arbiter);
+            /*
+               await context.state.zkappWorkerClient.definePreimage(
+               pk.toBase58(),
+               employer,
+               contractor,
+               arbiter,
+               contract_subject,
+               contract_outcome_deposit_description,
+               contract_outcome_deposit_after,
+               contract_outcome_deposit_before,
+               contract_outcome_deposit_employer,
+               contract_outcome_deposit_contractor,
+               contract_outcome_deposit_arbiter,
+               contract_outcome_success_description,
+               contract_outcome_success_after,
+               contract_outcome_success_before,
+               contract_outcome_success_employer,
+               contract_outcome_success_contractor,
+               contract_outcome_success_arbiter,
+               contract_outcome_failure_description,
+               contract_outcome_failure_after,
+               contract_outcome_failure_before,
+               contract_outcome_failure_employer,
+               contract_outcome_failure_contractor,
+               contract_outcome_failure_arbiter,
+               contract_outcome_cancel_description,
+               contract_outcome_cancel_after,
+               contract_outcome_cancel_before,
+               contract_outcome_cancel_employer,
+               contract_outcome_cancel_contractor,
+               contract_outcome_cancel_arbiter);
 
-            // now get its macpack
-            const macpack = await context.state.zkappWorkerClient.toMacPack();
+               // now get its macpack
+               const macpack = await context.state.zkappWorkerClient.toMacPack();
+             */
 
             // set the state
             await context.setState({
                 ...context.state,
                 loaded: true,
-                macpack: macpack,
+                finalized: false,
                 zkappPrivateKey: sk,
                 zkappPublicKey: pk,
-                contract_employer: context.state.publicKey,
+                contract_employer: contract_employer,
                 contract_contractor: contract_contractor,
                 contract_arbiter: contract_arbiter,
                 contract_outcome_deposit_after: contract_outcome_deposit_after,
@@ -272,8 +267,8 @@ const Editor = () => {
         }}>
             <div className="break-inside-avoid">
                 <h2>Contract</h2>
-                <p>As your are the contract creator, you <MinaValue>{ context.state.publicKey.toBase58() }</MinaValue> will take the Employer role. You will still need to define Contractor and Arbiter by providing their Mina base58 account addresses.</p>
-                <p>The time reference for all the deadlines is current blockchain length <MinaBlockchainLength>{ context.state.blockchainLenght }</MinaBlockchainLength>.</p>
+                <p>As your are the contract creator, you <MinaValue>{ context.connectedAddress }</MinaValue> will take the Employer role. You will still need to define Contractor and Arbiter by providing their Mina base58 account addresses.</p>
+                <p>The time reference for all the deadlines is current blockchain length <MinaBlockchainLength>{ context.blockchainLength }</MinaBlockchainLength>.</p>
                 <KeyGenerator />
             </div>
             <div className="columns-2">
@@ -283,7 +278,7 @@ const Editor = () => {
                         <label className="label">
                             Contract private key
                         </label>
-                        <input type="password" className="input input-bordered w-full max-w-xs" />
+                        <input type="password" name="base58sk" className="input input-bordered w-full max-w-xs" />
                         <label className="label">
                             <span className="label-text-alt">Required for deployment</span>
                         </label>
@@ -295,10 +290,7 @@ const Editor = () => {
                         <label className="label">
                             Employer
                         </label>
-                        <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" value={context.state.employerBase58} /><button className="btn" onClick={async (event) => {
-                            event.preventDefault();
-                            await setCurrentEmployer(context);
-                        }}>Set Current</button>
+                        <input type="text" name="base58employer" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
                         <label className="label">
                             <span className="label-text-alt">Employer is one who needs the service and pays for it.</span>
                         </label>
@@ -307,7 +299,7 @@ const Editor = () => {
                         <label className="label">
                             Contractor
                         </label>
-                        <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                        <input type="text" name="base58contractor" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
                         <label className="label">
                             <span className="label-text-alt">Contractor is one who does the work in exchange for MINA compensation.</span>
                         </label>
@@ -316,13 +308,12 @@ const Editor = () => {
                         <label className="label">
                             Arbiter
                         </label>
-                        <input type="text" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
+                        <input type="text" name="base58arbiter" placeholder="Type here" className="input input-bordered w-full max-w-xs" />
                         <label className="label">
                             <span className="label-text-alt">A person who verifies the outcome of the work in exchange for MINA compensation.</span>
                         </label>
                     </div>
                 </div>
-
 
                 <div className="break-inside-avoid">
                     <h2>Contract subject</h2>
@@ -330,7 +321,7 @@ const Editor = () => {
                         <label className="label">
                             Written description
                         </label>
-                        <textarea className="textarea textarea-secondary" placeholder="What the employer should do?" maxLength="128">
+                        <textarea name="contract_subject" className="textarea textarea-secondary" placeholder="What the employer should do?" maxLength="128">
                         </textarea>
                         <label className="label">
                             <span className="label-text-alt">What kind of work needs to be done?</span>
@@ -346,7 +337,7 @@ const Editor = () => {
                             <span className="label-text">Contractor payment</span>
                         </label>
                         <label className="input-group">
-                            <input type="text" placeholder="0.01" className="input input-bordered" />
+                            <input name="contractor_payment" type="text" placeholder="0.01" className="input input-bordered" />
                             <span>MINA</span>
                         </label>
                         <label className="label">
@@ -358,7 +349,7 @@ const Editor = () => {
                             <span className="label-text">Contractor security deposit</span>
                         </label>
                         <label className="input-group">
-                            <input type="text" placeholder="0.01" className="input input-bordered" />
+                            <input name="contractor_deposit" type="text" placeholder="0.01" className="input input-bordered" />
                             <span>MINA</span>
                         </label>
                         <label className="label">
@@ -369,7 +360,7 @@ const Editor = () => {
                         <label className="label">
                             <span className="label-text">Contractor failure penalty</span>
                         </label>
-                        <input type="range" min="0" max="100" defaultValue="25" className="range" step="1" />
+                        <input name="contractor_failure_penalty" type="range" min="0" max="100" defaultValue="25" className="range" step="1" />
                         <label className="label">
                             <span className="label-text-alt">This is the amount of lost deposit for the contractor for not doing the work. Percent of the deposit.</span>
                         </label>
@@ -378,7 +369,7 @@ const Editor = () => {
                         <label className="label">
                             <span className="label-text">Contractor cancel penalty</span>
                         </label>
-                        <input type="range" min="0" max="100" defaultValue="10" className="range" step="1" />
+                        <input name="contractor_cancel_penalty" type="range" min="0" max="100" defaultValue="10" className="range" step="1" />
                         <label className="label">
                             <span className="label-text-alt">This is the amount of lost deposit for the contractor for canceling the contract.</span>
                         </label>
@@ -392,7 +383,7 @@ const Editor = () => {
                             <span className="label-text">Employer security deposit</span>
                         </label>
                         <label className="input-group">
-                            <input type="text" placeholder="0.01" className="input input-bordered" />
+                            <input name="employer_deposit" type="text" placeholder="0.01" className="input input-bordered" />
                             <span>MINA</span>
                         </label>
                         <label className="label">
@@ -403,7 +394,7 @@ const Editor = () => {
                         <label className="label">
                             <span className="label-text">Employer arbitration fee share</span>
                         </label>
-                        <input type="range" min="0" max="100" defaultValue="50" className="range" step="1" />
+                        <input name="employer_arbitration_fee_percent" type="range" min="0" max="100" defaultValue="50" className="range" step="1" />
                         <label className="label">
                             <span className="label-text-alt">How much of the arbitration fee does the employer pay?</span>
                         </label>
@@ -418,7 +409,7 @@ const Editor = () => {
                                 <span className="label-text">Arbiter payment</span>
                             </label>
                             <label className="input-group">
-                                <input type="text" placeholder="0.01" className="input input-bordered" />
+                                <input name="arbiter_payment" type="text" placeholder="0.01" className="input input-bordered" />
                                 <span>MINA</span>
                             </label>
                             <label className="label">
@@ -430,7 +421,7 @@ const Editor = () => {
                                 <span className="label-text">Arbiter security deposit</span>
                             </label>
                             <label className="input-group">
-                                <input type="text" placeholder="0.01" className="input input-bordered" />
+                                <input name="arbiter_deposit" type="text" placeholder="0.01" className="input input-bordered" />
                                 <span>MINA</span>
                             </label>
                             <label className="label">
@@ -441,7 +432,7 @@ const Editor = () => {
                             <label className="label">
                                 <span className="label-text">Non-acting penalty</span>
                             </label>
-                            <input type="range" min="0" max="100" defaultValue="50" className="range" step="1" />
+                            <input name="arbiter_penalty_non_acting_percent" type="range" min="0" max="100" defaultValue="50" className="range" step="1" />
                             <label className="label">
                                 <span className="label-text-alt">Penalty for not declaring the outcome within the deadline. Has to be lower or equal to the sum of the arbitration fees from the Employer and the Contractor.</span>
                             </label>
@@ -455,7 +446,7 @@ const Editor = () => {
                         <label className="label">
                             <span className="label-text">Warm-up time</span>
                         </label>
-                        <input type="range" min="1" max="10" defaultValue="5" className="range" step="1" />
+                        <input name="deadline_warmup" type="range" min="1" max="10" defaultValue="5" className="range" step="1" />
                         <label className="label">
                             <span className="label-text-alt">How much time from now before the contract starts to accept the deposits.</span>
                         </label>
@@ -464,7 +455,7 @@ const Editor = () => {
                         <label className="label">
                             <span className="label-text">Deposit time</span>
                         </label>
-                        <input type="range" min="1" max="10" defaultValue="5" className="range" step="1" />
+                        <input name="deadline_deposit" type="range" min="1" max="10" defaultValue="5" className="range" step="1" />
                         <label className="label">
                             <span className="label-text-alt">How much time everyone has to deposit. Within this time window it is possible to cancel with no consequences.</span>
                         </label>
@@ -473,7 +464,7 @@ const Editor = () => {
                         <label className="label">
                             <span className="label-text">Execution time</span>
                         </label>
-                        <input type="range" min="1" max="10" defaultValue="5" className="range" step="1" />
+                        <input name="deadline_execution" type="range" min="1" max="10" defaultValue="5" className="range" step="1" />
                         <label className="label">
                             <span className="label-text-alt">How much time does the Contractor have to do the work.</span>
                         </label>
@@ -482,7 +473,7 @@ const Editor = () => {
                         <label className="label">
                             <span className="label-text">Failure declaration time</span>
                         </label>
-                        <input type="range" min="1" max="10" defaultValue="5" className="range" step="1" />
+                        <input name="deadline_failure" type="range" min="1" max="10" defaultValue="5" className="range" step="1" />
                         <label className="label">
                             <span className="label-text-alt">If after deadline, how much time the arbiter has to declare failure.</span>
                         </label>
@@ -496,7 +487,7 @@ const Editor = () => {
                         <label className="label">
                             Deposited
                         </label>
-                        <textarea className="textarea textarea-secondary" placeholder="">
+                        <textarea name="subject_deposit" className="textarea textarea-secondary" placeholder="">
                         </textarea>
                         <label className="label">
                             <span className="label-text-alt">Justify the deposit policy</span>
@@ -506,7 +497,7 @@ const Editor = () => {
                         <label className="label">
                             Success
                         </label>
-                        <textarea className="textarea textarea-secondary" placeholder="" maxLength="128">
+                        <textarea name="subject_success" className="textarea textarea-secondary" placeholder="" maxLength="128">
                         </textarea>
                         <label className="label">
                             <span className="label-text-alt">Justify the success policy</span>
@@ -516,7 +507,7 @@ const Editor = () => {
                         <label className="label">
                             Failure
                         </label>
-                        <textarea className="textarea textarea-secondary" placeholder="" maxLength="128">
+                        <textarea name="subject_failure" className="textarea textarea-secondary" placeholder="" maxLength="128">
                         </textarea>
                         <label className="label">
                             <span className="label-text-alt">Justify the failure policy</span>
@@ -526,7 +517,7 @@ const Editor = () => {
                         <label className="label">
                             Cancel
                         </label>
-                        <textarea className="textarea textarea-secondary" placeholder="" maxLength="128">
+                        <textarea name="subject_cancel" className="textarea textarea-secondary" placeholder="" maxLength="128">
                         </textarea>
                         <label className="label">
                             <span className="label-text-alt">Justify the cancelation policy</span>

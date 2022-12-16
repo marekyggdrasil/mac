@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useContext } from 'react';
 
 import AppContext from '../components/AppContext';
+import { finalizeContract } from '../components/interaction';
 
 
 const MacPackContent = () => {
@@ -10,17 +11,16 @@ const MacPackContent = () => {
     return (<code className="">{ context.state.macpack }</code>)
 }
 
-
 async function runExport(context) {
-    let element = document.getElementById('import-macpack');
-    let macpack = (element.innerText || element.textContent);
-    console.log(macpack);
     try {
+        if (!context.state.finalized) {
+            await finalizeContract(context);
+        }
         const macpack = await context.state.zkappWorkerClient.toMacPack();
-        console.log('imported correctly');
-        context.setState({ ...context.state, loaded: true, macpack: macpack });
+        console.log('exported correctly');
+        context.setState({ ...context.state, loaded: true, finalized: true, macpack: macpack });
     } catch (e:any) {
-        console.log('failed to import');
+        console.log('failed to export');
         console.log(e);
     }
 }
@@ -28,13 +28,21 @@ async function runExport(context) {
 
 const ExportCases = () => {
     const context = useContext(AppContext);
-    if (context.state.comp_button_state < 2) {
+    if (context.compilationButtonState < 2) {
         return (<div><p>You need to load the SnarkyJS library first!</p></div>);
     }
     if (!context.state.loaded) {
         return (
             <div>
                 <p>You do not have a loaded MAC! contract. There is nothing to export. You may either <Link href="/create">create</Link> a new contract or <Link href="/import">import</Link> one.</p>
+            </div>);
+    }
+    if (!context.state.finalized) {
+        return (
+            <div>
+                <p>You have a loaded MAC! contract but it is not finalized. You may <button className="btn" onClick={async () => {
+                    await runExport(context);
+                }}>finalize</button> it.</p>
             </div>);
     }
     return (

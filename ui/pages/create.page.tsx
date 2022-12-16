@@ -21,18 +21,19 @@ const CreationSteps = () => {
 
 const ConnectionIndicator = () => {
     const context = useContext(AppContext);
-    if (context.state.connect_button_state < 2) {
+    if (context.connectionButtonState < 2) {
         return <article className="container prose">
             Auro wallet not connected.
         </article>;
     }
     return <article className="container prose">
-        Connected as <MinaValue>{ context.state.publicKey.toBase58() }</MinaValue>.
+        Connected as <MinaValue>{ context.connectedAddress }</MinaValue>.
     </article>;
 }
 
 const CreateCases = () => {
-    const context = useContext(AppContext);if (context.state.comp_button_state < 2) {
+    const context = useContext(AppContext);
+    if (context.compilationButtonState < 2) {
         return (
             <article className="container prose">
                 <h1>Create a new MAC contract</h1>
@@ -46,7 +47,7 @@ const CreateCases = () => {
                 <div><p>You already have a loaded MAC! contract. You may <Link href="/current">deploy it or interact with it</Link>, <Link href="/close">close it</Link> or <Link href="/export">export it</Link>.</p></div>
             </article>);
     }
-    if (context.state.connect_button_state < 2) {
+    if (context.connectionButtonState < 2) {
         return (
             <article className="container prose">
                 <h1>Create a new MAC contract</h1>

@@ -4,7 +4,12 @@ import { useContext } from 'react';
 import AppContext from '../components/AppContext';
 
 async function runClose(context) {
-    context.setState({ ...context.state, loaded: false, macpack: 'Your MacPack will be here...' });
+    context.setState({
+        ...context.state,
+        loaded: false,
+        finalized: false,
+        macpack: 'Your MacPack will be here...'
+    });
 }
 
 export default function Close() {
