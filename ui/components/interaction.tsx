@@ -383,7 +383,6 @@ const InteractionCases = () => {
     } else {
         return (
             <div>
-                <GodMode/>
                 <InteractionEditor/>
                 <RenderContractDescription />
             </div>);
