@@ -46,9 +46,11 @@ async function runCompile(context) {
     console.log('runCompile');
     await context.setCompilationButtonState(3);
     try {
-        console.log('compiling');
-        await context.state.zkappWorkerClient.compileContract();
-        console.log('compiled');
+      console.log('compiling');
+      console.time('contract-compilation')
+      await context.state.zkappWorkerClient.compileContract();
+      console.timeEnd('contract-compilation')
+      console.log('compiled');
         await context.setCompilationButtonState(4);
     } catch (e:any) {
         console.log(e);
