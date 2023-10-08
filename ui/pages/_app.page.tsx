@@ -150,7 +150,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
     let [compilationButtonState, setCompilationButtonState] = useState(0);
     let [connectionButtonState, setConnectionButtonState] = useState(0);
-    let [blockchainLength, setBlockchainLength] = useState(null);
+    let [blockchainLength, setBlockchainLength] = useState(0);
     let [connectedAddress, setConnectedAddress] = useState('');
     let [txHash, setTxHash] = useState('');
 

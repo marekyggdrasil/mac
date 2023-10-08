@@ -1,7 +1,6 @@
 import Link from 'next/link';
 
-import { useContext } from 'react';
-import AppContext from '../components/AppContext';
+import { MacContextType, castContext } from '../components/AppContext';
 
 import {
     PublicKey
@@ -76,9 +75,9 @@ async function runImport(context) {
 }
 
 const ImportCases = () => {
-    const context = useContext(AppContext);
-    if (context.compilationButtonState < 2) {
-        return (<div><p>You need to load the SnarkyJS library first!</p></div>);
+  const context: MacContextType = castContext();
+  if (context.compilationButtonState < 2) {
+    return (<div><p>You need to load the SnarkyJS library first!</p></div>);
     }
     if (context.state.loaded) {
         return (<div><p>You already have a loaded MAC! contract. Before you import another one make sure you <Link href="/close">close</Link> is first.</p></div>);

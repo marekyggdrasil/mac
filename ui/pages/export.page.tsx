@@ -1,18 +1,16 @@
 import Link from 'next/link';
 
-import { useContext } from 'react';
-
-import AppContext from '../components/AppContext';
+import { MacContextType, castContext } from '../components/AppContext';
 import { finalizeContract } from '../components/interaction';
 
 
 const MacPackContent = () => {
-    const context = useContext(AppContext);
-    return (<code className="">{ context.state.macpack }</code>)
+  const context: MacContextType = castContext();
+  return (<code className="">{ context.state.macpack }</code>)
 }
 
-async function runExport(context) {
-    try {
+async function runExport(context: MacContextType) {
+  try {
         if (!context.state.finalized) {
             await finalizeContract(context);
         }
@@ -26,11 +24,11 @@ async function runExport(context) {
 }
 
 const FinalizeButton = () => {
-    const context = useContext(AppContext);
-    if (context.compilationButtonState == 3) {
-        return <button className="btn btn-disabled">
-            Finalize
-        </button>;
+  const context: MacContextType = castContext();
+  if (context.compilationButtonState == 3) {
+    return <button className="btn btn-disabled">
+      Finalize
+    </button>;
     } else {
         return <button className="btn btn-disabled" onClick={async () => {
             await runExport(context);
@@ -42,9 +40,9 @@ const FinalizeButton = () => {
 
 
 const ExportCases = () => {
-    const context = useContext(AppContext);
-    if (context.compilationButtonState < 2) {
-        return (<div><p>You need to load the SnarkyJS library first!</p></div>);
+  const context: MacContextType = castContext();
+  if (context.compilationButtonState < 2) {
+    return (<div><p>You need to load the SnarkyJS library first!</p></div>);
     }
     if (!context.state.loaded) {
         return (

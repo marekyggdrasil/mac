@@ -1,4 +1,4 @@
-import AppContext from './AppContext';
+import { MacContextType, castContext } from './AppContext';
 import { finalizeContract } from './interaction';
 
 import {
@@ -6,8 +6,8 @@ import {
     PrivateKey
 } from 'snarkyjs';
 
-export async function contractDeploy(context) {
-    const transactionFee = 0.1;
+export async function contractDeploy(context: MacContextType) {
+  const transactionFee = 0.1;
     await context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -18,7 +18,7 @@ export async function contractDeploy(context) {
         await finalizeContract(context);
     }
     let connectedAddress = context.connectedAddress;
-    if (!context.usingAuro) {
+    if (!context.state.usingAuro) {
         connectedAddress = context.state.actorPublicKey.toBase58();
     }
     console.log('fetchAccount');
@@ -28,7 +28,7 @@ export async function contractDeploy(context) {
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     console.log('createDeployTransaction');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         await context.state.zkappWorkerClient!.createDeployTransactionAuro(
             context.state.zkappPrivateKey);
     } else {
@@ -48,7 +48,7 @@ export async function contractDeploy(context) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         const transactionJSON = await context.state.zkappWorkerClient!.getTransactionJSON();
         console.log('sendTransaction');
         console.log(transactionJSON);
@@ -74,8 +74,8 @@ export async function contractDeploy(context) {
     });
 }
 
-export async function contractInit(context) {
-    const transactionFee = 0.1;
+export async function contractInit(context: MacContextType) {
+  const transactionFee = 0.1;
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -86,7 +86,7 @@ export async function contractInit(context) {
         await finalizeContract(context);
     }
     let connectedAddress = context.connectedAddress;
-    if (!context.usingAuro) {
+    if (!context.state.usingAuro) {
         connectedAddress = context.state.actorPublicKey.toBase58();
     }
     console.log('fetchAccount');
@@ -96,7 +96,7 @@ export async function contractInit(context) {
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     console.log('createDeployTransaction');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         await context.state.zkappWorkerClient!.createInitTransactionAuro(
             context.state.zkappPrivateKey);
     } else {
@@ -116,7 +116,7 @@ export async function contractInit(context) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         const transactionJSON = await context.state.zkappWorkerClient!.getTransactionJSON();
         console.log('sendTransaction');
         console.log(transactionJSON);
@@ -143,8 +143,8 @@ export async function contractInit(context) {
 }
 
 
-export async function contractDeposit(context) {
-    const transactionFee = 0.1;
+export async function contractDeposit(context: MacContextType) {
+  const transactionFee = 0.1;
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -155,7 +155,7 @@ export async function contractDeposit(context) {
         await finalizeContract(context);
     }
     let connectedAddress = context.connectedAddress;
-    if (!context.usingAuro) {
+    if (!context.state.usingAuro) {
         connectedAddress = context.state.actorPublicKey.toBase58();
     }
     console.log('fetchAccount');
@@ -165,7 +165,7 @@ export async function contractDeposit(context) {
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     console.log('createDeployTransaction');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         await context.state.zkappWorkerClient!.createDepositTransactionAuro(
             context.state.actorPrivateKey.toPublicKey());
     } else {
@@ -186,7 +186,7 @@ export async function contractDeposit(context) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         const transactionJSON = await context.state.zkappWorkerClient!.getTransactionJSON();
         console.log('sendTransaction');
         console.log(transactionJSON);
@@ -212,8 +212,8 @@ export async function contractDeposit(context) {
     });
 }
 
-export async function contractWithdraw(context) {
-    const transactionFee = 0.1;
+export async function contractWithdraw(context: MacContextType) {
+  const transactionFee = 0.1;
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -223,7 +223,7 @@ export async function contractWithdraw(context) {
         await finalizeContract(context);
     }
     let connectedAddress = context.connectedAddress;
-    if (!context.usingAuro) {
+    if (!context.state.usingAuro) {
         connectedAddress = context.state.actorPublicKey.toBase58();
     }
     console.log('fetchAccount');
@@ -233,13 +233,13 @@ export async function contractWithdraw(context) {
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     console.log('createDeployTransaction');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         await context.state.zkappWorkerClient!.createWithdrawTransactionAuro(
             context.state.actorPrivateKey.toPublicKey(),
             context.state.actorPrivateKey);
     } else {
         await context.state.zkappWorkerClient!.createWithdrawTransaction(
-            context.state.zkappPrivateKey, context.state.actorPrivateKey);
+            context.state.zkappPrivateKey.toPublicKey(), context.state.actorPrivateKey);
     }
     context.setState({
         ...context.state,
@@ -254,7 +254,7 @@ export async function contractWithdraw(context) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         const transactionJSON = await context.state.zkappWorkerClient!.getTransactionJSON();
         console.log('sendTransaction');
         console.log(transactionJSON);
@@ -279,8 +279,8 @@ export async function contractWithdraw(context) {
     });
 }
 
-export async function contractCancel(context) {
-    const transactionFee = 0.1;
+export async function contractCancel(context: MacContextType) {
+  const transactionFee = 0.1;
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -290,7 +290,7 @@ export async function contractCancel(context) {
         await finalizeContract(context);
     }
     let connectedAddress = context.connectedAddress;
-    if (!context.usingAuro) {
+    if (!context.state.usingAuro) {
         connectedAddress = context.state.actorPublicKey.toBase58();
     }
     console.log('fetchAccount');
@@ -300,7 +300,7 @@ export async function contractCancel(context) {
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     console.log('createDeployTransaction');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         await context.state.zkappWorkerClient!.createCancelTransactionAuro(
             context.state.zkappPrivateKey);
     } else {
@@ -321,7 +321,7 @@ export async function contractCancel(context) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         const transactionJSON = await context.state.zkappWorkerClient!.getTransactionJSON();
         console.log('sendTransaction');
         console.log(transactionJSON);
@@ -346,8 +346,8 @@ export async function contractCancel(context) {
     });
 }
 
-export async function contractSuccess(context) {
-    const transactionFee = 0.1;
+export async function contractSuccess(context: MacContextType) {
+  const transactionFee = 0.1;
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -357,7 +357,7 @@ export async function contractSuccess(context) {
         await finalizeContract(context);
     }
     let connectedAddress = context.connectedAddress;
-    if (!context.usingAuro) {
+    if (!context.state.usingAuro) {
         connectedAddress = context.state.actorPublicKey.toBase58();
     }
     console.log('fetchAccount');
@@ -367,7 +367,7 @@ export async function contractSuccess(context) {
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     console.log('createDeployTransaction');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         await context.state.zkappWorkerClient!.createSuccessTransactionAuro(
             context.state.zkappPrivateKey);
     } else {
@@ -389,7 +389,7 @@ export async function contractSuccess(context) {
     });
     console.log('getTransactionJSON');
     let _hash = '';
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         const transactionJSON = await context.state.zkappWorkerClient!.getTransactionJSON();
         console.log('sendTransaction');
         console.log(transactionJSON);
@@ -414,8 +414,8 @@ export async function contractSuccess(context) {
     });
 }
 
-export async function contractFailure(context) {
-    const transactionFee = 0.1;
+export async function contractFailure(context: MacContextType) {
+  const transactionFee = 0.1;
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -425,7 +425,7 @@ export async function contractFailure(context) {
         await finalizeContract(context);
     }
     let connectedAddress = context.connectedAddress;
-    if (!context.usingAuro) {
+    if (!context.state.usingAuro) {
         connectedAddress = context.state.actorPublicKey.toBase58();
     }
     console.log('fetchAccount');
@@ -435,13 +435,13 @@ export async function contractFailure(context) {
     await context.state.zkappWorkerClient.initZkappInstance(
         context.state.zkappPublicKey);
     console.log('createDeployTransaction');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         await context.state.zkappWorkerClient!.createFailureTransactionAuro(
             context.state.actorPrivateKey.toPublicKey(),
             context.state.actorPrivateKey);
     } else {
         await context.state.zkappWorkerClient!.createFailureTransaction(
-            context.state.zkappPrivateKey, context.state.actorPrivateKey);
+          context.state.zkappPrivateKey.toPublicKey(), context.state.actorPrivateKey);
     }
     context.setState({
         ...context.state,
@@ -456,7 +456,7 @@ export async function contractFailure(context) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.usingAuro) {
+    if (context.state.usingAuro) {
         const transactionJSON = await context.state.zkappWorkerClient!.getTransactionJSON();
         console.log('sendTransaction');
         console.log(transactionJSON);

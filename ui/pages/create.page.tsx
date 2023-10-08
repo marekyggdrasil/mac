@@ -1,30 +1,28 @@
 import Link from 'next/link';
 import Editor from '../components/editor';
 
-import { useContext } from 'react';
-
-import AppContext from '../components/AppContext';
+import { MacContextType, castContext } from '../components/AppContext';
 import { MinaValue } from '../components/highlights';
 
 const CreationSteps = () => {
-    const context = useContext(AppContext);
-    if (
-        <div><p>this is where we create a new contract</p>
-            <ul className="steps">
-                <li className="step step-primary">Define</li>
-                <li className="step">Deploy</li>
-                <li className="step">Share!</li>
-                <li className="step">Interact!</li>
-            </ul>
-        </div>);
+  const context: MacContextType = castContext();
+  if (
+    <div><p>this is where we create a new contract</p>
+      <ul className="steps">
+        <li className="step step-primary">Define</li>
+        <li className="step">Deploy</li>
+        <li className="step">Share!</li>
+        <li className="step">Interact!</li>
+      </ul>
+    </div>);
 }
 
 const ConnectionIndicator = () => {
-    const context = useContext(AppContext);
-    if (context.connectionButtonState < 2) {
-        return <article className="container prose">
-            Auro wallet not connected.
-        </article>;
+  const context: MacContextType = castContext();
+  if (context.connectionButtonState < 2) {
+    return <article className="container prose">
+      Auro wallet not connected.
+    </article>;
     }
     return <article className="container prose">
         Connected as <MinaValue>{ context.connectedAddress }</MinaValue>.
@@ -32,13 +30,13 @@ const ConnectionIndicator = () => {
 }
 
 const CreateCases = () => {
-    const context = useContext(AppContext);
-    if (context.compilationButtonState < 2) {
-        return (
-            <article className="container prose">
-                <h1>Create a new MAC contract</h1>
-                <div><p>You need to load the SnarkyJS library first!</p></div>
-            </article>);
+  const context: MacContextType = castContext();
+  if (context.compilationButtonState < 2) {
+    return (
+      <article className="container prose">
+        <h1>Create a new MAC contract</h1>
+        <div><p>You need to load the SnarkyJS library first!</p></div>
+      </article>);
     }
     if (context.state.loaded) {
         return (
@@ -63,6 +61,6 @@ const CreateCases = () => {
 }
 
 export default function Create( {state, setState } ) {
-    const context = useContext(AppContext);
-    return <CreateCases />;
+  const context: MacContextType = castContext();
+  return <CreateCases />;
 }

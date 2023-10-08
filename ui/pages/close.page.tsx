@@ -1,10 +1,9 @@
 import Link from 'next/link';
 
-import { useContext } from 'react';
-import AppContext from '../components/AppContext';
+import { MacContextType, castContext } from '../components/AppContext';
 
-async function runClose(context) {
-    context.setState({
+async function runClose(context: MacContextType) {
+  context.setState({
         ...context.state,
         loaded: false,
         finalized: false,
@@ -13,13 +12,13 @@ async function runClose(context) {
 }
 
 export default function Close() {
-    const context = useContext(AppContext);
-    if (!context.state.loaded) {
-        return (
-            <article className="container prose">
-                <h1>Close Contract</h1>
-                <div><p>You do not have any loaded MAC! contract. There is nothing to close. You may <Link href="/import">import</Link> or <Link href="/create">create</Link> a new one.</p></div>
-            </article>);
+  const context: MacContextType = castContext();
+  if (!context.state.loaded) {
+    return (
+      <article className="container prose">
+        <h1>Close Contract</h1>
+        <div><p>You do not have any loaded MAC! contract. There is nothing to close. You may <Link href="/import">import</Link> or <Link href="/create">create</Link> a new one.</p></div>
+      </article>);
     }
     return (
         <article className="container prose">

@@ -1,8 +1,11 @@
-import { useContext } from 'react';
-import AppContext from './AppContext';
+import {
+  PublicKey
+} from 'snarkyjs';
+
+import { MacContextType, castContext } from './AppContext';
 import { MinaValue, MinaBlockchainLength } from './highlights';
 
-function minaValue(v) {
+function minaValue(v: number) {
     let text = '';
     let va = v/1000000000;
     if (v >= 0) {
@@ -11,7 +14,7 @@ function minaValue(v) {
     return va.toString() + ' MINA';
 }
 
-function outcomeDescription(v) {
+function outcomeDescription(v: string) {
     if (v == '') {
         return 'N/A';
     }
@@ -19,153 +22,153 @@ function outcomeDescription(v) {
 }
 
 export const RenderOutcomes = () => {
-    const context = useContext(AppContext);
-    return (
-        <div className="overflow-x-auto">
-            <table className="table w-full">
-                <thead>
-                    <tr>
-                        <th>Outcome</th>
-                        <th>After</th>
-                        <th>Before</th>
-                        <th>Employer</th>
-                        <th>Contractor</th>
-                        <th>Arbiter</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <th>Deposit</th>
-                        <td>
-                            <MinaBlockchainLength>
-                                {context.state.contract_outcome_deposit_after}
-                            </MinaBlockchainLength>
-                        </td>
-                        <td>
-                            <MinaBlockchainLength>
-                                {context.state.contract_outcome_deposit_before}
-                            </MinaBlockchainLength>
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_deposit_employer)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_deposit_contractor)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_deposit_arbiter)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_deposit_employer
-                                + context.state.contract_outcome_deposit_contractor
-                                + context.state.contract_outcome_deposit_arbiter)}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Success</th>
-                        <td>
-                            <MinaBlockchainLength>
-                                {context.state.contract_outcome_success_after}
-                            </MinaBlockchainLength>
-                        </td>
-                        <td>
-                            <MinaBlockchainLength>
-                                {context.state.contract_outcome_success_before}
-                            </MinaBlockchainLength>
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_success_employer)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_success_contractor)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_success_arbiter)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_success_employer
-                                + context.state.contract_outcome_success_contractor
-                                + context.state.contract_outcome_success_arbiter)}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Failure</th>
-                        <td>
-                            <MinaBlockchainLength>
-                                {context.state.contract_outcome_failure_after}
-                            </MinaBlockchainLength>
-                        </td>
-                        <td>
-                            <MinaBlockchainLength>
-                                {context.state.contract_outcome_failure_before}
-                            </MinaBlockchainLength>
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_failure_employer)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_failure_contractor)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_failure_arbiter)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_failure_employer
-                                + context.state.contract_outcome_failure_contractor
-                                + context.state.contract_outcome_failure_arbiter)}
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Cancel</th>
-                        <td>
-                            <MinaBlockchainLength>
-                                {context.state.contract_outcome_cancel_after}
-                            </MinaBlockchainLength>
-                        </td>
-                        <td>
-                            <MinaBlockchainLength>
-                                {context.state.contract_outcome_cancel_before}
-                            </MinaBlockchainLength>
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_cancel_employer)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_cancel_contractor)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_cancel_arbiter)}
-                        </td>
-                        <td>
-                            {minaValue(
-                                context.state.contract_outcome_cancel_employer
-                                + context.state.contract_outcome_cancel_contractor
-                                + context.state.contract_outcome_cancel_arbiter)}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>);
+  const context: MacContextType = castContext();
+  return (
+    <div className="overflow-x-auto">
+      <table className="table w-full">
+        <thead>
+          <tr>
+            <th>Outcome</th>
+            <th>After</th>
+            <th>Before</th>
+            <th>Employer</th>
+            <th>Contractor</th>
+            <th>Arbiter</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Deposit</th>
+            <td>
+              <MinaBlockchainLength>
+                {context.state.contract_outcome_deposit_after}
+              </MinaBlockchainLength>
+            </td>
+            <td>
+              <MinaBlockchainLength>
+                {context.state.contract_outcome_deposit_before}
+              </MinaBlockchainLength>
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_deposit_employer)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_deposit_contractor)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_deposit_arbiter)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_deposit_employer
+                + context.state.contract_outcome_deposit_contractor
+                + context.state.contract_outcome_deposit_arbiter)}
+            </td>
+          </tr>
+          <tr>
+            <th>Success</th>
+            <td>
+              <MinaBlockchainLength>
+                {context.state.contract_outcome_success_after}
+              </MinaBlockchainLength>
+            </td>
+            <td>
+              <MinaBlockchainLength>
+                {context.state.contract_outcome_success_before}
+              </MinaBlockchainLength>
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_success_employer)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_success_contractor)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_success_arbiter)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_success_employer
+                + context.state.contract_outcome_success_contractor
+                + context.state.contract_outcome_success_arbiter)}
+            </td>
+          </tr>
+          <tr>
+            <th>Failure</th>
+            <td>
+              <MinaBlockchainLength>
+                {context.state.contract_outcome_failure_after}
+              </MinaBlockchainLength>
+            </td>
+            <td>
+              <MinaBlockchainLength>
+                {context.state.contract_outcome_failure_before}
+              </MinaBlockchainLength>
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_failure_employer)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_failure_contractor)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_failure_arbiter)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_failure_employer
+                + context.state.contract_outcome_failure_contractor
+                + context.state.contract_outcome_failure_arbiter)}
+            </td>
+          </tr>
+          <tr>
+            <th>Cancel</th>
+            <td>
+              <MinaBlockchainLength>
+                {context.state.contract_outcome_cancel_after}
+              </MinaBlockchainLength>
+            </td>
+            <td>
+              <MinaBlockchainLength>
+                {context.state.contract_outcome_cancel_before}
+              </MinaBlockchainLength>
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_cancel_employer)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_cancel_contractor)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_cancel_arbiter)}
+            </td>
+            <td>
+              {minaValue(
+                context.state.contract_outcome_cancel_employer
+                + context.state.contract_outcome_cancel_contractor
+                + context.state.contract_outcome_cancel_arbiter)}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>);
 }
 
 export const RenderOutcomesDescriptions = () => {
-    const context = useContext(AppContext);
+  const context: MacContextType = castContext();
     return (
         <div className="overflow-x-auto">
             <table className="table w-full">
@@ -197,8 +200,8 @@ export const RenderOutcomesDescriptions = () => {
         </div>);
 }
 
-function safeAddressRender(address) {
-    if (!address) {
+function safeAddressRender(address: PublicKey) {
+  if (!address) {
         return "";
     }
     if (address.toBase58) {
@@ -208,7 +211,7 @@ function safeAddressRender(address) {
 }
 
 export const RenderInvolvedParties = () => {
-    const context = useContext(AppContext);
+  const context: MacContextType = castContext();
     return (
         <div className="overflow-x-auto">
             <table className="table w-full">
@@ -249,7 +252,7 @@ export const RenderInvolvedParties = () => {
 }
 
 export const RenderContractDescription = () => {
-    const context = useContext(AppContext);
+  const context: MacContextType = castContext();
     return (
         <div>
             <h2>Contract description</h2>

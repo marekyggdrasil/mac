@@ -1,6 +1,4 @@
-import { useContext } from 'react';
-
-import AppContext from './AppContext';
+import { MacContextType, castContext } from './AppContext';
 import { MinaValue } from './highlights';
 
 import {
@@ -9,9 +7,9 @@ import {
 } from 'snarkyjs';
 
 export const InteractionModeUIInfo = () => {
-    const context = useContext(AppContext);
-    if (context.state.usingAuro) {
-        return (<p>You are using AURO wallet.</p>);
+  const context: MacContextType = castContext();
+  if (context.state.usingAuro) {
+    return (<p>You are using AURO wallet.</p>);
     } else {
         if (context.state.actorPublicKey) {
             return (<div>You are using <strong>PrivateKey</strong> mode as <MinaValue>{context.state.actorPublicKey.toBase58()}</MinaValue>.</div>);
@@ -21,48 +19,48 @@ export const InteractionModeUIInfo = () => {
 }
 
 export const InteractionModeUIButton = () => {
-    const context = useContext(AppContext);
-    return (<button className="btn" onClick={async (event) => {
-        await context.setState({
-            ...context.state,
-            usingAuro: !context.state.usingAuro
-        });
-    }}>Switch</button>);
+  const context: MacContextType = castContext();
+  return (<button className="btn" onClick={async (event) => {
+    await context.setState({
+      ...context.state,
+      usingAuro: !context.state.usingAuro
+    });
+  }}>Switch</button>);
 }
 
 export const InteractionModeUIForm = () => {
-    const context = useContext(AppContext);
-    return (<form onSubmit={async (event) => {
-        event.preventDefault();
-        const private_key = event.target.base58sk.value;
-        try {
-            PrivateKey.fromBase58(private_key);
-        } catch (e:any) {
-            return alert('Invalid private key');
-        }
-        const actor_sk = PrivateKey.fromBase58(private_key);
-        const actor_pk = actor_sk.toPublicKey();
-        await context.setState({
-            ...context.state,
-            actorPrivateKey: actor_sk,
-            actorPublicKey: actor_pk
-        });
-    }}>
-        <div className="form-control">
-            <label className="input-group">
-                <InteractionModeUIButton/><input type="password" name="base58sk" className="input input-bordered w-full max-w-xs" /><button type="submit" className="btn btn-active">Update Private Key</button>
-            </label>
-        </div>
-    </form>);
+  const context: MacContextType = castContext();
+  return (<form onSubmit={async (event) => {
+    event.preventDefault();
+    const private_key = event.target.base58sk.value;
+    try {
+      PrivateKey.fromBase58(private_key);
+    } catch (e:any) {
+      return alert('Invalid private key');
+    }
+    const actor_sk = PrivateKey.fromBase58(private_key);
+    const actor_pk = actor_sk.toPublicKey();
+    await context.setState({
+      ...context.state,
+      actorPrivateKey: actor_sk,
+      actorPublicKey: actor_pk
+    });
+  }}>
+    <div className="form-control">
+      <label className="input-group">
+        <InteractionModeUIButton/><input type="password" name="base58sk" className="input input-bordered w-full max-w-xs" /><button type="submit" className="btn btn-active">Update Private Key</button>
+      </label>
+    </div>
+  </form>);
 }
 
 export const InteractionModeUI = () => {
-    const context = useContext(AppContext);
-    if (context.state.usingAuro) {
-        return (<div>
-            <InteractionModeUIInfo/>
-            <InteractionModeUIButton/>
-        </div>);
+  const context: MacContextType = castContext();
+  if (context.state.usingAuro) {
+    return (<div>
+      <InteractionModeUIInfo/>
+      <InteractionModeUIButton/>
+    </div>);
     }
     return (<div>
         <InteractionModeUIInfo/>

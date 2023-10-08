@@ -1,17 +1,15 @@
 import Link from 'next/link';
-
-import { useContext } from 'react';
-import AppContext from './AppContext'
+import { MacContextType, castContext } from './AppContext';
 
 
 const CircuitCompileButton = () => {
-    const context = useContext(AppContext);
-    if (context.compilationButtonState == 0) {
-        return <button className="btn" onClick={() => {
-            context.state.runLoadSnarkyJS(context);
-        }}>
-            Load SnarkyJS
-        </button>;
+  const context: MacContextType = castContext();
+  if (context.compilationButtonState == 0) {
+    return <button className="btn" onClick={() => {
+      context.state.runLoadSnarkyJS(context);
+    }}>
+      Load SnarkyJS
+    </button>;
     } else if (context.compilationButtonState == 1) {
         return <button className="btn btn-disabled animate-pulse">
             Loading SnarkyJS...
@@ -44,11 +42,11 @@ const currentBlock = (blockchainLength) => {
 }
 
 const ConnectButton = () => {
-    const context = useContext(AppContext);
-    if (context.compilationButtonState < 2) {
-        return <button className="btn btn-disabled">
-            Connect
-        </button>;
+  const context: MacContextType = castContext();
+  if (context.compilationButtonState < 2) {
+    return <button className="btn btn-disabled">
+      Connect
+    </button>;
     } else if (context.connectionButtonState == 0) {
         return <button className="btn" onClick={() => {
             context.state.connectWallet(context);
