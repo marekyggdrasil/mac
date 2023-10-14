@@ -34,6 +34,10 @@ const CircuitCompileButton = () => {
         return <button className="btn btn-disabled">
             Circuit compiled!
         </button>;
+    } else {
+      return <button className="btn btn-disabled">
+        Unknown
+      </button>;
     }
 }
 
@@ -64,6 +68,8 @@ const ConnectButton = () => {
         </div>;
     } else if (context.connectionButtonState == 2) {
         return <button className="btn btn-disabled">Connected!</button>;
+    } else {
+      return <button className="btn btn-disabled">Unknown</button>;
     }
 }
 
