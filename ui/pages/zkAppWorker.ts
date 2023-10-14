@@ -7,10 +7,11 @@ import {
   fetchAccount,
   UInt32,
   UInt64,
-    CircuitString,
-    fetchLastBlock,
-    VerificationKey,
-    AccountUpdate
+  Bool,
+  CircuitString,
+  fetchLastBlock,
+  VerificationKey,
+  AccountUpdate
 } from 'snarkyjs'
 
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
@@ -26,17 +27,81 @@ interface VerificationKeyData {
     hash: string;
 }
 
-const state = {
-  Mac: null as null | typeof Mac,
-  Outcome: null as null | typeof Outcome,
-  Preimage: null as null | typeof Preimage,
-  zkapp: null as null | Mac,
-  preimage: null as null | Preimage,
-  transaction: null as null | Transaction,
-  fromMacPack: null as null | fromMacPack,
-    toMacPack: null as null | toMacPack,
-    vKey: null as null | VerificationKeyData
+type zkAppWorkerState = {
+  Mac: typeof Mac,
+  Outcome: typeof Outcome,
+  Preimage: typeof Preimage,
+  zkapp: null | Mac,
+  preimage: null | Preimage,
+  transaction: null | Transaction,
+  fromMacPack: typeof fromMacPack,
+  toMacPack: typeof toMacPack,
+  vKey: null | VerificationKeyData
 }
+
+function castPreimageValue(
+  preimage: Preimage | null): Preimage {
+  if (preimage === null) {
+    throw Error('preimage value is null');
+  }
+  return preimage;
+}
+
+function castVerificationKeyDataValue(
+  vkd: VerificationKeyData | null): VerificationKeyData {
+  if (vkd === null) {
+    throw Error('VerificationKeyData value is null');
+  }
+  return vkd;
+}
+
+/*
+function castState(state: null | zkAppWorkerState): zkAppWorkerState {
+  if (state === null) {
+    throw Error('state is null');
+  }
+  return state;
+}
+
+function castStateTypes(state: zkAppWorkerState) {
+  return state;
+  if (state.Mac === null) {
+    throw Error('Mac is null');
+  }
+  if (state.Outcome === null) {
+    throw Error('Outcome is null');
+  }
+  if (state.Preimage === null) {
+    throw Error('Preimage is null');
+  }
+  if (state.Preimage === null) {
+    throw Error('Failed to initiate the smart contract');
+  }
+}
+
+function castStateValues(state: zkAppWorkerState) {
+  if (state.zkapp === null) {
+    throw Error('zkapp is null');
+  }
+  if (state.preimage === null) {
+    throw Error('preimage is null');
+  }
+  if (state.transaction === null) {
+    throw Error('transaction is null');
+  }
+  if (state.fromMacPack === null) {
+    throw Error('fromMacPack is null');
+  }
+  if (state.toMacPack === null) {
+    throw Error('toMacPack is null');
+  }
+  if (state.vKey === null) {
+    throw Error('vKey is null');
+  }
+}
+*/
+
+let state: null | zkAppWorkerState = null;
 
 // ---------------------------------------------------------------------------------------
 
@@ -52,14 +117,31 @@ const functions = {
   },
     loadContract: async (args: {}) => {
     const { Mac } = await import(
-          '../../contracts/build/src/Mac.js');
-    state.Mac = Mac;
+      '../../contracts/build/src/Mac.js');
+      if (Mac === null) {
+        throw Error('Mac type is null');
+      }
     const { Outcome, Preimage } = await import(
-          '../../contracts/build/src/strpreim.js');
-    state.Outcome = Outcome;
-    state.Preimage = Preimage;
+      '../../contracts/build/src/strpreim.js');
+      if (Outcome === null) {
+        throw Error('Ouctome type is null');
+      }
+    if (Preimage === null) {
+      throw Error('Preimage type is null');
+    }
     const { fromMacPack, toMacPack } = await import(
         '../../contracts/build/src/helpers.js');
+    state = {
+        Mac: Mac,
+        Outcome: Outcome,
+        Preimage: Preimage,
+        zkapp: null,
+        preimage: null,
+        transaction: null,
+      fromMacPack: fromMacPack,
+      toMacPack: toMacPack,
+        vKey: null
+      }
     state.fromMacPack = fromMacPack;
       state.toMacPack = toMacPack;
   },
@@ -69,6 +151,9 @@ const functions = {
     return block.blockchainLength.toJSON();
   },
   compileContract: async (args: {}) => {
+    if (state === null) {
+      throw Error('state is null');
+    }
       let { verificationKey } = await state.Mac!.compile();
       state.vKey = verificationKey;
   },
@@ -81,158 +166,329 @@ const functions = {
         return privateKey.toBase58();
     },
   initZkappInstance: async (args: { publicKey58: string }) => {
+    if (state === null) {
+      throw Error('state is null');
+    }
     const publicKey = PublicKey.fromBase58(args.publicKey58);
-      state.zkapp = new state.Mac!(publicKey);
+    state.zkapp = new state.Mac!(publicKey);
   },
     getBlockchainLength: async (args: {}) => {
         const network_state = await Mina.getNetworkState();
         return network_state.blockchainLength.toString();
     },
-    createDeployTransaction: async (args: { privateKey58: string, deployerPrivateKey58: string }) => {
+    createDeployTransaction: async (
+      args: { privateKey58: string, deployerPrivateKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
         const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(args.privateKey58);
         const deployerPrivateKey: PrivateKey = PrivateKey.fromBase58(args.deployerPrivateKey58);
         let transactionFee = 100_000_000;
         //const _commitment: Field = state.Preimage.hash(state.preimage);
-        let verificationKey: VerificationKeyData = state.vKey;
+      let verificationKey: VerificationKeyData = castVerificationKeyDataValue(state.vKey);
         const transaction = await Mina.transaction(
             { feePayerKey: deployerPrivateKey, fee: transactionFee },
-            () => {
+          () => {
+            if (state === null) {
+              throw Error('state is null');
+            }
             AccountUpdate.fundNewAccount(deployerPrivateKey);
-            state.zkapp!.deploy({ zkappKey: zkAppPrivateKey, verificationKey });
+            state.zkapp!.deploy(
+              { zkappKey: zkAppPrivateKey, verificationKey });
             //state.zkapp!.initialize(_commitment);
         });
         state.transaction = transaction;
     },
-    createInitTransaction: async (args: { deployerPrivateKey58: string }) => {
-        const deployerPrivateKey: PrivateKey = PrivateKey.fromBase58(args.deployerPrivateKey58);
-        let transactionFee = 100_000_000;
-        const _commitment: Field = state.Preimage.hash(state.preimage);
-        const transaction = await Mina.transaction(
-            { feePayerKey: deployerPrivateKey, fee: transactionFee },
-            () => {
-                state.zkapp!.initialize(_commitment);
-            });
+    createInitTransaction: async (
+      args: { deployerPrivateKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
+      const deployerPrivateKey: PrivateKey = PrivateKey.fromBase58(
+        args.deployerPrivateKey58);
+      let transactionFee = 100_000_000;
+      const _commitment: Field = state.Preimage.hash(
+        castPreimageValue(state.preimage));
+      const transaction = await Mina.transaction(
+        { feePayerKey: deployerPrivateKey, fee: transactionFee },
+        () => {
+          if (state === null) {
+            throw Error('state is null');
+          }
+            state.zkapp!.initialize(_commitment);
+          });
         state.transaction = transaction;
     },
-    createDeployTransactionAuro: async (args: { privateKey58: string }) => {
+    createDeployTransactionAuro: async (
+      args: { privateKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
+
+      const deployerPrivateKey: PrivateKey = PrivateKey.fromBase58(
+        ""); // defining just to resolve the types, AURO deployment has to be changed completely
         const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(args.privateKey58);
-        const _commitment: Field = state.Preimage.hash(state.preimage);
-        let verificationKey: VerificationKeyData = state.vKey;
+      const _commitment: Field = state.Preimage.hash(
+        castPreimageValue(state.preimage));
+      let verificationKey: VerificationKeyData = castVerificationKeyDataValue(state.vKey);
+      let transactionFee = 100_000_000;
         const transaction = await Mina.transaction(
             { feePayerKey: deployerPrivateKey, fee: transactionFee },
-            () => {
+          () => {
+            if (state === null) {
+              throw Error('state is null');
+            }
                 state.zkapp!.deploy({ zkappKey: zkAppPrivateKey, verificationKey });
                 state.zkapp!.initialize(_commitment);
             });
         state.transaction = transaction;
     },
-    sendTransaction: async (args: {}) => {
-        const res = await state.transaction.send();
-        const hash = await res.hash();
-        return JSON.stringify({
-            'hash': hash
-        });
+  sendTransaction: async (args: {}) => {
+    if (state === null) {
+      throw Error('state is null');
+    }
+    if (state.transaction === null) {
+      throw Error('state.transaction is null');
+    }
+    const res = await state.transaction.send();
+    const hash = await res.hash();
+    return JSON.stringify({
+      'hash': hash
+    });
+  },
+  sendTransactionSign: async (
+    args: {deployerPrivateKey58: string}
+  ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
+      if (state.transaction === null) {
+        throw Error('state.transaction is null');
+      }
+      const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(
+        args.deployerPrivateKey58);
+      state.transaction.sign([feePayerPrivateKey]);
+      const res = await state.transaction.send();
+      const hash = await res.hash();
+      return JSON.stringify({
+        'hash': hash
+      });
     },
-    sendTransactionSign: async (args: {deployerPrivateKey58: string}) => {
-        const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(args.deployerPrivateKey58);
-        state.transaction.sign([feePayerPrivateKey]);
-        const res = await state.transaction.send();
-        const hash = await res.hash();
-        return JSON.stringify({
-            'hash': hash
-        });
-    },
-    createDepositTransaction: async (args: { actorPublicKey58: string, deployerPrivateKey58: string }) => {
+    createDepositTransaction: async (
+      args: { actorPublicKey58: string, deployerPrivateKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
         const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(args.deployerPrivateKey58);
         let transactionFee = 100_000_000;
         const actor: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
         const transaction = await Mina.transaction(
             { feePayerKey: feePayerPrivateKey, fee: transactionFee },
-            () => {
+          () => {
+            if (state === null) {
+              throw Error('state is null');
+            }
+            if (state.preimage === null) {
+              throw Error('Preimage is null');
+            }
                 state.zkapp!.deposit(state.preimage, actor);
         });
         state.transaction = transaction;
     },
-    createDepositTransactionAuro: async (args: { actorPublicKey58: string }) => {
+    createDepositTransactionAuro: async (
+      args: { actorPublicKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
         const actor: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
-        const transaction = await Mina.transaction(() => {
+      const transaction = await Mina.transaction(() => {
+        if (state === null) {
+          throw Error('state is null');
+        }
+        if (state.preimage === null) {
+          throw Error('Preimage is null');
+        }
             state.zkapp!.deposit(state.preimage, actor);
         });
         state.transaction = transaction;
     },
-    createWithdrawTransaction: async (args: { actorPublicKey58: string, deployerPrivateKey58: string }) => {
+    createWithdrawTransaction: async (
+      args: { actorPublicKey58: string, deployerPrivateKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
         const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(args.deployerPrivateKey58);
         let transactionFee = 100_000_000;
         const actor: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
         const transaction = await Mina.transaction(
             { feePayerKey: feePayerPrivateKey, fee: transactionFee },
-            () => {
+          () => {
+            if (state === null) {
+              throw Error('state is null');
+            }
+            if (state.preimage === null) {
+              throw Error('Preimage is null');
+            }
                 state.zkapp!.withdraw(state.preimage, actor);
             });
         state.transaction = transaction;
     },
-    createWithdrawTransactionAuro: async (args: { publicKey58: string }) => {
+    createWithdrawTransactionAuro: async (
+      args: { publicKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
         const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
-        const transaction = await Mina.transaction(() => {
+      const transaction = await Mina.transaction(() => {
+        if (state === null) {
+          throw Error('state is null');
+        }
+        if (state.preimage === null) {
+          throw Error('Preimage is null');
+        }
             state.zkapp!.withdraw(state.preimage, actor);
         });
         state.transaction = transaction;
     },
-    createSuccessTransaction: async (args: { actorPublicKey58: string, deployerPrivateKey58: string }) => {
+    createSuccessTransaction: async (
+      args: { actorPublicKey58: string, deployerPrivateKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
         const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(args.deployerPrivateKey58);
         let transactionFee = 100_000_000;
         const actor: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
         const transaction = await Mina.transaction(
             { feePayerKey: feePayerPrivateKey, fee: transactionFee },
-            () => {
+          () => {
+            if (state === null) {
+              throw Error('state is null');
+            }
+            if (state.preimage === null) {
+              throw Error('Preimage is null');
+            }
                 state.zkapp!.success(state.preimage, actor);
             });
         state.transaction = transaction;
     },
-    createSuccessTransactionAuro: async (args: { publicKey58: string }) => {
+    createSuccessTransactionAuro: async (
+      args: { publicKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
         const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
-        const transaction = await Mina.transaction(() => {
+      const transaction = await Mina.transaction(() => {
+        if (state === null) {
+          throw Error('state is null');
+        }
+        if (state.preimage === null) {
+          throw Error('Preimage is null');
+        }
             state.zkapp!.success(state.preimage, actor);
         });
         state.transaction = transaction;
     },
-    createFailureTransaction: async (args: { actorPublicKey58: string, deployerPrivateKey58: string }) => {
+    createFailureTransaction: async (
+      args: { actorPublicKey58: string, deployerPrivateKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
         const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(args.deployerPrivateKey58);
         let transactionFee = 100_000_000;
         const actor: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
         const transaction = await Mina.transaction(
             { feePayerKey: feePayerPrivateKey, fee: transactionFee },
-            () => {
+          () => {
+            if (state === null) {
+              throw Error('state is null');
+            }
+            if (state.preimage === null) {
+              throw Error('Preimage is null');
+            }
                 state.zkapp!.failure(state.preimage, actor);
             });
         state.transaction = transaction;
     },
-    createFailureTransactionAuro: async (args: { publicKey58: string }) => {
+    createFailureTransactionAuro: async (
+      args: { publicKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
         const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
-        const transaction = await Mina.transaction(() => {
+      const transaction = await Mina.transaction(() => {
+        if (state === null) {
+          throw Error('state is null');
+        }
+        if (state.preimage === null) {
+          throw Error('Preimage is null');
+        }
             state.zkapp!.failure(state.preimage, actor);
         });
         state.transaction = transaction;
     },
-    createCancelTransaction: async (args: { actorPublicKey58: string, deployerPrivateKey58: string }) => {
-        const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(args.deployerPrivateKey58);
+    createCancelTransaction: async (
+      args: { actorPublicKey58: string, deployerPrivateKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
+      if (state.preimage === null) {
+        throw Error('Preimage is null');
+      }
+        const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(
+          args.deployerPrivateKey58);
         let transactionFee = 100_000_000;
-        const actor: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
+        const actor: PublicKey = PublicKey.fromBase58(
+          args.actorPublicKey58);
         const transaction = await Mina.transaction(
             { feePayerKey: feePayerPrivateKey, fee: transactionFee },
-            () => {
-                state.zkapp!.cancel(state.preimage, actor);
-            });
-        state.transaction = transaction;
-    },
-    createCancelTransactionAuro: async (args: { publicKey58: string }) => {
-        const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
-        const transaction = await Mina.transaction(() => {
+          () => {
+            if (state === null) {
+              throw Error('state is null');
+            }
+            if (state.preimage === null) {
+              throw Error('Preimage is null');
+            }
             state.zkapp!.cancel(state.preimage, actor);
         });
         state.transaction = transaction;
     },
-    getContractState: async (args: {}) => {
+    createCancelTransactionAuro: async (
+      args: { publicKey58: string }
+    ) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
+      if (state.preimage === null) {
+        throw Error('Preimage is null');
+      }
+        const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
+      const transaction = await Mina.transaction(() => {
+        if (state === null) {
+          throw Error('state is null');
+        }
+        if (state.preimage === null) {
+          throw Error('Preimage is null');
+        }
+            state.zkapp!.cancel(state.preimage, actor);
+        });
+        state.transaction = transaction;
+    },
+  getContractState: async (args: {}) => {
+    if (state === null) {
+      throw Error('state is null');
+    }
         const automaton_state: Field = await state.zkapp!.automaton_state.get();
         const memory: Field = await state.zkapp!.memory.get();
         const actions: Bool[] = memory.toBits(3);
@@ -269,13 +525,25 @@ const functions = {
             'automaton_state': st
         });
     },
-    fromMacPack: (args: { macpack: string }) => {
+  fromMacPack: (args: { macpack: string }) => {
+    if (state === null) {
+      throw Error('state is null');
+    }
         state.preimage = state.fromMacPack(args.macpack);
     },
-    toMacPack: (args: {}) => {
-        return state.toMacPack(state.preimage);
+  toMacPack: (args: {}) => {
+    if (state === null) {
+      throw Error('state is null');
+    }
+    return state.toMacPack(castPreimageValue(state.preimage));
     },
-    getPreimageData: (args: {}) => {
+  getPreimageData: (args: {}) => {
+    if (state === null) {
+      throw Error('state is null');
+    }
+    if (state.preimage === null) {
+      throw Error('Preimage is null');
+    }
         return JSON.stringify({
             address: state.preimage.address.toBase58(),
             employer: state.preimage.employer.toBase58(),
@@ -339,6 +607,9 @@ contract_outcome_cancel_contractor: parseInt(state.preimage.cancel.payment_contr
         contract_outcome_cancel_contractor: number,
         contract_outcome_cancel_arbiter: number
     }) => {
+      if (state === null) {
+        throw Error('state is null');
+      }
         const outcome_deposited: Outcome = new state.Outcome({
             description: CircuitString.fromString(args.contract_outcome_deposit_description),
             payment_employer: UInt64.from(args.contract_outcome_deposit_employer),
@@ -383,9 +654,15 @@ contract_outcome_cancel_contractor: parseInt(state.preimage.cancel.payment_contr
             cancel: outcome_cancel});
     },
   proveTransaction: async (args: {}) => {
+    if (state === null) {
+      throw Error('state is null');
+    }
     await state.transaction!.prove();
   },
   getTransactionJSON: async (args: {}) => {
+    if (state === null) {
+      throw Error('state is null');
+    }
     return state.transaction!.toJSON();
   },
 };
@@ -404,6 +681,7 @@ export type ZkappWorkerReponse = {
   id: number,
   data: any
 }
+
 if (process.browser) {
   addEventListener('message', async (event: MessageEvent<ZkappWorkerRequest>) => {
     const returnData = await functions[event.data.fn](event.data.args);
