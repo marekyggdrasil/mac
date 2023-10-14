@@ -32,18 +32,12 @@ export default class ZkappWorkerClient {
         return PrivateKey.fromBase58(result);
     }
 
-  fetchAccount({ publicKey }: { publicKey: PublicKey }): ReturnType<typeof fetchAccount> {
-      const result = this._call('fetchAccount', { publicKey58: publicKey.toBase58() });
-    return (result as ReturnType<typeof fetchAccount>);
+    async fetchAccount({ publicKey }: { publicKey: PublicKey }): ReturnType<typeof fetchAccount> {
+    return await this._callFetchAccount('fetchAccount', { publicKey58: publicKey.toBase58() });
   }
 
   initZkappInstance(publicKey: PublicKey) {
     return this._call('initZkappInstance', { publicKey58: publicKey.toBase58() });
-  }
-
-  async getNum(): Promise<Field> {
-    const result = await this._call('getNum', {});
-    return Field.fromJSON(JSON.parse(result as string));
   }
 
     async fetchBlockchainLength(): Promise<number> {
@@ -233,7 +227,7 @@ export default class ZkappWorkerClient {
     };
   }
 
-  _call(fn: WorkerFunctions, args: any) {
+  _call(fn: WorkerFunctions, args: any): Promise<string> {
     return new Promise((resolve, reject) => {
       this.promises[this.nextId] = { resolve, reject }
 
@@ -248,4 +242,21 @@ export default class ZkappWorkerClient {
       this.nextId++;
     });
   }
+
+
+    _callFetchAccount(fn: WorkerFunctions, args: any): Promise<ReturnType<typeof fetchAccount>> {
+        return new Promise((resolve, reject) => {
+            this.promises[this.nextId] = { resolve, reject }
+
+            const message: ZkappWorkerRequest = {
+                id: this.nextId,
+                fn,
+                args,
+            };
+
+            this.worker.postMessage(message);
+
+            this.nextId++;
+        });
+    }
 }
