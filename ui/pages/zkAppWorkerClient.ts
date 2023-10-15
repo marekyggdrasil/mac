@@ -5,7 +5,7 @@ import {
     Field
 } from 'snarkyjs'
 
-import type { ZkappWorkerRequest, ZkappWorkerReponse, WorkerFunctions } from './zkappWorker';
+import type { ZkappWorkerRequest, ZkappWorkerReponse, WorkerFunctions } from './zkAppWorker';
 
 export default class ZkappWorkerClient {
 
