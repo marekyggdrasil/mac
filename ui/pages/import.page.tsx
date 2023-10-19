@@ -3,16 +3,22 @@ import Link from 'next/link';
 import { MacContextType, castContext } from '../components/AppContext';
 
 import {
-    PublicKey
+  PublicKey
 } from 'snarkyjs'
 
-async function runImport(context) {
-    let element = document.getElementById('import-macpack');
-    let macpack = (element.innerText || element.textContent);
-    console.log(macpack);
-    try {
-        await context.state.zkappWorkerClient.fromMacPack(macpack);
-        console.log('imported correctly');
+async function runImport(context: MacContextType) {
+  let element = document.getElementById('import-macpack');
+  if (element === null) {
+    throw Error('Macpack container is missing');
+  }
+  let macpack = (element.innerText || element.textContent);
+  console.log(macpack);
+  try {
+    if (macpack === null) {
+      throw Error('Macpack value is null');
+    }
+    await context.state.zkappWorkerClient.fromMacPack(macpack);
+    console.log('imported correctly');
         // get the preimage to app state for the display
         const r = await context.state.zkappWorkerClient.getPreimageData();
         console.log('preimage data');
