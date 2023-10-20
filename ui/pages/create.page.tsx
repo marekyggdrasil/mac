@@ -6,7 +6,7 @@ import { MinaValue } from '../components/highlights';
 
 const CreationSteps = () => {
   const context: MacContextType = castContext();
-  if (
+  return (
     <div><p>this is where we create a new contract</p>
       <ul className="steps">
         <li className="step step-primary">Define</li>
@@ -60,7 +60,7 @@ const CreateCases = () => {
         </article>);
 }
 
-export default function Create( {state, setState } ) {
+export default function Create() {
   const context: MacContextType = castContext();
   return <CreateCases />;
 }
