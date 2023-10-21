@@ -41,7 +41,7 @@ const CircuitCompileButton = () => {
     }
 }
 
-const currentBlock = (blockchainLength) => {
+const currentBlock = (blockchainLength: number) => {
     return "Block " + blockchainLength.toString();
 }
 

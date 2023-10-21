@@ -1,7 +1,14 @@
 import Link from 'next/link';
 import { useContext } from 'react';
 
-import { MacContextType, castContext } from './AppContext';
+import ZkappWorkerClient from '../pages/zkAppWorkerClient';
+
+import {
+  MacContextType,
+  castContext,
+  castZkAppWorkerClient
+} from './AppContext';
+
 import { MinaValue } from './highlights';
 import {
     contractDeploy,
@@ -20,7 +27,8 @@ import {
 
 export async function finalizeContract(context: MacContextType) {
   // instantiate preimage via worker and compute macpack
-  await context.state.zkappWorkerClient.definePreimage(
+  const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
+  await zkappWorkerClient.definePreimage(
     context.state.zkappPublicKey.toBase58(),
     context.state.contract_employer.toBase58(),
     context.state.contract_contractor.toBase58(),
@@ -50,19 +58,20 @@ export async function finalizeContract(context: MacContextType) {
     Math.abs(context.state.contract_outcome_cancel_employer),
     Math.abs(context.state.contract_outcome_cancel_contractor),
     Math.abs(context.state.contract_outcome_cancel_arbiter));
-    // now get its macpack
-    const macpack = await context.state.zkappWorkerClient.toMacPack();
-    context.setState({ ...context.state, loaded: true, macpack: macpack });
+  // now get its macpack
+  const macpack = await zkappWorkerClient.toMacPack();
+  context.setState({ ...context.state, loaded: true, macpack: macpack });
 }
 
 async function contractRefreshState(context: MacContextType) {
-  const contract_state = await context.state.zkappWorkerClient!.getContractState();
-    context.setState(
-        { ...context.state,
-          employerActed: contract_state['acted']['employer'],
-          contractorActed: contract_state['acted']['contractor'],
-          arbiterActed: contract_state['acted']['arbiter'],
-          automatonState: contract_state['automatonState'] });
+  const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
+  const contract_state = await zkappWorkerClient.getContractState();
+  context.setState(
+    { ...context.state,
+      employerActed: contract_state['acted']['employer'],
+      contractorActed: contract_state['acted']['contractor'],
+      arbiterActed: contract_state['acted']['arbiter'],
+      automatonState: contract_state['automatonState'] });
 
 }
 

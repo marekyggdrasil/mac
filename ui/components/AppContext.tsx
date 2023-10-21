@@ -9,7 +9,7 @@ import {
 import ZkappWorkerClient from '../pages/zkAppWorkerClient';
 
 export type MacContextStateType = {
-  zkappWorkerClient: ZkappWorkerClient,
+  zkappWorkerClient: ZkappWorkerClient | null,
   finalized: boolean,
   hasWallet: boolean,
   hasBeenSetup: boolean,
@@ -96,4 +96,11 @@ export function castContext(): MacContextType {
     throw Error('Context state is not defined');
   }
   return context;
+}
+
+export function castZkAppWorkerClient(context: MacContextType): ZkappWorkerClient {
+  if (context.state.zkappWorkerClient === null) {
+    throw Error('context.state.zkappWorkerClient is not defined, first load snarkyjs library');
+  }
+  return context.state.zkappWorkerClient;
 }

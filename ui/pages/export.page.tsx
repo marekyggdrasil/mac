@@ -1,6 +1,13 @@
 import Link from 'next/link';
 
-import { MacContextType, castContext } from '../components/AppContext';
+import ZkappWorkerClient from './zkAppWorkerClient';
+
+import {
+  MacContextType,
+  castContext,
+  castZkAppWorkerClient
+} from '../components/AppContext';
+
 import { finalizeContract } from '../components/interaction';
 
 
@@ -14,8 +21,9 @@ async function runExport(context: MacContextType) {
         if (!context.state.finalized) {
             await finalizeContract(context);
         }
-        const macpack = await context.state.zkappWorkerClient.toMacPack();
-        console.log('exported correctly');
+    const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
+    const macpack = await zkappWorkerClient.toMacPack();
+    console.log('exported correctly');
         context.setState({ ...context.state, loaded: true, finalized: true, macpack: macpack });
     } catch (e:any) {
         console.log('failed to export');

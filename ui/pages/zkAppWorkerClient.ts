@@ -145,7 +145,7 @@ export default class ZkappWorkerClient {
             deployerPrivateKey58: deployerPrivateKey.toBase58()
         });
     }
-    async createInitTransactionAuro(actor: PrivateKey, deployerPrivateKey: PrivateKey) {
+    async createInitTransactionAuro() {
         return false;
     }
 

@@ -1,6 +1,12 @@
 import Link from 'next/link';
 
-import { MacContextType, castContext } from '../components/AppContext';
+import ZkappWorkerClient from './zkAppWorkerClient';
+
+import {
+  MacContextType,
+  castContext,
+  castZkAppWorkerClient
+} from '../components/AppContext';
 
 import {
   PublicKey
@@ -11,30 +17,31 @@ async function runImport(context: MacContextType) {
   if (element === null) {
     throw Error('Macpack container is missing');
   }
+  let zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   let macpack = (element.innerText || element.textContent);
   console.log(macpack);
   try {
     if (macpack === null) {
       throw Error('Macpack value is null');
     }
-    await context.state.zkappWorkerClient.fromMacPack(macpack);
+    await zkappWorkerClient.fromMacPack(macpack);
     console.log('imported correctly');
-        // get the preimage to app state for the display
-        const r = await context.state.zkappWorkerClient.getPreimageData();
-        console.log('preimage data');
+    // get the preimage to app state for the display
+    const r = await zkappWorkerClient.getPreimageData();
+    console.log('preimage data');
         console.log(r);
         console.log(r.address);
         // context.setState({ ...context.state, loaded: true, macpack: macpack });
 
         let zkAppPublicKey: PublicKey = PublicKey.fromBase58(r.address);
-        await context.state.zkappWorkerClient.initZkappInstance(zkAppPublicKey);
-        const account = await context.state.zkappWorkerClient.fetchAccount(
-            { publicKey: zkAppPublicKey });
-        let is_deployed = false;
+    await zkappWorkerClient.initZkappInstance(zkAppPublicKey);
+    const account = await zkappWorkerClient.fetchAccount(
+      { publicKey: zkAppPublicKey });
+    let is_deployed = false;
         if (account.account !== undefined) {
             is_deployed = true;
-            const on_chain_state = await context.state.zkappWorkerClient.getContractState();
-            console.log(on_chain_state);
+          const on_chain_state = await zkappWorkerClient.getContractState();
+          console.log(on_chain_state);
         }
 
         // set the state
