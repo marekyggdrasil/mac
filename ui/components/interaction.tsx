@@ -25,6 +25,17 @@ import {
     PublicKey
 } from 'snarkyjs';
 
+interface ContractStateActedType {
+  employer: boolean;
+  contractor: boolean;
+  arbiter: boolean;
+}
+
+interface ContractStateType {
+  acted: ContractStateActedType;
+  automaton_state: string;
+}
+
 export async function finalizeContract(context: MacContextType) {
   // instantiate preimage via worker and compute macpack
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
@@ -66,12 +77,13 @@ export async function finalizeContract(context: MacContextType) {
 async function contractRefreshState(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   const contract_state = await zkappWorkerClient.getContractState();
+  const contract_state_parsed = JSON.parse(contract_state) as ContractStateType;
   context.setState(
     { ...context.state,
-      employerActed: contract_state['acted']['employer'],
-      contractorActed: contract_state['acted']['contractor'],
-      arbiterActed: contract_state['acted']['arbiter'],
-      automatonState: contract_state['automatonState'] });
+      employerActed: contract_state_parsed.acted.employer,
+      contractorActed: contract_state_parsed.acted.contractor,
+      arbiterActed: contract_state_parsed.acted.arbiter,
+      automatonState: contract_state_parsed.automaton_state });
 
 }
 
