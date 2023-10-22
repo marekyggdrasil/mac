@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { MacContextType, castContext } from './AppContext';
 import { MinaValue } from './highlights';
 
@@ -16,7 +18,7 @@ const ConnectedAddress = () => {
 }
 
 
-const Layout = ( {children} ) => {
+const Layout = ({ children }: { children: ReactNode }) => {
   const context: MacContextType = castContext();
   return (
     <div>

@@ -34,8 +34,6 @@ export const InteractionModeUIForm = () => {
     <form onSubmit={
     async (event) => {
       event.preventDefault();
-      //const base58sk = event.target.namedItem('base58sk') as HTMLInputElement;
-      // const private_key = (event.target as HTMLInputElement)?.base58sk.value;
       const private_key = (event.target as any).base58sk.value;
       try {
         PrivateKey.fromBase58(private_key);
