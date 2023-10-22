@@ -30,28 +30,39 @@ export const InteractionModeUIButton = () => {
 
 export const InteractionModeUIForm = () => {
   const context: MacContextType = castContext();
-  return (<form onSubmit={async (event) => {
-    event.preventDefault();
-    const private_key = event.target.base58sk.value;
-    try {
-      PrivateKey.fromBase58(private_key);
-    } catch (e:any) {
-      return alert('Invalid private key');
-    }
-    const actor_sk = PrivateKey.fromBase58(private_key);
-    const actor_pk = actor_sk.toPublicKey();
-    await context.setState({
-      ...context.state,
-      actorPrivateKey: actor_sk,
-      actorPublicKey: actor_pk
-    });
-  }}>
-    <div className="form-control">
-      <label className="input-group">
-        <InteractionModeUIButton/><input type="password" name="base58sk" className="input input-bordered w-full max-w-xs" /><button type="submit" className="btn btn-active">Update Private Key</button>
-      </label>
-    </div>
-  </form>);
+  return (
+    <form onSubmit={
+    async (event) => {
+      event.preventDefault();
+      //const base58sk = event.target.namedItem('base58sk') as HTMLInputElement;
+      // const private_key = (event.target as HTMLInputElement)?.base58sk.value;
+      const private_key = (event.target as any).base58sk.value;
+      try {
+        PrivateKey.fromBase58(private_key);
+      } catch (e:any) {
+        return alert('Invalid private key');
+      }
+      const actor_sk = PrivateKey.fromBase58(private_key);
+      const actor_pk = actor_sk.toPublicKey();
+      await context.setState({
+        ...context.state,
+        actorPrivateKey: actor_sk,
+        actorPublicKey: actor_pk
+      });
+    }}>
+      <div className="form-control">
+        <label className="input-group">
+          <InteractionModeUIButton/>
+          <input
+            type="password"
+            name="base58sk"
+            className="input input-bordered w-full max-w-xs" />
+          <button
+            type="submit"
+            className="btn btn-active">Update Private Key</button>
+        </label>
+      </div>
+    </form>);
 }
 
 export const InteractionModeUI = () => {
