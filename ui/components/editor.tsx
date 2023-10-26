@@ -14,14 +14,22 @@ async function generateKeyPair(context: MacContextType) {
 
 const KeyGenerator = () => {
   const context: MacContextType = castContext();
-  if (!context.state.zkappPublicKeyCandidate) {
+  if (!context.state.zkappPublicKeyCandidate.value) {
     return <p>Your MAC! contract does not have a private key. Click on <button className="btn" onClick={async (event) => {
       event.preventDefault();
       await generateKeyPair(context);
       return;
     }}>Generate</button> to prepare a new key pair.</p>;
     }
-    return <p>Your MAC! contract public key and address is <MinaValue>{ context.state.zkappPublicKeyCandidate.toBase58() }</MinaValue> and corresponding private key is <MinaSecretValue>{ context.state.zkappPrivateKeyCandidate.toBase58() }</MinaSecretValue></p>;
+  let zkapp_pk = '';
+  if (context.state.zkappPublicKeyCandidate !== null) {
+    zkapp_pk = context.state.zkappPublicKeyCandidate.toBase58();
+  }
+  let zkapp_sk = '';
+  if (context.state.zkappPrivateKeyCandidate !== null) {
+    zkapp_sk = context.state.zkappPrivateKeyCandidate.toBase58();
+  }
+  return <p>Your MAC! contract public key and address is <MinaValue>{ zkapp_pk }</MinaValue> and corresponding private key is <MinaSecretValue>{ zkapp_sk }</MinaSecretValue></p>;
 }
 
 const Editor = () => {

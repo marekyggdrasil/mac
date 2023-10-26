@@ -16,7 +16,7 @@ export type MacContextStateType = {
   usingAuro: boolean,
   accountExists: boolean,
   tx_command: string,
-  currentNum: Field,
+  currentNum: Field | null,
   lastTxId: string,
   zkappPrivateKeyCandidate: PrivateKey,
   zkappPublicKeyCandidate: PublicKey,
