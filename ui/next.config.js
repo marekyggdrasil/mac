@@ -34,14 +34,14 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  basePath: process.env.NODE_ENV === 'production' ? '/mac' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
-    assetPrefix: process.env.NODE_ENV === 'production' ? '/mac/' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
+    basePath: '', //process.env.NODE_ENV === 'production' ? '/mac' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
+    assetPrefix: '', //process.env.NODE_ENV === 'production' ? '/mac/' : undefined, // update if your repo name changes for 'npm run deploy' to work successfully
     typescript: {
         // !! WARN !!
         // Dangerously allow production builds to successfully complete even if
         // your project has type errors.
         // !! WARN !!
-        ignoreBuildErrors: true,
+        ignoreBuildErrors: false,
     },
 };
 

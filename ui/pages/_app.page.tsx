@@ -101,7 +101,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     hasBeenSetup: false,
     usingAuro: true,
     accountExists: false,
-    currentNum: new Field(-1),
+    currentNum: null,
     lastTxId: '',
     zkappPrivateKeyCandidate: new PrivateKey(),
     zkappPublicKeyCandidate: new PublicKey(),
