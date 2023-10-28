@@ -224,12 +224,15 @@ export class Mac extends SmartContract {
     // determine the amount of the withdrawal
     const current_outcome: Outcome = Circuit.if(
       is_state_canceled_early,
+      Outcome,
       contract_preimage.deposited,
       Circuit.if(
         is_state_canceled,
+        Outcome,
         contract_preimage.cancel,
         Circuit.if(
           is_state_succeeded,
+          Outcome,
           contract_preimage.success,
           contract_preimage.failure // only option left...
         )
