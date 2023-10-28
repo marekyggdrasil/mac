@@ -9,7 +9,7 @@ import {
   PublicKey,
   UInt64,
   UInt32,
-} from 'snarkyjs';
+} from 'o1js';
 
 import { Participant, Outcome, Preimage } from './preimage';
 

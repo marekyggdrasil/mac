@@ -6,7 +6,7 @@ import {
   method,
   DeployArgs,
   Permissions,
-} from 'snarkyjs';
+} from 'o1js';
 
 /**
  * Basic Example

@@ -9,7 +9,7 @@ import {
   PublicKey,
   UInt64,
   Poseidon,
-} from 'snarkyjs';
+} from 'o1js';
 
 import { Outcome, Preimage } from './strpreim';
 import { makeDummyPreimage } from './strdummy';

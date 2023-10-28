@@ -10,7 +10,7 @@ import {
   UInt64,
   UInt32,
   Bool,
-} from 'snarkyjs';
+} from 'o1js';
 
 import bs58 from 'bs58';
 import byteify from 'byteify';

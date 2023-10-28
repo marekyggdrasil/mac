@@ -1,7 +1,7 @@
 import bs58 from 'bs58';
 import byteify from 'byteify';
 
-import { Field, CircuitString, PublicKey, UInt64, UInt32 } from 'snarkyjs';
+import { Field, CircuitString, PublicKey, UInt64, UInt32 } from 'o1js';
 
 import { Outcome, Preimage } from './strpreim';
 

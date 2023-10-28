@@ -7,7 +7,7 @@ import {
   PrivateKey,
   PublicKey,
   AccountUpdate,
-} from 'snarkyjs';
+} from 'o1js';
 
 /*
  * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace
@@ -59,7 +59,7 @@ describe('Add', () => {
     const zkAppInstance = new Add(zkAppAddress);
     await localDeploy(zkAppInstance, zkAppPrivateKey, deployerAccount);
     const num = zkAppInstance.num.get();
-    expect(num).toEqual(Field.one);
+    expect(num).toEqual(new Field(1));
   });
 
   it('correctly updates the num state on the `Add` smart contract', async () => {

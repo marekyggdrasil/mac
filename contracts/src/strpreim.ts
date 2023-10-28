@@ -7,7 +7,7 @@ import {
   UInt32,
   Bool,
   Struct,
-} from 'snarkyjs';
+} from 'o1js';
 
 export class Outcome extends Struct({
   description: CircuitString,

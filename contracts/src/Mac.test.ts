@@ -11,7 +11,7 @@ import {
   UInt32,
   UInt64,
   AccountUpdate,
-} from 'snarkyjs';
+} from 'o1js';
 
 //import { Participant, Outcome, Preimage } from './preimage';
 //import { makeDummyPreimage } from './dummy';

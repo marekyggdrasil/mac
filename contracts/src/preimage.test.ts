@@ -8,7 +8,7 @@ import {
   PrivateKey,
   PublicKey,
   UInt64,
-} from 'snarkyjs';
+} from 'o1js';
 
 import { Participant, Outcome, Preimage } from './preimage';
 import { makeDummyPreimage } from './dummy';
