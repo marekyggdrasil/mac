@@ -1,5 +1,12 @@
 import { Add } from './Add';
-import { Field, Mina, PrivateKey, PublicKey, AccountUpdate } from 'o1js';
+import {
+  shutdown,
+  Field,
+  Mina,
+  PrivateKey,
+  PublicKey,
+  AccountUpdate,
+} from 'o1js';
 
 /*
  * This file specifies how to test the `Add` example smart contract. It is safe to delete this file and replace
@@ -35,6 +42,10 @@ describe('Add', () => {
     zkApp = new Add(zkAppAddress);
   });
 
+  afterAll(async () => {
+    setTimeout(shutdown, 0);
+  });
+
   async function localDeploy() {
     const txn = await Mina.transaction(deployerAccount, () => {
       AccountUpdate.fundNewAccount(deployerAccount);
@@ -63,5 +74,5 @@ describe('Add', () => {
 
     const updatedNum = zkApp.num.get();
     expect(updatedNum).toEqual(Field(3));
-  });
+  }, 50000);
 });
