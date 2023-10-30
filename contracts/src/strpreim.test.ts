@@ -46,6 +46,7 @@ describe('Preimage tests', () => {
     const arbiter_sk: PrivateKey = PrivateKey.fromBase58(
       'EKECauk9amNhhRHWSQtQRveHf4bF9WDbSbe656V9TQ8jRPJJdSyS'
     );
+
     [
       employer,
       contractor,
@@ -58,7 +59,7 @@ describe('Preimage tests', () => {
     ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk, zkAppAddress);
 
     commitment = Field(
-      '12517600383836778729745374021447463418614436683236389184660408025482332054289'
+      '3262985893969862402364762079656198465695636832664339061743215480471813876993'
     );
   });
 
@@ -67,7 +68,7 @@ describe('Preimage tests', () => {
   });
 
   it('should compute hash commitment of a Preimage', () => {
-    expect(Preimage.hash(mac_contract)).toEqual(commitment);
+    Preimage.hash(mac_contract).assertEquals(commitment);
   });
 
   it('should correctly import/export a whole contract using macpacs', () => {
