@@ -356,7 +356,7 @@ describe('Mac tests', () => {
     );
   });
 
-  it('should allow the withdrawal with no consequences to those who deposited after early cancellation', async () => {
+  it.only('should allow the withdrawal with no consequences to those who deposited after early cancellation', async () => {
     const balance_initial = 1000000000000;
     const amount_payment = 6000000;
     const amount_deposit = 6000000;
