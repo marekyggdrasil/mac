@@ -8,6 +8,7 @@ import {
   CircuitString,
   PrivateKey,
   PublicKey,
+  Provable,
   UInt32,
   UInt64,
   AccountUpdate,
@@ -31,13 +32,15 @@ async function deposit(
   zkAppInstance: Mac,
   actor_sk: PrivateKey
 ) {
-  const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_sk, () => {
-    zkAppInstance.deposit(mac_contract, actor_pk);
+  Provable.asProver(async () => {
+    const actor_pk: PublicKey = actor_sk.toPublicKey();
+    const tx = await Mina.transaction(actor_sk, () => {
+      zkAppInstance.deposit(mac_contract, actor_pk);
+    });
+    await tx.prove();
+    await tx.sign([actor_sk]);
+    await tx.send();
   });
-  await tx.prove();
-  await tx.sign([actor_sk]);
-  await tx.send();
 }
 
 async function withdraw(
@@ -45,13 +48,15 @@ async function withdraw(
   zkAppInstance: Mac,
   actor_sk: PrivateKey
 ) {
-  const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_sk, () => {
-    zkAppInstance.withdraw(mac_contract, actor_pk);
+  Provable.asProver(async () => {
+    const actor_pk: PublicKey = actor_sk.toPublicKey();
+    const tx = await Mina.transaction(actor_sk, () => {
+      zkAppInstance.withdraw(mac_contract, actor_pk);
+    });
+    await tx.prove();
+    await tx.sign([actor_sk]);
+    await tx.send();
   });
-  await tx.prove();
-  await tx.sign([actor_sk]);
-  await tx.send();
 }
 
 async function success(
@@ -59,13 +64,15 @@ async function success(
   zkAppInstance: Mac,
   actor_sk: PrivateKey
 ) {
-  const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_sk, () => {
-    zkAppInstance.success(mac_contract, actor_pk);
+  Provable.asProver(async () => {
+    const actor_pk: PublicKey = actor_sk.toPublicKey();
+    const tx = await Mina.transaction(actor_sk, () => {
+      zkAppInstance.success(mac_contract, actor_pk);
+    });
+    await tx.prove();
+    await tx.sign([actor_sk]);
+    await tx.send();
   });
-  await tx.prove();
-  await tx.sign([actor_sk]);
-  await tx.send();
 }
 
 async function failure(
@@ -73,13 +80,15 @@ async function failure(
   zkAppInstance: Mac,
   actor_sk: PrivateKey
 ) {
-  const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_sk, () => {
-    zkAppInstance.failure(mac_contract, actor_pk);
+  Provable.asProver(async () => {
+    const actor_pk: PublicKey = actor_sk.toPublicKey();
+    const tx = await Mina.transaction(actor_sk, () => {
+      zkAppInstance.failure(mac_contract, actor_pk);
+    });
+    await tx.prove();
+    await tx.sign([actor_sk]);
+    await tx.send();
   });
-  await tx.prove();
-  await tx.sign([actor_sk]);
-  await tx.send();
 }
 
 async function cancel(
@@ -87,13 +96,15 @@ async function cancel(
   zkAppInstance: Mac,
   actor_sk: PrivateKey
 ) {
-  const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_sk, () => {
-    zkAppInstance.cancel(mac_contract, actor_pk);
+  Provable.asProver(async () => {
+    const actor_pk: PublicKey = actor_sk.toPublicKey();
+    const tx = await Mina.transaction(actor_sk, () => {
+      zkAppInstance.cancel(mac_contract, actor_pk);
+    });
+    await tx.prove();
+    await tx.sign([actor_sk]);
+    await tx.send();
   });
-  await tx.prove();
-  await tx.sign([actor_sk]);
-  await tx.send();
 }
 
 function assertBalance(keys: PublicKey[], balances: number[]) {
@@ -111,20 +122,22 @@ async function localDeploy(
   contractor_sk: PrivateKey,
   arbiter_sk: PrivateKey
 ) {
-  const tx_deploy = await Mina.transaction(deployerAccount, () => {
-    AccountUpdate.fundNewAccount(deployerAccount);
-    zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
-  });
-  await tx_deploy.prove();
-  await tx_deploy.sign([zkAppPrivateKey]);
-  await tx_deploy.send();
+  Provable.asProver(async () => {
+    const tx_deploy = await Mina.transaction(deployerAccount, () => {
+      AccountUpdate.fundNewAccount(deployerAccount);
+      zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
+    });
+    await tx_deploy.prove();
+    await tx_deploy.sign([zkAppPrivateKey]);
+    await tx_deploy.send();
 
-  const tx_init = await Mina.transaction(deployerAccount, () => {
-    zkAppInstance.initialize(Preimage.hash(mac_contract));
+    const tx_init = await Mina.transaction(deployerAccount, () => {
+      zkAppInstance.initialize(Preimage.hash(mac_contract));
+    });
+    await tx_init.prove();
+    await tx_init.sign([zkAppPrivateKey]);
+    await tx_init.send();
   });
-  await tx_init.prove();
-  await tx_init.sign([zkAppPrivateKey]);
-  await tx_init.send();
 }
 
 describe('Mac tests', () => {
@@ -151,10 +164,12 @@ describe('Mac tests', () => {
 
   let local: ReturnType<typeof Mina.LocalBlockchain>;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     await isReady;
     await Mac.compile();
+  });
 
+  beforeEach(async () => {
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
 
