@@ -124,7 +124,7 @@ export class Mac extends SmartContract {
     );
 
     // transfer the funds
-    const payerUpdate = AccountUpdate.create(actor);
+    const payerUpdate = AccountUpdate.createSigned(actor);
     payerUpdate.send({ to: this.address, amount: amount });
 
     // update the memory
