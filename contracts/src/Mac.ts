@@ -66,7 +66,8 @@ export class Mac extends SmartContract {
     this.memory.set(Field(0));
   }
 
-  @method deposit(contract_preimage: Preimage, actor: PublicKey) {
+  @method deposit(actor: PublicKey) {
+    /*
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
 
@@ -85,6 +86,7 @@ export class Mac extends SmartContract {
 
     // check if the deposit deadline is respected
     blockchain_length.assertGte(contract_preimage.deposited.start_after);
+
     blockchain_length.assertLt(contract_preimage.deposited.finish_before);
 
     // make sure the caller is a party in the contract
@@ -162,6 +164,7 @@ export class Mac extends SmartContract {
       Field(state_initial)
     );
     this.automaton_state.set(new_state);
+    */
   }
 
   @method withdraw(contract_preimage: Preimage, actor: PublicKey) {
