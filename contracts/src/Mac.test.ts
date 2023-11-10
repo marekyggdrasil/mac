@@ -102,7 +102,7 @@ function assertBalance(keys: PublicKey[], balances: number[]) {
     Mina.getBalance(keys[i]).assertEquals(UInt64.from(balances[i]));
   }
 }
-
+/*
 async function localDeploy(
   zkAppInstance: Mac,
   zkAppPrivateKey: PrivateKey,
@@ -113,12 +113,12 @@ async function localDeploy(
   arbiter_sk: PrivateKey
 ) {
   Provable.asProver(async () => {
-    const tx_deploy = await Mina.transaction(deployerAccount, () => {
-      AccountUpdate.fundNewAccount(deployerAccount);
+    const tx_deploy = await Mina.transaction(deployerAccount.toPublicKey(), () => {
+      AccountUpdate.fundNewAccount(deployerAccount.toPublicKey());
       zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
     });
     await tx_deploy.prove();
-    await tx_deploy.sign([zkAppPrivateKey]);
+    await tx_deploy.sign([zkAppPrivateKey, deployerAccount]);
     await tx_deploy.send();
 
     const tx_init = await Mina.transaction(deployerAccount, () => {
@@ -129,6 +129,7 @@ async function localDeploy(
     await tx_init.send();
   });
 }
+*/
 
 describe('Mac tests', () => {
   let employer: PublicKey,
@@ -176,6 +177,19 @@ describe('Mac tests', () => {
     contractor_pk = contractor_sk.toPublicKey();
     arbiter_pk = arbiter_sk.toPublicKey();
 
+    zkAppInstance = new Mac(zkAppAddress);
+    const tx_deploy = await Mina.transaction(
+      deployerAccount.toPublicKey(),
+      () => {
+        AccountUpdate.fundNewAccount(deployerAccount.toPublicKey());
+        zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
+      }
+    );
+    await tx_deploy.prove();
+    tx_deploy.sign([zkAppPrivateKey, deployerAccount]);
+    await tx_deploy.send();
+
+    /*
     [
       employer,
       contractor,
@@ -198,6 +212,7 @@ describe('Mac tests', () => {
       contractor_sk,
       arbiter_sk
     );
+    */
   });
 
   afterAll(async () => {
