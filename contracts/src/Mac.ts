@@ -66,7 +66,7 @@ export class Mac extends SmartContract {
     this.memory.set(Field(0));
   }
 
-  @method deposit(actor: PublicKey) {
+  @method deposit(contract_preimage: Preimage, actor: PublicKey) {
     /*
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
