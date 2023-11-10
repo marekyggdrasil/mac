@@ -1,5 +1,5 @@
 import bs58 from 'bs58';
-import byteify from 'byteify';
+import * as byteify from 'byteify';
 
 import { Field, CircuitString, PublicKey, UInt64, UInt32 } from 'o1js';
 

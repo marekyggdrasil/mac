@@ -13,7 +13,7 @@ import {
 } from 'o1js';
 
 import bs58 from 'bs58';
-import byteify from 'byteify';
+import * as byteify from 'byteify';
 
 function Uint8ArrayConcat(arrays: Uint8Array[]): Uint8Array {
   let t: number[] = [];
