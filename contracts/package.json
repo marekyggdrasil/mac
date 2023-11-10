@@ -56,14 +56,7 @@
     "testEnvironment": "node",
     "slowTestThreshold": 1500,
     "testTimeout": 10800000,
-    "verbose": true,
-    "roots": [
-      "tests",
-      "experimental"
-    ],
-    "setupFilesAfterEnv": [
-      "./jest-config.ts"
-    ]
+    "verbose": true
   },
   "packageManager": "yarn@3.6.4"
 }
