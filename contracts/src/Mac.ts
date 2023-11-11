@@ -1,39 +1,41 @@
 import {
-  Field,
-  Bool,
-  Circuit,
+  //Field,
+  //Bool,
+  //Circuit,
   SmartContract,
-  state,
-  State,
+  //state,
+  //State,
   method,
   DeployArgs,
   Permissions,
-  PrivateKey,
+  //PrivateKey,
   PublicKey,
-  UInt32,
+  //UInt32,
   UInt64,
   AccountUpdate,
 } from 'o1js';
 
-import { Preimage, Outcome } from './strpreim';
+// import { Preimage, Outcome } from './strpreim';
 
+/*
 const state_initial: number = 0;
 const state_deposited: number = 1;
 const state_canceled_early: number = 2;
 const state_canceled: number = 3;
 const state_succeeded: number = 4;
 const state_failed: number = 5;
+*/
 
 export class Mac extends SmartContract {
   // on-chain state is public
-  @state(Field) commitment = State<Field>();
+  //@state(Field) commitment = State<Field>();
 
   // 0 - initial
   // 1 - everyone deposited
   // 2 - someone decided to cancel
   // 3 - contract succeeded
   // 4 - contract failed
-  @state(Field) automaton_state = State<Field>();
+  //@state(Field) automaton_state = State<Field>();
 
   // E - employer
   // C - contractor
@@ -48,7 +50,7 @@ export class Mac extends SmartContract {
   // 101 - 5
   // 110 - 6
   // 111 - 7
-  @state(Field) memory = State<Field>();
+  //@state(Field) memory = State<Field>();
   // ...and method arguments are private, beautiful, right?
 
   deploy(args: DeployArgs) {
@@ -60,14 +62,24 @@ export class Mac extends SmartContract {
     });
   }
 
+  /*
   @method initialize(commitment: Field) {
     this.commitment.set(commitment);
     this.automaton_state.set(Field(0));
     this.memory.set(Field(0));
   }
+  */
 
+  @method simpledeposit(user: PublicKey) {
+    // add your deposit logic circuit here
+    // that will adjust the amount
+
+    const payerUpdate = AccountUpdate.createSigned(user);
+    payerUpdate.send({ to: this.address, amount: UInt64.from(1000000) });
+  }
+
+  /*
   @method deposit(contract_preimage: Preimage, actor: PublicKey) {
-    /*
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
 
@@ -86,7 +98,6 @@ export class Mac extends SmartContract {
 
     // check if the deposit deadline is respected
     blockchain_length.assertGte(contract_preimage.deposited.start_after);
-
     blockchain_length.assertLt(contract_preimage.deposited.finish_before);
 
     // make sure the caller is a party in the contract
@@ -124,10 +135,12 @@ export class Mac extends SmartContract {
         )
       )
     );
+    // worked until here
 
     // transfer the funds
     const payerUpdate = AccountUpdate.createSigned(actor);
-    payerUpdate.send({ to: this.address, amount: amount });
+    payerUpdate.send({ to: this.address, amount: UInt64.from(0) });
+    // payerUpdate.send({ to: this.address, amount: amount });
 
     // update the memory
     actions[2] = Circuit.if(
@@ -164,7 +177,6 @@ export class Mac extends SmartContract {
       Field(state_initial)
     );
     this.automaton_state.set(new_state);
-    */
   }
 
   @method withdraw(contract_preimage: Preimage, actor: PublicKey) {
@@ -421,4 +433,5 @@ export class Mac extends SmartContract {
     const next_memory: Field = Circuit.if(is_within_deadline, Field(0), memory);
     this.memory.set(next_memory);
   }
+  */
 }

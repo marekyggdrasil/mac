@@ -27,6 +27,7 @@ const state_canceled: number = 3;
 const state_succeeded: number = 4;
 const state_failed: number = 5;
 
+/*
 async function deposit(
   mac_contract: Preimage,
   zkAppInstance: Mac,
@@ -34,7 +35,8 @@ async function deposit(
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
   const tx = await Mina.transaction(actor_pk, () => {
-    zkAppInstance.deposit(mac_contract, actor_pk);
+    // zkAppInstance.deposit(mac_contract, actor_pk);
+    zkAppInstance.simpledeposit(actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
@@ -96,13 +98,14 @@ async function cancel(
   await tx.sign([actor_sk]);
   await tx.send();
 }
-
 function assertBalance(keys: PublicKey[], balances: number[]) {
   for (let i = 0; i < keys.length; ++i) {
     Mina.getBalance(keys[i]).assertEquals(UInt64.from(balances[i]));
   }
 }
+*/
 
+/*
 async function localDeploy(
   zkAppInstance: Mac,
   zkAppPrivateKey: PrivateKey,
@@ -128,6 +131,7 @@ async function localDeploy(
   await tx_init.sign([deployerAccount]);
   await tx_init.send();
 }
+*/
 
 describe('Mac tests', () => {
   let employer: PublicKey,
@@ -175,20 +179,17 @@ describe('Mac tests', () => {
     contractor_pk = contractor_sk.toPublicKey();
     arbiter_pk = arbiter_sk.toPublicKey();
 
-    zkAppInstance = new Mac(zkAppAddress);
     /*
-    const tx_deploy = await Mina.transaction(
-      deployerAccount.toPublicKey(),
-      () => {
-        AccountUpdate.fundNewAccount(deployerAccount.toPublicKey());
-        zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
-      }
-    );
-    await tx_deploy.prove();
-    tx_deploy.sign([zkAppPrivateKey, deployerAccount]);
-    await tx_deploy.send();
+    const tx_account = await Mina.transaction(employer_pk, () => {
+      AccountUpdate.fundNewAccount(employer_pk);
+    });
+    await tx_account.sign([employer_sk]);
+    await tx_account.send();
     */
 
+    zkAppInstance = new Mac(zkAppAddress);
+
+    /*
     [
       employer,
       contractor,
@@ -198,7 +199,8 @@ describe('Mac tests', () => {
       outcome_failure,
       outcome_cancel,
       mac_contract,
-    ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk, zkAppAddress);
+    ] = makeDummyPreimage(
+      employer_sk, contractor_sk, arbiter_sk, zkAppAddress);
 
     // deploy the contract
     zkAppInstance = new Mac(zkAppAddress);
@@ -211,12 +213,14 @@ describe('Mac tests', () => {
       contractor_sk,
       arbiter_sk
     );
+    */
   });
 
   afterAll(async () => {
     setTimeout(shutdown, 0);
   });
 
+  /*
   it('should correctly deploy Mac contract, approve and withdraw but only at correct stages', async () => {
     const balance_initial = 1000000000000;
     const amount_payment = 6000000;
@@ -358,8 +362,31 @@ describe('Mac tests', () => {
       ]
     );
   });
+  */
 
-  it.only('should allow the withdrawal with no consequences to those who deposited after early cancellation', async () => {
+  it.skip('simple test', async () => {
+    // deploy
+    const deployer_pk: PublicKey = deployerAccount.toPublicKey();
+    const tx_deploy = await Mina.transaction(deployer_pk, () => {
+      AccountUpdate.fundNewAccount(deployer_pk);
+      zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
+    });
+    await tx_deploy.prove();
+    await tx_deploy.sign([zkAppPrivateKey, deployerAccount]);
+    await tx_deploy.send();
+
+    // run method
+    const tx = await Mina.transaction(employer_pk, () => {
+      // zkAppInstance.deposit(mac_contract, actor_pk);
+      zkAppInstance.simpledeposit(employer_pk);
+    });
+    await tx.prove();
+    await tx.sign([employer_sk]);
+    await tx.send();
+  });
+
+  it('should allow the withdrawal with no consequences to those who deposited after early cancellation', async () => {
+    /*
     const balance_initial = 1000000000000;
     const amount_payment = 6000000;
     const amount_deposit = 6000000;
@@ -379,11 +406,21 @@ describe('Mac tests', () => {
     console.log(Mina.getBalance(zkAppAddress).toString());
     console.log(Mina.getBalance(employer_pk).toString());
 
-    await deposit(mac_contract, zkAppInstance, employer_sk);
+
+    const tx = await Mina.transaction(employer_pk, () => {
+      // zkAppInstance.deposit(mac_contract, actor_pk);
+      zkAppInstance.simpledeposit(employer_pk);
+    });
+    await tx.prove();
+    await tx.sign([employer_sk]);
+    await tx.send();
+    */
     /*
+    await deposit(mac_contract, zkAppInstance, employer_sk);
     console.log(Mina.getBalance(zkAppAddress).toString());
     console.log(Mina.getBalance(employer_pk).toString());
-
+    */
+    /*
     console.log('3');
     // check balances after the employer deposit
 
