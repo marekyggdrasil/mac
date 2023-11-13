@@ -364,7 +364,7 @@ describe('Mac tests', () => {
   });
   */
 
-  it.skip('simple test', async () => {
+  it('simple test', async () => {
     // deploy
     const deployer_pk: PublicKey = deployerAccount.toPublicKey();
     const tx_deploy = await Mina.transaction(deployer_pk, () => {
@@ -385,7 +385,7 @@ describe('Mac tests', () => {
     await tx.send();
   });
 
-  it('should allow the withdrawal with no consequences to those who deposited after early cancellation', async () => {
+  it.skip('should allow the withdrawal with no consequences to those who deposited after early cancellation', async () => {
     /*
     const balance_initial = 1000000000000;
     const amount_payment = 6000000;
