@@ -441,10 +441,10 @@ describe('Mac tests', () => {
 
     console.log('7');
     // now we test if everyone who deposited can withdraw what has been deposited
-    /*
     // let the contractor do the withdrawal
     await withdraw(mac_contract, zkAppInstance, contractor_sk);
 
+    /*
     console.log('8');
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
