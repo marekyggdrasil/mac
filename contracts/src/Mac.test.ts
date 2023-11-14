@@ -444,7 +444,6 @@ describe('Mac tests', () => {
     // let the contractor do the withdrawal
     await withdraw(mac_contract, zkAppInstance, contractor_sk);
 
-    /*
     console.log('8');
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
@@ -474,6 +473,5 @@ describe('Mac tests', () => {
       [0, balance_initial, balance_initial, balance_initial]
     );
     console.log('12');
-    */
   });
 });
