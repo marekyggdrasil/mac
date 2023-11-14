@@ -357,27 +357,6 @@ describe('Mac tests', () => {
   });
   */
 
-  it.skip('simple test', async () => {
-    // deploy
-    const deployer_pk: PublicKey = deployerAccount.toPublicKey();
-    const tx_deploy = await Mina.transaction(deployer_pk, () => {
-      AccountUpdate.fundNewAccount(deployer_pk);
-      zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
-    });
-    await tx_deploy.prove();
-    await tx_deploy.sign([zkAppPrivateKey, deployerAccount]);
-    await tx_deploy.send();
-
-    // run method
-    const tx = await Mina.transaction(employer_pk, () => {
-      // zkAppInstance.deposit(mac_contract, actor_pk);
-      zkAppInstance.simpledeposit(employer_pk);
-    });
-    await tx.prove();
-    await tx.sign([employer_sk]);
-    await tx.send();
-  });
-
   it('should allow the withdrawal with no consequences to those who deposited after early cancellation', async () => {
     const balance_initial = 1000000000000;
     const amount_payment = 6000000;
