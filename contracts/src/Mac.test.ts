@@ -400,18 +400,20 @@ describe('Mac tests', () => {
     console.log(Mina.getBalance(zkAppAddress).toString());
     console.log(Mina.getBalance(employer_pk).toString());
 
+    /*
     const tx = await Mina.transaction(employer_pk, () => {
-      // zkAppInstance.deposit(mac_contract, actor_pk);
-      zkAppInstance.simpledeposit(employer_pk);
+      zkAppInstance.deposit(mac_contract, employer_pk);
+      // zkAppInstance.simpledeposit(employer_pk);
     });
     await tx.prove();
     await tx.sign([employer_sk]);
     await tx.send();
-    /*
+    */
+
     await deposit(mac_contract, zkAppInstance, employer_sk);
     console.log(Mina.getBalance(zkAppAddress).toString());
     console.log(Mina.getBalance(employer_pk).toString());
-    */
+
     /*
     console.log('3');
     // check balances after the employer deposit
