@@ -66,15 +66,6 @@ export class Mac extends SmartContract {
     this.memory.set(Field(0));
   }
 
-  @method simpledeposit(user: PublicKey) {
-    // add your deposit logic circuit here
-    // that will adjust the amount
-
-    const payerUpdate = AccountUpdate.createSigned(user);
-    const recipientUpdate = AccountUpdate.create(this.address);
-    payerUpdate.send({ to: recipientUpdate, amount: UInt64.from(1000000) });
-  }
-
   @method deposit(contract_preimage: Preimage, actor: PublicKey) {
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
@@ -175,7 +166,6 @@ export class Mac extends SmartContract {
     this.automaton_state.set(new_state);
   }
 
-  /*
   @method withdraw(contract_preimage: Preimage, actor: PublicKey) {
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
@@ -430,5 +420,4 @@ export class Mac extends SmartContract {
     const next_memory: Field = Circuit.if(is_within_deadline, Field(0), memory);
     this.memory.set(next_memory);
   }
-  */
 }
