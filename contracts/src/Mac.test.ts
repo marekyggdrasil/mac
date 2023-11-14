@@ -41,14 +41,13 @@ async function deposit(
   await tx.send();
 }
 
-/*
 async function withdraw(
   mac_contract: Preimage,
   zkAppInstance: Mac,
   actor_sk: PrivateKey
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_sk, () => {
+  const tx = await Mina.transaction(actor_pk, () => {
     zkAppInstance.withdraw(mac_contract, actor_pk);
   });
   await tx.prove();
@@ -62,7 +61,7 @@ async function success(
   actor_sk: PrivateKey
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_sk, () => {
+  const tx = await Mina.transaction(actor_pk, () => {
     zkAppInstance.success(mac_contract, actor_pk);
   });
   await tx.prove();
@@ -76,7 +75,7 @@ async function failure(
   actor_sk: PrivateKey
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_sk, () => {
+  const tx = await Mina.transaction(actor_pk, () => {
     zkAppInstance.failure(mac_contract, actor_pk);
   });
   await tx.prove();
@@ -90,14 +89,13 @@ async function cancel(
   actor_sk: PrivateKey
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_sk, () => {
+  const tx = await Mina.transaction(actor_pk, () => {
     zkAppInstance.cancel(mac_contract, actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
   await tx.send();
 }
-*/
 
 function assertBalance(keys: PublicKey[], balances: number[]) {
   for (let i = 0; i < keys.length; ++i) {
