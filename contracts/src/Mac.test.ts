@@ -14,8 +14,6 @@ import {
   AccountUpdate,
 } from 'o1js';
 
-//import { Participant, Outcome, Preimage } from './preimage';
-//import { makeDummyPreimage } from './dummy';
 import { Outcome, Preimage } from './strpreim';
 import { makeDummyPreimage } from './strdummy';
 import { Mac } from './Mac';
@@ -174,14 +172,6 @@ describe('Mac tests', () => {
     employer_pk = employer_sk.toPublicKey();
     contractor_pk = contractor_sk.toPublicKey();
     arbiter_pk = arbiter_sk.toPublicKey();
-
-    /*
-    const tx_account = await Mina.transaction(employer_pk, () => {
-      AccountUpdate.fundNewAccount(employer_pk);
-    });
-    await tx_account.sign([employer_sk]);
-    await tx_account.send();
-    */
 
     zkAppInstance = new Mac(zkAppAddress);
 
@@ -362,7 +352,6 @@ describe('Mac tests', () => {
     const amount_arbitration_reward_employer_share = 1000000;
     const amount_arbitration_reward_contractor_share = 1000000;
 
-    console.log('1');
     // initial balance of the contract is zero
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
@@ -370,39 +359,10 @@ describe('Mac tests', () => {
     );
     local.setBlockchainLength(UInt32.from(1));
 
-    console.log('2');
     // let the employer do the deposit
-    console.log(Mina.getBalance(zkAppAddress).toString());
-    console.log(Mina.getBalance(employer_pk).toString());
-
-    /*
-    const tx = await Mina.transaction(employer_pk, () => {
-      zkAppInstance.deposit(mac_contract, employer_pk);
-      // zkAppInstance.simpledeposit(employer_pk);
-    });
-    await tx.prove();
-    await tx.sign([employer_sk]);
-    await tx.send();
-    */
-
     await deposit(mac_contract, zkAppInstance, employer_sk);
-    console.log(Mina.getBalance(zkAppAddress).toString());
-    console.log(Mina.getBalance(employer_pk).toString());
 
-    console.log('3');
     // check balances after the employer deposit
-
-    assertBalance([zkAppAddress], [amount_payment + amount_deposit]);
-    console.log('3.1');
-    assertBalance(
-      [employer_pk],
-      [balance_initial - amount_payment - amount_deposit]
-    );
-    console.log('3.2');
-    assertBalance([contractor_pk], [balance_initial]);
-    console.log('3.3');
-    assertBalance([arbiter_pk], [balance_initial]);
-    console.log('3.4');
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
       [
@@ -414,11 +374,9 @@ describe('Mac tests', () => {
     );
     local.setBlockchainLength(UInt32.from(2));
 
-    console.log('4');
     // let the contractor do the deposit
     await deposit(mac_contract, zkAppInstance, contractor_sk);
 
-    console.log('5');
     // check balances after the contractor deposit
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
@@ -432,17 +390,14 @@ describe('Mac tests', () => {
 
     local.setBlockchainLength(UInt32.from(3));
 
-    console.log('6');
     // the arbiter did not do the deposit yet, contractor decides to cancel
     await cancel(mac_contract, zkAppInstance, contractor_sk);
     local.setBlockchainLength(UInt32.from(4));
 
-    console.log('7');
     // now we test if everyone who deposited can withdraw what has been deposited
     // let the contractor do the withdrawal
     await withdraw(mac_contract, zkAppInstance, contractor_sk);
 
-    console.log('8');
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
       [
@@ -453,23 +408,19 @@ describe('Mac tests', () => {
       ]
     );
 
-    console.log('9');
     // now the arbiter will try to withdraw, this must fail as the arbiter
     // did not do any deposit
     await expect(async () => {
       await withdraw(mac_contract, zkAppInstance, arbiter_sk);
     }).rejects.toThrow();
 
-    console.log('10');
     // now the employer successfully withdraws own deposit
     await withdraw(mac_contract, zkAppInstance, employer_sk);
 
-    console.log('11');
     // check if the balances returned to their original state
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
       [0, balance_initial, balance_initial, balance_initial]
     );
-    console.log('12');
   });
 });
