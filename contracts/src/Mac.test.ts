@@ -435,13 +435,13 @@ describe('Mac tests', () => {
     local.setBlockchainLength(UInt32.from(3));
 
     console.log('6');
-    /*
     // the arbiter did not do the deposit yet, contractor decides to cancel
     await cancel(mac_contract, zkAppInstance, contractor_sk);
     local.setBlockchainLength(UInt32.from(4));
 
     console.log('7');
     // now we test if everyone who deposited can withdraw what has been deposited
+    /*
     // let the contractor do the withdrawal
     await withdraw(mac_contract, zkAppInstance, contractor_sk);
 
