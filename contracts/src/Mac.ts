@@ -75,7 +75,6 @@ export class Mac extends SmartContract {
     payerUpdate.send({ to: recipientUpdate, amount: UInt64.from(1000000) });
   }
 
-  /*
   @method deposit(contract_preimage: Preimage, actor: PublicKey) {
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);
@@ -136,8 +135,8 @@ export class Mac extends SmartContract {
 
     // transfer the funds
     const payerUpdate = AccountUpdate.createSigned(actor);
-    payerUpdate.send({ to: this.address, amount: UInt64.from(0) });
-    // payerUpdate.send({ to: this.address, amount: amount });
+    const recipientUpdate = AccountUpdate.create(this.address);
+    payerUpdate.send({ to: recipientUpdate, amount: amount });
 
     // update the memory
     actions[2] = Circuit.if(
@@ -176,6 +175,7 @@ export class Mac extends SmartContract {
     this.automaton_state.set(new_state);
   }
 
+  /*
   @method withdraw(contract_preimage: Preimage, actor: PublicKey) {
     const commitment: Field = this.commitment.get();
     this.commitment.assertEquals(commitment);

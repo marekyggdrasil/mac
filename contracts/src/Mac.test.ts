@@ -34,8 +34,7 @@ async function deposit(
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
   const tx = await Mina.transaction(actor_pk, () => {
-    // zkAppInstance.deposit(mac_contract, actor_pk);
-    zkAppInstance.simpledeposit(actor_pk);
+    zkAppInstance.deposit(mac_contract, actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
