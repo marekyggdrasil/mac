@@ -1,41 +1,39 @@
 import {
-  //Field,
-  //Bool,
-  //Circuit,
+  Field,
+  Bool,
+  Circuit,
   SmartContract,
-  //state,
-  //State,
+  state,
+  State,
   method,
   DeployArgs,
   Permissions,
-  //PrivateKey,
+  PrivateKey,
   PublicKey,
-  //UInt32,
+  UInt32,
   UInt64,
   AccountUpdate,
 } from 'o1js';
 
-// import { Preimage, Outcome } from './strpreim';
+import { Preimage, Outcome } from './strpreim';
 
-/*
 const state_initial: number = 0;
 const state_deposited: number = 1;
 const state_canceled_early: number = 2;
 const state_canceled: number = 3;
 const state_succeeded: number = 4;
 const state_failed: number = 5;
-*/
 
 export class Mac extends SmartContract {
   // on-chain state is public
-  //@state(Field) commitment = State<Field>();
+  @state(Field) commitment = State<Field>();
 
   // 0 - initial
   // 1 - everyone deposited
   // 2 - someone decided to cancel
   // 3 - contract succeeded
   // 4 - contract failed
-  //@state(Field) automaton_state = State<Field>();
+  @state(Field) automaton_state = State<Field>();
 
   // E - employer
   // C - contractor
@@ -50,7 +48,7 @@ export class Mac extends SmartContract {
   // 101 - 5
   // 110 - 6
   // 111 - 7
-  //@state(Field) memory = State<Field>();
+  @state(Field) memory = State<Field>();
   // ...and method arguments are private, beautiful, right?
 
   deploy(args: DeployArgs) {
@@ -62,13 +60,11 @@ export class Mac extends SmartContract {
     });
   }
 
-  /*
   @method initialize(commitment: Field) {
     this.commitment.set(commitment);
     this.automaton_state.set(Field(0));
     this.memory.set(Field(0));
   }
-  */
 
   @method simpledeposit(user: PublicKey) {
     // add your deposit logic circuit here

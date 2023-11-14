@@ -27,7 +27,6 @@ const state_canceled: number = 3;
 const state_succeeded: number = 4;
 const state_failed: number = 5;
 
-/*
 async function deposit(
   mac_contract: Preimage,
   zkAppInstance: Mac,
@@ -43,6 +42,7 @@ async function deposit(
   await tx.send();
 }
 
+/*
 async function withdraw(
   mac_contract: Preimage,
   zkAppInstance: Mac,
@@ -98,14 +98,14 @@ async function cancel(
   await tx.sign([actor_sk]);
   await tx.send();
 }
+*/
+
 function assertBalance(keys: PublicKey[], balances: number[]) {
   for (let i = 0; i < keys.length; ++i) {
     Mina.getBalance(keys[i]).assertEquals(UInt64.from(balances[i]));
   }
 }
-*/
 
-/*
 async function localDeploy(
   zkAppInstance: Mac,
   zkAppPrivateKey: PrivateKey,
@@ -131,7 +131,6 @@ async function localDeploy(
   await tx_init.sign([deployerAccount]);
   await tx_init.send();
 }
-*/
 
 describe('Mac tests', () => {
   let employer: PublicKey,
@@ -189,7 +188,6 @@ describe('Mac tests', () => {
 
     zkAppInstance = new Mac(zkAppAddress);
 
-    /*
     [
       employer,
       contractor,
@@ -199,8 +197,7 @@ describe('Mac tests', () => {
       outcome_failure,
       outcome_cancel,
       mac_contract,
-    ] = makeDummyPreimage(
-      employer_sk, contractor_sk, arbiter_sk, zkAppAddress);
+    ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk, zkAppAddress);
 
     // deploy the contract
     zkAppInstance = new Mac(zkAppAddress);
@@ -213,7 +210,6 @@ describe('Mac tests', () => {
       contractor_sk,
       arbiter_sk
     );
-    */
   });
 
   afterAll(async () => {
@@ -364,7 +360,7 @@ describe('Mac tests', () => {
   });
   */
 
-  it('simple test', async () => {
+  it.skip('simple test', async () => {
     // deploy
     const deployer_pk: PublicKey = deployerAccount.toPublicKey();
     const tx_deploy = await Mina.transaction(deployer_pk, () => {
@@ -385,8 +381,7 @@ describe('Mac tests', () => {
     await tx.send();
   });
 
-  it.skip('should allow the withdrawal with no consequences to those who deposited after early cancellation', async () => {
-    /*
+  it('should allow the withdrawal with no consequences to those who deposited after early cancellation', async () => {
     const balance_initial = 1000000000000;
     const amount_payment = 6000000;
     const amount_deposit = 6000000;
@@ -406,7 +401,6 @@ describe('Mac tests', () => {
     console.log(Mina.getBalance(zkAppAddress).toString());
     console.log(Mina.getBalance(employer_pk).toString());
 
-
     const tx = await Mina.transaction(employer_pk, () => {
       // zkAppInstance.deposit(mac_contract, actor_pk);
       zkAppInstance.simpledeposit(employer_pk);
@@ -414,7 +408,6 @@ describe('Mac tests', () => {
     await tx.prove();
     await tx.sign([employer_sk]);
     await tx.send();
-    */
     /*
     await deposit(mac_contract, zkAppInstance, employer_sk);
     console.log(Mina.getBalance(zkAppAddress).toString());
