@@ -414,7 +414,6 @@ describe('Mac tests', () => {
     console.log(Mina.getBalance(zkAppAddress).toString());
     console.log(Mina.getBalance(employer_pk).toString());
 
-    /*
     console.log('3');
     // check balances after the employer deposit
 
@@ -429,7 +428,6 @@ describe('Mac tests', () => {
     console.log('3.3');
     assertBalance([arbiter_pk], [balance_initial]);
     console.log('3.4');
-    /
     assertBalance(
       [zkAppAddress, employer_pk, contractor_pk, arbiter_pk],
       [
@@ -439,7 +437,6 @@ describe('Mac tests', () => {
         balance_initial,
       ]
     );
-    /
     local.setBlockchainLength(UInt32.from(2));
 
     console.log('4');
@@ -461,6 +458,7 @@ describe('Mac tests', () => {
     local.setBlockchainLength(UInt32.from(3));
 
     console.log('6');
+    /*
     // the arbiter did not do the deposit yet, contractor decides to cancel
     await cancel(mac_contract, zkAppInstance, contractor_sk);
     local.setBlockchainLength(UInt32.from(4));
