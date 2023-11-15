@@ -4,7 +4,7 @@ import { MinaValue } from './highlights';
 import {
     PublicKey,
     PrivateKey
-} from 'snarkyjs';
+} from 'o1js';
 
 export const InteractionModeUIInfo = () => {
   const context: MacContextType = castContext();

@@ -3,7 +3,7 @@ import {
   PublicKey,
   PrivateKey,
     Field
-} from 'snarkyjs'
+} from 'o1js'
 
 import type { ZkappWorkerRequest, ZkappWorkerReponse, WorkerFunctions } from './zkAppWorker';
 

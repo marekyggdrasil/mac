@@ -4,7 +4,7 @@ import {
   Field,
   PrivateKey,
   PublicKey
-} from 'snarkyjs';
+} from 'o1js';
 
 import ZkappWorkerClient from '../pages/zkAppWorkerClient';
 

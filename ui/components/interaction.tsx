@@ -23,7 +23,7 @@ import { RenderContractDescription } from './ContractRendering';
 import { InteractionModeUI } from './multiwallet';
 import {
     PublicKey
-} from 'snarkyjs';
+} from 'o1js';
 
 interface ContractStateActedType {
   employer: boolean;

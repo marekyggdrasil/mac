@@ -10,7 +10,7 @@ import {
 
 import {
   PublicKey
-} from 'snarkyjs'
+} from 'o1js'
 
 async function runImport(context: MacContextType) {
   let element = document.getElementById('import-macpack');

@@ -1,6 +1,6 @@
 import {
   PublicKey
-} from 'snarkyjs';
+} from 'o1js';
 
 import { MacContextType, castContext } from './AppContext';
 import { MinaValue, MinaBlockchainLength } from './highlights';

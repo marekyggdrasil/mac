@@ -12,7 +12,7 @@ import {
   fetchLastBlock,
   VerificationKey,
   AccountUpdate
-} from 'snarkyjs'
+} from 'o1js'
 
 type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 

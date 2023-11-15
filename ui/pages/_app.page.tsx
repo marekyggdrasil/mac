@@ -21,7 +21,7 @@ import {
     PublicKey,
     fetchAccount,
     fetchLastBlock
-} from 'snarkyjs';
+} from 'o1js';
 
 import ZkappWorkerClient from './zkAppWorkerClient';
 

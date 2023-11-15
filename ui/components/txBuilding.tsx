@@ -11,7 +11,7 @@ import { finalizeContract } from './interaction';
 import {
     PublicKey,
     PrivateKey
-} from 'snarkyjs';
+} from 'o1js';
 
 export async function contractDeploy(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
