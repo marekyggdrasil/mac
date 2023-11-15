@@ -14,7 +14,7 @@ async function generateKeyPair(context: MacContextType) {
 
 const KeyGenerator = () => {
   const context: MacContextType = castContext();
-  if (!context.state.zkappPublicKeyCandidate.value) {
+  if (context.state.zkappPublicKeyCandidate.isEmpty()) {
     return <p>Your MAC! contract does not have a private key. Click on <button className="btn" onClick={async (event) => {
       event.preventDefault();
       await generateKeyPair(context);
