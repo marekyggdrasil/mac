@@ -37,9 +37,18 @@ export async function contractDeploy(context: MacContextType) {
     context.state.zkappPublicKey);
   console.log('createDeployTransaction');
     if (context.state.usingAuro) {
+      if (context.state.zkappPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       await zkappWorkerClient.createDeployTransactionAuro(
         context.state.zkappPrivateKey);
     } else {
+      if (context.state.zkappPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       await zkappWorkerClient.createDeployTransaction(
         context.state.zkappPrivateKey, context.state.actorPrivateKey);
     }
@@ -108,6 +117,9 @@ export async function contractInit(context: MacContextType) {
     if (context.state.usingAuro) {
       await zkappWorkerClient.createInitTransactionAuro();
     } else {
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       await zkappWorkerClient.createInitTransaction(
         context.state.actorPrivateKey);
     }
@@ -136,6 +148,9 @@ export async function contractInit(context: MacContextType) {
         });
         await context.setTxHash(hash);
     } else {
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
       console.log('done');
         console.log(hash);
@@ -175,9 +190,15 @@ export async function contractDeposit(context: MacContextType) {
     context.state.zkappPublicKey);
   console.log('createDeployTransaction');
     if (context.state.usingAuro) {
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       await zkappWorkerClient.createDepositTransactionAuro(
         context.state.actorPrivateKey.toPublicKey());
     } else {
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       await zkappWorkerClient.createDepositTransaction(
         context.state.actorPrivateKey.toPublicKey(),
         context.state.actorPrivateKey);
@@ -246,6 +267,12 @@ export async function contractWithdraw(context: MacContextType) {
     if (context.state.usingAuro) {
       await zkappWorkerClient.createWithdrawTransactionAuro();
     } else {
+      if (context.state.zkappPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       await zkappWorkerClient.createWithdrawTransaction(
         context.state.zkappPrivateKey.toPublicKey(), context.state.actorPrivateKey);
     }
@@ -274,6 +301,9 @@ export async function contractWithdraw(context: MacContextType) {
         });
         await context.setTxHash(hash);
     } else {
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
       console.log('done');
         console.log(hash);
@@ -312,6 +342,9 @@ export async function contractCancel(context: MacContextType) {
     if (context.state.usingAuro) {
       await zkappWorkerClient.createCancelTransactionAuro();
     } else {
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       await zkappWorkerClient.createCancelTransaction(
         context.state.actorPrivateKey.toPublicKey(),
         context.state.actorPrivateKey);
@@ -341,6 +374,9 @@ export async function contractCancel(context: MacContextType) {
         });
         await context.setTxHash(hash);
     } else {
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
       console.log('done');
         console.log(hash);
@@ -379,6 +415,9 @@ export async function contractSuccess(context: MacContextType) {
     if (context.state.usingAuro) {
       await zkappWorkerClient.createSuccessTransactionAuro();
     } else {
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       await zkappWorkerClient.createSuccessTransaction(
         context.state.actorPrivateKey.toPublicKey(),
         context.state.actorPrivateKey);
@@ -409,6 +448,9 @@ export async function contractSuccess(context: MacContextType) {
         });
         await context.setTxHash(hash);
     } else {
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
       console.log('done');
         console.log(hash);
@@ -447,6 +489,12 @@ export async function contractFailure(context: MacContextType) {
     if (context.state.usingAuro) {
       await zkappWorkerClient.createFailureTransactionAuro();
     } else {
+      if (context.state.zkappPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       await zkappWorkerClient.createFailureTransaction(
         context.state.zkappPrivateKey.toPublicKey(),
         context.state.actorPrivateKey);
@@ -476,6 +524,9 @@ export async function contractFailure(context: MacContextType) {
         });
         await context.setTxHash(hash);
     } else {
+      if (context.state.actorPrivateKey === null) {
+        throw Error('Private key is not defined');
+      }
       const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
       console.log('done');
         console.log(hash);
