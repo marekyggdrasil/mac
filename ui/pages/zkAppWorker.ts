@@ -10,7 +10,6 @@ import {
   Bool,
   CircuitString,
   fetchLastBlock,
-  VerificationKey,
   AccountUpdate
 } from 'o1js'
 
@@ -22,11 +21,6 @@ import type { Mac } from '../../contracts/src/Mac';
 import type { Outcome, Preimage } from '../../contracts/src/strpreim';
 import type { fromMacPack, toMacPack } from '../../contracts/src/helpers';
 
-interface VerificationKeyData {
-    data: string;
-    hash: string;
-}
-
 type zkAppWorkerState = {
   Mac: typeof Mac,
   Outcome: typeof Outcome,
@@ -35,8 +29,7 @@ type zkAppWorkerState = {
   preimage: null | Preimage,
   transaction: null | Transaction,
   fromMacPack: typeof fromMacPack,
-  toMacPack: typeof toMacPack,
-  vKey: null | VerificationKeyData
+  toMacPack: typeof toMacPack
 }
 
 function castPreimageValue(
@@ -45,14 +38,6 @@ function castPreimageValue(
     throw Error('preimage value is null');
   }
   return preimage;
-}
-
-function castVerificationKeyDataValue(
-  vkd: VerificationKeyData | null): VerificationKeyData {
-  if (vkd === null) {
-    throw Error('VerificationKeyData value is null');
-  }
-  return vkd;
 }
 
 /*
@@ -95,9 +80,6 @@ function castStateValues(state: zkAppWorkerState) {
   if (state.toMacPack === null) {
     throw Error('toMacPack is null');
   }
-  if (state.vKey === null) {
-    throw Error('vKey is null');
-  }
 }
 */
 
@@ -139,8 +121,7 @@ const functions = {
         preimage: null,
         transaction: null,
       fromMacPack: fromMacPack,
-      toMacPack: toMacPack,
-        vKey: null
+      toMacPack: toMacPack
       }
     state.fromMacPack = fromMacPack;
       state.toMacPack = toMacPack;
@@ -154,8 +135,7 @@ const functions = {
     if (state === null) {
       throw Error('state is null');
     }
-      let { verificationKey } = await state.Mac!.compile();
-      state.vKey = verificationKey;
+      await state.Mac!.compile();
   },
   fetchAccount: async (args: { publicKey58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
@@ -186,7 +166,6 @@ const functions = {
         const deployerPrivateKey: PrivateKey = PrivateKey.fromBase58(args.deployerPrivateKey58);
         let transactionFee = 100_000_000;
         //const _commitment: Field = state.Preimage.hash(state.preimage);
-      let verificationKey: VerificationKeyData = castVerificationKeyDataValue(state.vKey);
         const transaction = await Mina.transaction(
             { feePayerKey: deployerPrivateKey, fee: transactionFee },
           () => {
@@ -195,7 +174,7 @@ const functions = {
             }
             AccountUpdate.fundNewAccount(deployerPrivateKey);
             state.zkapp!.deploy(
-              { zkappKey: zkAppPrivateKey, verificationKey });
+              { zkappKey: zkAppPrivateKey });
             //state.zkapp!.initialize(_commitment);
         });
         state.transaction = transaction;
@@ -233,7 +212,6 @@ const functions = {
         const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(args.privateKey58);
       const _commitment: Field = state.Preimage.hash(
         castPreimageValue(state.preimage));
-      let verificationKey: VerificationKeyData = castVerificationKeyDataValue(state.vKey);
       let transactionFee = 100_000_000;
         const transaction = await Mina.transaction(
             { feePayerKey: deployerPrivateKey, fee: transactionFee },
@@ -241,7 +219,7 @@ const functions = {
             if (state === null) {
               throw Error('state is null');
             }
-                state.zkapp!.deploy({ zkappKey: zkAppPrivateKey, verificationKey });
+                state.zkapp!.deploy({ zkappKey: zkAppPrivateKey });
                 state.zkapp!.initialize(_commitment);
             });
         state.transaction = transaction;
