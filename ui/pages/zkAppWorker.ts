@@ -117,20 +117,20 @@ const functions = {
   },
     loadContract: async (args: {}) => {
     const { Mac } = await import(
-      '../../contracts/build/src/Mac.js');
+      '../../contracts/build/Mac.js');
       if (Mac === null) {
         throw Error('Mac type is null');
       }
     const { Outcome, Preimage } = await import(
-      '../../contracts/build/src/strpreim.js');
+      '../../contracts/build/strpreim.js');
       if (Outcome === null) {
-        throw Error('Ouctome type is null');
+        throw Error('Outcome type is null');
       }
     if (Preimage === null) {
       throw Error('Preimage type is null');
     }
     const { fromMacPack, toMacPack } = await import(
-        '../../contracts/build/src/helpers.js');
+        '../../contracts/build/helpers.js');
     state = {
         Mac: Mac,
         Outcome: Outcome,
