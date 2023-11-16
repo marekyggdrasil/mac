@@ -2,7 +2,7 @@ import {
   PublicKey
 } from 'o1js';
 
-import { MacContextType, castContext } from './AppContext';
+import { MacContextType, CastContext } from './AppContext';
 import { MinaValue, MinaBlockchainLength } from './highlights';
 
 function minaValue(v: number) {
@@ -22,7 +22,7 @@ function outcomeDescription(v: string) {
 }
 
 export const RenderOutcomes = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   return (
     <div className="overflow-x-auto">
       <table className="table w-full">
@@ -168,7 +168,7 @@ export const RenderOutcomes = () => {
 }
 
 export const RenderOutcomesDescriptions = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
     return (
         <div className="overflow-x-auto">
             <table className="table w-full">
@@ -211,7 +211,7 @@ function safeAddressRender(address: PublicKey) {
 }
 
 export const RenderInvolvedParties = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
     return (
         <div className="overflow-x-auto">
             <table className="table w-full">
@@ -252,7 +252,7 @@ export const RenderInvolvedParties = () => {
 }
 
 export const RenderContractDescription = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
     return (
         <div>
             <h2>Contract description</h2>

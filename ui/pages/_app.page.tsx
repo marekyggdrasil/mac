@@ -4,7 +4,7 @@ import type { AppProps } from 'next/app';
 import {
   MacContextStateType,
   MacContextType,
-  castContext,
+  CastContext,
   castZkAppWorkerClient,
   AppContext
 } from '../components/AppContext';
@@ -36,6 +36,7 @@ async function runLoadSnarkyJS(context: MacContextType) {
             zkappWorkerClient: zkappWorkerClient });
         console.log('loading SnarkyJS');
         await zkappWorkerClient.loadSnarkyJS();
+        console.log('isReady finished');
         await zkappWorkerClient.setActiveInstanceToBerkeley();
         console.log('SnarkyJS loaded');
         console.log('loading contract')

@@ -4,7 +4,7 @@ import ZkappWorkerClient from './zkAppWorkerClient';
 
 import {
   MacContextType,
-  castContext,
+  CastContext,
   castZkAppWorkerClient
 } from '../components/AppContext';
 
@@ -88,7 +88,7 @@ async function runImport(context: MacContextType) {
 }
 
 const ImportCases = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.compilationButtonState < 2) {
     return (<div><p>You need to load the SnarkyJS library first!</p></div>);
     }

@@ -89,7 +89,9 @@ let state: null | zkAppWorkerState = null;
 
 const functions = {
   loadSnarkyJS: async (args: {}) => {
+    console.log('a');
     await isReady;
+    console.log('b');
   },
   setActiveInstanceToBerkeley: async (args: {}) => {
     const Berkeley = Mina.BerkeleyQANet(

@@ -1,9 +1,9 @@
 import Link from 'next/link';
-import { MacContextType, castContext } from './AppContext';
+import { MacContextType, CastContext } from './AppContext';
 
 
 const CircuitCompileButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.compilationButtonState == 0) {
     return <button className="btn" onClick={() => {
       context.state.runLoadSnarkyJS(context);
@@ -46,7 +46,7 @@ const currentBlock = (blockchainLength: number) => {
 }
 
 const ConnectButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.compilationButtonState < 2) {
     return <button className="btn btn-disabled">
       Connect

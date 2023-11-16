@@ -1,11 +1,10 @@
 import Link from 'next/link';
-import { useContext } from 'react';
 
 import ZkappWorkerClient from '../pages/zkAppWorkerClient';
 
 import {
   MacContextType,
-  castContext,
+  CastContext,
   castZkAppWorkerClient
 } from './AppContext';
 
@@ -88,7 +87,7 @@ async function contractRefreshState(context: MacContextType) {
 }
 
 const DeployButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (!context.state.deployed) {
     if (
       (context.state.tx_building_state != '') &&
@@ -108,7 +107,7 @@ const DeployButton = () => {
 }
 
 const InitButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (!context.state.deployed) {
     return (<button className="btn btn-disabled">Initialize</button>);
     } else if (context.state.tx_building_state == '') {
@@ -122,7 +121,7 @@ const InitButton = () => {
 }
 
 const DepositButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (
     (context.state.contract_outcome_deposit_after <= context.blockchainLength) &&
     (context.blockchainLength < context.state.contract_outcome_deposit_before)) {
@@ -139,7 +138,7 @@ const DepositButton = () => {
 
 
 const WithdrawButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if ((context.connectedAddress === null) || (context.blockchainLength < context.state.contract_outcome_deposit_after)) {
     return (<button className="btn btn-disabled">Withdraw</button>);
     }
@@ -150,7 +149,7 @@ const WithdrawButton = () => {
 
 
 const SuccessButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.connectedAddress === null) {
     return (<button className="btn btn-primary btn-disabled">Judge success</button>);
     }
@@ -168,7 +167,7 @@ const SuccessButton = () => {
 
 
 const FailureButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.connectedAddress === null) {
     return (<button className="btn btn-primary btn-disabled">Judge failure</button>);
     }
@@ -186,7 +185,7 @@ const FailureButton = () => {
 
 
 const CancelButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.connectedAddress === null) {
     return (<button className="btn btn-disabled">Cancel for free</button>);
     }
@@ -209,7 +208,7 @@ const CancelButton = () => {
 }
 
 const GodMode = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   return (<div>
     <button className="btn btn-primary" onClick={async () => {
       await contractDeploy(context);
@@ -237,7 +236,7 @@ const GodMode = () => {
 
 
 const DeploymentInformation = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.state.deployed) {
     return (<p>The contract has been deployed.</p>);
     } else {
@@ -246,7 +245,7 @@ const DeploymentInformation = () => {
 }
 
 const TxIds = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.txHash != '') {
     const url = "https://berkeley.minaexplorer.com/transaction/" + context.txHash;
         console.log(url);
@@ -256,7 +255,7 @@ const TxIds = () => {
 }
 
 const ConnectedAccount = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.connectedAddress !== null) {
     const employer = context.state.contract_employer.toBase58();
         const contractor = context.state.contract_contractor.toBase58();
@@ -280,7 +279,7 @@ const ConnectedAccount = () => {
 }
 
 const CancelTimeLine = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if ((context.state.contract_outcome_cancel_after <= context.blockchainLength) &&
       (context.blockchainLength < context.state.contract_outcome_cancel_before)) {
     return (<p>It is possible to <strong>cancel</strong> at the current stage with a financial penalty.</p>);
@@ -291,7 +290,7 @@ const CancelTimeLine = () => {
 }
 
 const ContractTimeline = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.blockchainLength !== null) {
     if (context.blockchainLength < context.state.contract_outcome_deposit_after) {
             return (<p>The contract is in the <strong>warm-up</strong> stage</p>);
@@ -319,7 +318,7 @@ const ContractTimeline = () => {
 }
 
 const EmployerActed = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.state.employerActed) {
     return (<div>Employer has acted.</div>);
     }
@@ -327,7 +326,7 @@ const EmployerActed = () => {
 }
 
 const ContractorActed = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.state.contractorActed) {
     return (<div>Contractor has acted.</div>);
     }
@@ -335,7 +334,7 @@ const ContractorActed = () => {
 }
 
 const ArbiterActed = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.state.arbiterActed) {
     return (<div>Arbiter has acted.</div>);
     }
@@ -353,7 +352,7 @@ const WhoActed = () => {
 
 
 const InteractionUI = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   return (<div>
     <ConnectedAccount />
     <ContractTimeline />
@@ -370,7 +369,7 @@ const InteractionUI = () => {
 }
 
 const InteractionEditor = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (!context.state.deployed) {
     if (context.compilationButtonState < 4) {
             return (
@@ -394,7 +393,7 @@ const InteractionEditor = () => {
 
 
 const InteractionCases = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.compilationButtonState < 2) {
     return (<div>Make sure you load the SnarkyJS library!</div>);
     } else if (context.connectionButtonState < 2) {

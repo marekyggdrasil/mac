@@ -1,11 +1,11 @@
 import Link from 'next/link';
 import Editor from '../components/editor';
 
-import { MacContextType, castContext } from '../components/AppContext';
+import { MacContextType, CastContext } from '../components/AppContext';
 import { MinaValue } from '../components/highlights';
 
 const CreationSteps = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   return (
     <div><p>this is where we create a new contract</p>
       <ul className="steps">
@@ -18,7 +18,7 @@ const CreationSteps = () => {
 }
 
 const ConnectionIndicator = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.connectionButtonState < 2) {
     return <article className="container prose">
       Auro wallet not connected.
@@ -30,7 +30,7 @@ const ConnectionIndicator = () => {
 }
 
 const CreateCases = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.compilationButtonState < 2) {
     return (
       <article className="container prose">
@@ -61,6 +61,6 @@ const CreateCases = () => {
 }
 
 export default function Create() {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   return <CreateCases />;
 }

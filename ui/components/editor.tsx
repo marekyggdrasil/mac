@@ -3,7 +3,7 @@ import {
     PrivateKey
 } from 'o1js';
 
-import { MacContextType, castContext } from './AppContext';
+import { MacContextType, CastContext } from './AppContext';
 import { MinaValue, MinaBlockchainLength, MinaSecretValue } from './highlights';
 
 async function generateKeyPair(context: MacContextType) {
@@ -13,7 +13,7 @@ async function generateKeyPair(context: MacContextType) {
 }
 
 const KeyGenerator = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.state.zkappPublicKeyCandidate.isEmpty()) {
     return <p>Your MAC! contract does not have a private key. Click on <button className="btn" onClick={async (event) => {
       event.preventDefault();
@@ -33,7 +33,7 @@ const KeyGenerator = () => {
 }
 
 const Editor = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   return (
     <form onSubmit={async (event) => {
       event.preventDefault();

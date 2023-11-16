@@ -1,6 +1,6 @@
 import Link from 'next/link';
 
-import { MacContextType, castContext } from '../components/AppContext';
+import { MacContextType, CastContext } from '../components/AppContext';
 
 async function runClose(context: MacContextType) {
   context.setState({
@@ -12,7 +12,7 @@ async function runClose(context: MacContextType) {
 }
 
 export default function Close() {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (!context.state.loaded) {
     return (
       <article className="container prose">

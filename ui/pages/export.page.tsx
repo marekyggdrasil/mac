@@ -4,7 +4,7 @@ import ZkappWorkerClient from './zkAppWorkerClient';
 
 import {
   MacContextType,
-  castContext,
+  CastContext,
   castZkAppWorkerClient
 } from '../components/AppContext';
 
@@ -12,7 +12,7 @@ import { finalizeContract } from '../components/interaction';
 
 
 const MacPackContent = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   return (<code className="">{ context.state.macpack }</code>)
 }
 
@@ -32,7 +32,7 @@ async function runExport(context: MacContextType) {
 }
 
 const FinalizeButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.compilationButtonState == 3) {
     return <button className="btn btn-disabled">
       Finalize
@@ -48,7 +48,7 @@ const FinalizeButton = () => {
 
 
 const ExportCases = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.compilationButtonState < 2) {
     return (<div><p>You need to load the SnarkyJS library first!</p></div>);
     }

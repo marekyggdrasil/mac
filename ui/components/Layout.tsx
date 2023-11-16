@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 
-import { MacContextType, castContext } from './AppContext';
+import { MacContextType, CastContext } from './AppContext';
 import { MinaValue } from './highlights';
 
 import Navbar from './navbar';
@@ -8,7 +8,7 @@ import Head from 'next/head';
 
 
 const ConnectedAddress = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.connectedAddress) {
     return <div className="flex flex-row-reverse text-sm font-normal">
       <MinaValue>{context.connectedAddress}</MinaValue>
@@ -19,7 +19,7 @@ const ConnectedAddress = () => {
 
 
 const Layout = ({ children }: { children: ReactNode }) => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   return (
     <div>
       <Head>

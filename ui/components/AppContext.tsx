@@ -87,7 +87,7 @@ export type MacContextType = {
 
 export const AppContext = createContext<MacContextType | null>(null);
 
-export function castContext(): MacContextType {
+export function CastContext(): MacContextType {
   const context = useContext(AppContext)
   if (context === null) {
     throw Error('Context is not defined');

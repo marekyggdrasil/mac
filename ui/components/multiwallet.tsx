@@ -1,4 +1,4 @@
-import { MacContextType, castContext } from './AppContext';
+import { MacContextType, CastContext } from './AppContext';
 import { MinaValue } from './highlights';
 
 import {
@@ -7,7 +7,7 @@ import {
 } from 'o1js';
 
 export const InteractionModeUIInfo = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.state.usingAuro) {
     return (<p>You are using AURO wallet.</p>);
     } else {
@@ -19,7 +19,7 @@ export const InteractionModeUIInfo = () => {
 }
 
 export const InteractionModeUIButton = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   return (<button className="btn" onClick={async (event) => {
     await context.setState({
       ...context.state,
@@ -29,7 +29,7 @@ export const InteractionModeUIButton = () => {
 }
 
 export const InteractionModeUIForm = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   return (
     <form onSubmit={
     async (event) => {
@@ -64,7 +64,7 @@ export const InteractionModeUIForm = () => {
 }
 
 export const InteractionModeUI = () => {
-  const context: MacContextType = castContext();
+  const context: MacContextType = CastContext();
   if (context.state.usingAuro) {
     return (<div>
       <InteractionModeUIInfo/>

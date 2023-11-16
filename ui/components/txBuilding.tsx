@@ -2,7 +2,7 @@ import ZkappWorkerClient from '../pages/zkAppWorkerClient';
 
 import {
   MacContextType,
-  castContext,
+  CastContext,
   castZkAppWorkerClient
 } from './AppContext';
 
