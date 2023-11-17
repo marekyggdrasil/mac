@@ -36,22 +36,11 @@ export async function contractDeploy(context: MacContextType) {
   await zkappWorkerClient.initZkappInstance(
     context.state.zkappPublicKey);
   console.log('createDeployTransaction');
-    if (context.state.usingAuro) {
-      if (context.state.zkappPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      await zkappWorkerClient.createDeployTransactionAuro(
-        context.state.zkappPrivateKey);
-    } else {
-      if (context.state.zkappPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      await zkappWorkerClient.createDeployTransaction(
-        context.state.zkappPrivateKey, context.state.actorPrivateKey);
-    }
+  if (context.state.zkappPrivateKey === null) {
+    throw Error('Private key is not defined');
+  }
+  await zkappWorkerClient.createDeployTransaction(
+    context.state.zkappPrivateKey);
     await context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -65,23 +54,10 @@ export async function contractDeploy(context: MacContextType) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.state.usingAuro) {
-      const transactionJSON = await zkappWorkerClient.getTransactionJSON();
-      console.log('sendTransaction');
-        console.log(transactionJSON);
-        const { hash } = await (window as any).mina.sendTransaction({
-            transaction: transactionJSON,
-            feePayer: {
-                memo: '',
-            },
-        });
-        await context.setTxHash(hash);
-    } else {
       const { hash } = await zkappWorkerClient.sendTransaction();
       console.log('done');
         console.log(hash);
         await context.setTxHash(hash);
-    }
     await context.setState({
         ...context.state,
         creatingTransaction: false,
@@ -117,11 +93,11 @@ export async function contractInit(context: MacContextType) {
     if (context.state.usingAuro) {
       await zkappWorkerClient.createInitTransactionAuro();
     } else {
-      if (context.state.actorPrivateKey === null) {
+      if (context.state.actorPublicKey === null) {
         throw Error('Private key is not defined');
       }
       await zkappWorkerClient.createInitTransaction(
-        context.state.actorPrivateKey);
+        context.state.actorPublicKey);
     }
     context.setState({
         ...context.state,
@@ -136,7 +112,6 @@ export async function contractInit(context: MacContextType) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.state.usingAuro) {
       const transactionJSON = await zkappWorkerClient.getTransactionJSON();
       console.log('sendTransaction');
         console.log(transactionJSON);
@@ -147,15 +122,6 @@ export async function contractInit(context: MacContextType) {
             },
         });
         await context.setTxHash(hash);
-    } else {
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
-      console.log('done');
-        console.log(hash);
-        await context.setTxHash(hash);
-    }
     await context.setState({
         ...context.state,
         creatingTransaction: false,
@@ -189,20 +155,8 @@ export async function contractDeposit(context: MacContextType) {
   await zkappWorkerClient.initZkappInstance(
     context.state.zkappPublicKey);
   console.log('createDeployTransaction');
-    if (context.state.usingAuro) {
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
       await zkappWorkerClient.createDepositTransactionAuro(
-        context.state.actorPrivateKey.toPublicKey());
-    } else {
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      await zkappWorkerClient.createDepositTransaction(
-        context.state.actorPrivateKey.toPublicKey(),
-        context.state.actorPrivateKey);
-    }
+        context.state.actorPublicKey);
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -216,7 +170,6 @@ export async function contractDeposit(context: MacContextType) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.state.usingAuro) {
       const transactionJSON = await zkappWorkerClient.getTransactionJSON();
       console.log('sendTransaction');
         console.log(transactionJSON);
@@ -227,12 +180,6 @@ export async function contractDeposit(context: MacContextType) {
             },
         });
         await context.setTxHash(hash);
-    } else {
-      const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
-      console.log('done');
-        console.log(hash);
-        await context.setTxHash(hash);
-    }
     await context.setState({
         ...context.state,
         creatingTransaction: false,
@@ -264,18 +211,11 @@ export async function contractWithdraw(context: MacContextType) {
   await zkappWorkerClient.initZkappInstance(
     context.state.zkappPublicKey);
   console.log('createDeployTransaction');
-    if (context.state.usingAuro) {
-      await zkappWorkerClient.createWithdrawTransactionAuro();
-    } else {
-      if (context.state.zkappPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      await zkappWorkerClient.createWithdrawTransaction(
-        context.state.zkappPrivateKey.toPublicKey(), context.state.actorPrivateKey);
-    }
+
+  if (context.state.actorPublicKey === null) {
+    throw Error('Private key is not defined');
+  }
+  await zkappWorkerClient.createWithdrawTransactionAuro(context.state.actorPublicKey);
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -289,7 +229,6 @@ export async function contractWithdraw(context: MacContextType) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.state.usingAuro) {
       const transactionJSON = await zkappWorkerClient.getTransactionJSON();
       console.log('sendTransaction');
         console.log(transactionJSON);
@@ -300,15 +239,6 @@ export async function contractWithdraw(context: MacContextType) {
             },
         });
         await context.setTxHash(hash);
-    } else {
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
-      console.log('done');
-        console.log(hash);
-        await context.setTxHash(hash);
-    }
     await context.setState({
         ...context.state,
         creatingTransaction: false,
@@ -339,16 +269,11 @@ export async function contractCancel(context: MacContextType) {
   await zkappWorkerClient.initZkappInstance(
     context.state.zkappPublicKey);
   console.log('createDeployTransaction');
-    if (context.state.usingAuro) {
-      await zkappWorkerClient.createCancelTransactionAuro();
-    } else {
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      await zkappWorkerClient.createCancelTransaction(
-        context.state.actorPrivateKey.toPublicKey(),
-        context.state.actorPrivateKey);
-    }
+
+  if (context.state.actorPublicKey === null) {
+    throw Error('Private key is not defined');
+  }
+  await zkappWorkerClient.createCancelTransactionAuro(context.state.actorPublicKey);
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -362,7 +287,6 @@ export async function contractCancel(context: MacContextType) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.state.usingAuro) {
       const transactionJSON = await zkappWorkerClient.getTransactionJSON();
       console.log('sendTransaction');
         console.log(transactionJSON);
@@ -373,15 +297,6 @@ export async function contractCancel(context: MacContextType) {
             },
         });
         await context.setTxHash(hash);
-    } else {
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
-      console.log('done');
-        console.log(hash);
-        await context.setTxHash(hash);
-    }
     await context.setState({
         ...context.state,
         creatingTransaction: false,
@@ -412,16 +327,7 @@ export async function contractSuccess(context: MacContextType) {
   await zkappWorkerClient.initZkappInstance(
     context.state.zkappPublicKey);
   console.log('createDeployTransaction');
-    if (context.state.usingAuro) {
       await zkappWorkerClient.createSuccessTransactionAuro();
-    } else {
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      await zkappWorkerClient.createSuccessTransaction(
-        context.state.actorPrivateKey.toPublicKey(),
-        context.state.actorPrivateKey);
-    }
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -436,7 +342,6 @@ export async function contractSuccess(context: MacContextType) {
     });
     console.log('getTransactionJSON');
     let _hash = '';
-    if (context.state.usingAuro) {
       const transactionJSON = await zkappWorkerClient.getTransactionJSON();
       console.log('sendTransaction');
         console.log(transactionJSON);
@@ -447,15 +352,6 @@ export async function contractSuccess(context: MacContextType) {
             },
         });
         await context.setTxHash(hash);
-    } else {
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
-      console.log('done');
-        console.log(hash);
-        await context.setTxHash(hash);
-    }
     await context.setState({
         ...context.state,
         creatingTransaction: false,
@@ -486,19 +382,7 @@ export async function contractFailure(context: MacContextType) {
   await zkappWorkerClient.initZkappInstance(
     context.state.zkappPublicKey);
   console.log('createDeployTransaction');
-    if (context.state.usingAuro) {
       await zkappWorkerClient.createFailureTransactionAuro();
-    } else {
-      if (context.state.zkappPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      await zkappWorkerClient.createFailureTransaction(
-        context.state.zkappPrivateKey.toPublicKey(),
-        context.state.actorPrivateKey);
-    }
     context.setState({
         ...context.state,
         creatingTransaction: true,
@@ -512,7 +396,6 @@ export async function contractFailure(context: MacContextType) {
         tx_building_state: 'Initiating...'
     });
     console.log('getTransactionJSON');
-    if (context.state.usingAuro) {
       const transactionJSON = await zkappWorkerClient.getTransactionJSON();
       console.log('sendTransaction');
         console.log(transactionJSON);
@@ -523,15 +406,6 @@ export async function contractFailure(context: MacContextType) {
             },
         });
         await context.setTxHash(hash);
-    } else {
-      if (context.state.actorPrivateKey === null) {
-        throw Error('Private key is not defined');
-      }
-      const { hash } = await zkappWorkerClient.sendTransactionSign(context.state.actorPrivateKey);
-      console.log('done');
-        console.log(hash);
-        await context.setTxHash(hash);
-    }
     await context.setState({
         ...context.state,
         creatingTransaction: false,

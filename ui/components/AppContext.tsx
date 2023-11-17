@@ -22,7 +22,6 @@ export type MacContextStateType = {
   zkappPublicKeyCandidate: PublicKey,
   zkappPrivateKey: PrivateKey | null,
   zkappPublicKey: PublicKey,
-  actorPrivateKey: PrivateKey | null,
   actorPublicKey: PublicKey,
   creatingTransaction: boolean,
   runLoadSnarkyJS: Function,

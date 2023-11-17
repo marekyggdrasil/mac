@@ -108,7 +108,6 @@ function MyApp({ Component, pageProps }: AppProps) {
     zkappPublicKeyCandidate: PublicKey.empty(),
     zkappPrivateKey: null,
     zkappPublicKey: PublicKey.empty(),
-    actorPrivateKey: null,
     actorPublicKey: PublicKey.empty(),
     creatingTransaction: false,
     runLoadSnarkyJS: runLoadSnarkyJS,

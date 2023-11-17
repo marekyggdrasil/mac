@@ -123,26 +123,16 @@ export default class ZkappWorkerClient {
         const result = await this._call('sendTransaction', {});
         return JSON.parse(result);
     }
-    async sendTransactionSign(deployerPrivateKey: PrivateKey) {
-        const result = await this._call('sendTransactionSign', {
-            deployerPrivateKey58: deployerPrivateKey.toBase58()});
-        return JSON.parse(result);
-    }
-    async createDeployTransaction(privateKey: PrivateKey, deployerPrivateKey: PrivateKey) {
+
+    async createDeployTransaction(privateKey: PrivateKey) {
         return await this._call('createDeployTransaction', {
-            privateKey58: privateKey.toBase58(),
-            deployerPrivateKey58: deployerPrivateKey.toBase58()
-        });
-    }
-    async createDeployTransactionAuro(privateKey: PrivateKey) {
-        return await this._call('createDeployTransactionAuro', {
             privateKey58: privateKey.toBase58()
         });
     }
 
-    async createInitTransaction(deployerPrivateKey: PrivateKey) {
+    async createInitTransaction(deployerPublicKey: PublicKey) {
         return await this._call('createInitTransaction', {
-            deployerPrivateKey58: deployerPrivateKey.toBase58()
+            deployerPublicKey58: deployerPublicKey.toBase58()
         });
     }
     async createInitTransactionAuro() {
@@ -159,13 +149,9 @@ export default class ZkappWorkerClient {
             actorPublicKey58: actor.toBase58()});
     }
 
-    async createWithdrawTransactionAuro() {
-        return await this._call('createWithdrawTransaction', {});
-    }
-    async createWithdrawTransaction(actor: PublicKey, deployerPrivateKey: PrivateKey) {
-        return await this._call('createWithdrawTransaction', {
-            actorPublicKey58: actor.toBase58(),
-            deployerPrivateKey58: deployerPrivateKey.toBase58()});
+  async createWithdrawTransactionAuro(actor: PublicKey) {
+      return await this._call('createWithdrawTransactionAuro', {
+        actorPublicKey58: actor.toBase58()});
     }
 
     async createSuccessTransactionAuro() {
@@ -186,13 +172,9 @@ export default class ZkappWorkerClient {
         return await this._call('createFailureTransaction', {});
     }
 
-    async createCancelTransaction(actor: PublicKey, deployerPrivateKey: PrivateKey) {
-        return await this._call('createCancelTransaction', {
-            actorPublicKey58: actor.toBase58(),
-            deployerPrivateKey58: deployerPrivateKey.toBase58()});
-    }
-    async createCancelTransactionAuro() {
-        return await this._call('createCancelTransaction', {});
+  async createCancelTransactionAuro(actor: PublicKey) {
+        return await this._call('createCancelTransactionAuro', {
+          actorPublicKey58: actor.toBase58()});
     }
 
     async getContractState() {
