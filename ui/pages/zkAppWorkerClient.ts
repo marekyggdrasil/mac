@@ -124,11 +124,13 @@ export default class ZkappWorkerClient {
         return JSON.parse(result);
     }
 
-    async createDeployTransaction(privateKey: PrivateKey) {
-        return await this._call('createDeployTransaction', {
-            privateKey58: privateKey.toBase58()
-        });
-    }
+  async createDeployTransaction(
+    zkAppPrivateKey: PrivateKey, feePayerAddress: PublicKey) {
+    return await this._call('createDeployTransaction', {
+      zkAppPrivateKey58: zkAppPrivateKey.toBase58(),
+      feePayerAddress58: feePayerAddress.toBase58(),
+    });
+  }
 
     async createInitTransaction(deployerPublicKey: PublicKey) {
         return await this._call('createInitTransaction', {

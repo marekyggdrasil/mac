@@ -159,29 +159,25 @@ const functions = {
         return network_state.blockchainLength.toString();
     },
     createDeployTransaction: async (
-      args: { privateKey58: string}
+      args: { zkAppPrivateKey58: string, feePayerAddress58: string}
     ) => {
       if (state === null) {
         throw Error('state is null');
       }
-        const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(args.privateKey58);
-        let transactionFee = 100_000_000;
-      /*
-        //const _commitment: Field = state.Preimage.hash(state.preimage);
-        const transaction = await Mina.transaction(
-            { feePayerKey: deployerPrivateKey, fee: transactionFee },
-          () => {
-            if (state === null) {
-              throw Error('state is null');
-            }
-            AccountUpdate.fundNewAccount(deployerPrivateKey);
-            state.zkapp!.deploy(
-              { zkappKey: zkAppPrivateKey });
-            //state.zkapp!.initialize(_commitment);
+      const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(
+        args.zkAppPrivateKey58);
+      const feePayer: PublicKey = PublicKey.fromBase58(
+        args.feePayerAddress58);
+      const transaction = await Mina.transaction(
+        feePayer,
+        () => {
+          if (state === null) {
+            throw Error('state is null');
+          }
+          state.zkapp!.deploy({ zkappKey: zkAppPrivateKey });
         });
-        state.transaction = transaction;
-        */
-      // TODO apply what we discovered in the AURO deploy tutorial
+      transaction.sign([zkAppPrivateKey]);
+      state.transaction = transaction;
     },
     createInitTransaction: async (
       args: { deployerPublicKey58: string }
@@ -206,30 +202,6 @@ const functions = {
         state.transaction = transaction;
         */
       // TODO
-    },
-    createDeployTransactionAuro: async (
-      args: { privateKey58: string }
-    ) => {
-      if (state === null) {
-        throw Error('state is null');
-      }
-
-      const deployerPrivateKey: PrivateKey = PrivateKey.fromBase58(
-        ""); // defining just to resolve the types, AURO deployment has to be changed completely
-        const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(args.privateKey58);
-      const _commitment: Field = state.Preimage.hash(
-        castPreimageValue(state.preimage));
-      let transactionFee = 100_000_000;
-        const transaction = await Mina.transaction(
-            { feePayerKey: deployerPrivateKey, fee: transactionFee },
-          () => {
-            if (state === null) {
-              throw Error('state is null');
-            }
-                state.zkapp!.deploy({ zkappKey: zkAppPrivateKey });
-                state.zkapp!.initialize(_commitment);
-            });
-        state.transaction = transaction;
     },
   sendTransaction: async (args: {}) => {
     if (state === null) {
