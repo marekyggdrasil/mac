@@ -25,29 +25,36 @@ import {
 
 import ZkappWorkerClient from './zkAppWorkerClient';
 
+async function timeout(seconds: number): Promise<void> {
+  return new Promise<void>((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, seconds * 1000);
+  });
+}
+
 async function runLoadSnarkyJS(context: MacContextType) {
   console.log('runLoadSnarkyJS')
   // indicate it is compiling now
   await context.setCompilationButtonState(1);
-    setTimeout(async () => {
-        const zkappWorkerClient = new ZkappWorkerClient();
-        await context.setState({
-            ...context.state,
-            zkappWorkerClient: zkappWorkerClient });
-        console.log('loading SnarkyJS');
-        await zkappWorkerClient.loadSnarkyJS();
-        console.log('isReady finished');
-        await zkappWorkerClient.setActiveInstanceToBerkeley();
-        console.log('SnarkyJS loaded');
-        console.log('loading contract')
-        await zkappWorkerClient.loadContract();
-        console.log('contract loaded');
-        console.log('blockchain length');
-        const length = await zkappWorkerClient.fetchBlockchainLength();
-        console.log(length);
-        await context.setBlockchainLength(length);
-        await context.setCompilationButtonState(2);
-    }, 2000)
+  console.log('loading web worker')
+  const zkappWorkerClient = new ZkappWorkerClient();
+  await timeout(5);
+  console.log('done loading web worker')
+  await context.setState({
+    ...context.state,
+    zkappWorkerClient: zkappWorkerClient });
+  console.log('setting active instance to berkeley')
+  await zkappWorkerClient.setActiveInstanceToBerkeley();
+  console.log('berkeley loaded');
+  console.log('loading contract')
+  await zkappWorkerClient.loadContract();
+  console.log('contract loaded');
+  console.log('blockchain length');
+  const length = await zkappWorkerClient.fetchBlockchainLength();
+  console.log(length);
+  await context.setBlockchainLength(length);
+  await context.setCompilationButtonState(2);
 }
 
 async function runCompile(context: MacContextType) {

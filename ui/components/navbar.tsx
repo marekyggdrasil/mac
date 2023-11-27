@@ -8,11 +8,11 @@ const CircuitCompileButton = () => {
     return <button className="btn" onClick={() => {
       context.state.runLoadSnarkyJS(context);
     }}>
-      Load SnarkyJS
+      Load o1js
     </button>;
     } else if (context.compilationButtonState == 1) {
         return <button className="btn btn-disabled animate-pulse">
-            Loading SnarkyJS...
+            Loading o1js...
         </button>;
     } else if (
         (context.compilationButtonState == 2) && (context.connectionButtonState <= 1)) {
