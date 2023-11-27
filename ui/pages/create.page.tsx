@@ -35,7 +35,7 @@ const CreateCases = () => {
     return (
       <article className="container prose">
         <h1>Create a new MAC contract</h1>
-        <div><p>You need to load the SnarkyJS library first!</p></div>
+        <div><p>You need to load the o1js library first!</p></div>
       </article>);
     }
     if (context.state.loaded) {

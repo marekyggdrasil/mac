@@ -8,19 +8,23 @@ import { MinaValue, MinaBlockchainLength, MinaSecretValue } from './highlights';
 
 async function generateKeyPair(context: MacContextType) {
   const sk: PrivateKey = PrivateKey.random();
-    const pk: PublicKey = sk.toPublicKey();
-    context.setState({ ...context.state, zkappPrivateKeyCandidate: sk, zkappPublicKeyCandidate: pk });
+  const pk: PublicKey = sk.toPublicKey();
+  context.setState({
+    ...context.state,
+    zkappPrivateKeyCandidate: sk,
+    zkappPublicKeyCandidate: pk
+  });
 }
 
 const KeyGenerator = () => {
   const context: MacContextType = CastContext();
-  if (context.state.zkappPublicKeyCandidate.isEmpty()) {
+  if (context.state.zkappPublicKeyCandidate.isEmpty().toBoolean()) {
     return <p>Your MAC! contract does not have a private key. Click on <button className="btn" onClick={async (event) => {
       event.preventDefault();
       await generateKeyPair(context);
       return;
     }}>Generate</button> to prepare a new key pair.</p>;
-    }
+  }
   let zkapp_pk = '';
   if (context.state.zkappPublicKeyCandidate !== null) {
     zkapp_pk = context.state.zkappPublicKeyCandidate.toBase58();
