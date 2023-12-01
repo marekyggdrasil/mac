@@ -89,10 +89,14 @@ let state: null | zkAppWorkerState = null;
 
 const functions = {
   setActiveInstanceToBerkeley: async (args: {}) => {
-    const Berkeley = Mina.BerkeleyQANet(
-      "https://proxy.berkeley.minaexplorer.com/graphql"
-    );
-    Mina.setActiveInstance(Berkeley);
+    try {
+      const Berkeley = Mina.BerkeleyQANet(
+        "https://proxy.berkeley.minaexplorer.com/graphql"
+      );
+      Mina.setActiveInstance(Berkeley);
+    } catch (e: unknown) {
+      throw e;
+    }
   },
     loadContract: async (args: {}) => {
     const { Mac } = await import(
@@ -125,7 +129,7 @@ const functions = {
   },
   fetchBlockchainLength: async (args: {}) => {
     let block = await fetchLastBlock(
-            "https://proxy.berkeley.minaexplorer.com/graphql");
+      "https://proxy.berkeley.minaexplorer.com/graphql");
     return block.blockchainLength.toJSON();
   },
   compileContract: async (args: {}) => {
@@ -150,11 +154,18 @@ const functions = {
     state.zkapp = new state.Mac!(publicKey);
   },
     getBlockchainLength: async (args: {}) => {
+      try {
         const network_state = await Mina.getNetworkState();
         return network_state.blockchainLength.toString();
+      } catch (e: unknown) {
+        throw Error('nope!');
+      }
     },
     createDeployTransaction: async (
-      args: { zkAppPrivateKey58: string, feePayerAddress58: string}
+        args: {
+            zkAppPrivateKey58: string,
+            feePayerAddress58: string
+        }
     ) => {
       if (state === null) {
         throw Error('state is null');
@@ -163,8 +174,9 @@ const functions = {
         args.zkAppPrivateKey58);
       const feePayer: PublicKey = PublicKey.fromBase58(
         args.feePayerAddress58);
+      let transactionFee = 100_000_000;
       const transaction = await Mina.transaction(
-        feePayer,
+        { sender: feePayer, fee: transactionFee },
         () => {
           if (state === null) {
             throw Error('state is null');

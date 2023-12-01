@@ -26,13 +26,11 @@ export async function contractDeploy(context: MacContextType) {
   if (!context.state.finalized) {
     await finalizeContract(context);
   }
-  let connectedAddress = context.connectedAddress;
-  if (!context.state.usingAuro) {
-    connectedAddress = context.state.actorPublicKey.toBase58();
-  }
+  const connectedAddress58: string = context.connectedAddress;
+  const connectedAddress: PublicKey = PublicKey.fromBase58(connectedAddress58);
   console.log('fetchAccount');
   await zkappWorkerClient.fetchAccount(
-    { publicKey: PublicKey.fromBase58(connectedAddress) });
+    { publicKey: connectedAddress });
   console.log('initZkappInstance');
   await zkappWorkerClient.initZkappInstance(
     context.state.zkappPublicKey);
@@ -41,7 +39,8 @@ export async function contractDeploy(context: MacContextType) {
     throw Error('Private key is not defined');
   }
   await zkappWorkerClient.createDeployTransaction(
-    context.state.zkappPrivateKey, context.state.actorPublicKey);
+    context.state.zkappPrivateKey,
+    connectedAddress);
   await context.setState({
     ...context.state,
     creatingTransaction: true,

@@ -19,7 +19,6 @@ import {
     contractFailure
 } from './txBuilding';
 import { RenderContractDescription } from './ContractRendering';
-import { InteractionModeUI } from './multiwallet';
 import {
     PublicKey
 } from 'o1js';
@@ -413,7 +412,6 @@ const Interaction = () => {
     return (
         <article className="container prose">
             <h1>Interact with a <i>MAC!</i> contract</h1>
-            <InteractionModeUI/>
             <InteractionCases />
         </article>);
 }
