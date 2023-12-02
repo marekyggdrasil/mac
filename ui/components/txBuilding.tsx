@@ -54,7 +54,15 @@ export async function contractDeploy(context: MacContextType) {
     tx_building_state: 'Initiating...'
   });
   console.log('getTransactionJSON');
-  const { hash } = await zkappWorkerClient.sendTransaction();
+  const transactionJSON = await zkappWorkerClient.getTransactionJSON();
+  console.log(transactionJSON);
+  const { hash } = await (window as any).mina.sendTransaction({
+    transaction: transactionJSON,
+    feePayer: {
+      memo: '',
+    },
+  });
+  await context.setTxHash(hash);
   console.log('done');
   console.log(hash);
   await context.setTxHash(hash);
