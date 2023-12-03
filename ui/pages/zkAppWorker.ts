@@ -181,6 +181,7 @@ const functions = {
           if (state === null) {
             throw Error('state is null');
           }
+          AccountUpdate.fundNewAccount(feePayer);
           state.zkapp!.deploy({ zkappKey: zkAppPrivateKey });
         });
       transaction.sign([zkAppPrivateKey]);
