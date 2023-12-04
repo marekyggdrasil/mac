@@ -1,7 +1,5 @@
-import Interaction from '../components/interaction';
+import Interaction from "../components/interaction";
 
 export default function Current() {
-    return (
-        <Interaction />
-    )
+  return <Interaction />;
 }

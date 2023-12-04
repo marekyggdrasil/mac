@@ -9,7 +9,11 @@
     "lint": "next lint",
     "ts-watch": "tsc --noEmit --incremental --watch",
     "export": "next export",
+    "format": "prettier --write --ignore-unknown **/*",
     "deploy": "next build && next export && touch out/.nojekyll  && git add -f out && git commit -m \"Deploy gh-pages\" && cd .. && git subtree push --prefix ui/out origin gh-pages"
+  },
+  "devDependencies": {
+    "prettier": "3.0.3"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.8",

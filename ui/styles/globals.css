@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 .blurred {
-    filter: blur(3px);
-    -webkit-filter: blur(3px);
+  filter: blur(3px);
+  -webkit-filter: blur(3px);
 }
 
 .table th:first-child {
-    z-index: 0;
+  z-index: 0;
 }
