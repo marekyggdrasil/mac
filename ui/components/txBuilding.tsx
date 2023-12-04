@@ -73,7 +73,7 @@ export async function contractDeploy(context: MacContextType) {
 export async function contractInit(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   const transactionFee = 0.1;
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Preparing...",
@@ -82,40 +82,28 @@ export async function contractInit(context: MacContextType) {
   if (!context.state.finalized) {
     await finalizeContract(context);
   }
-  let connectedAddress = context.connectedAddress;
-  if (!context.state.usingAuro) {
-    connectedAddress = context.state.actorPublicKey.toBase58();
-  }
+  const connectedAddress58: string = context.connectedAddress;
+  const connectedAddress: PublicKey = PublicKey.fromBase58(connectedAddress58);
   console.log("fetchAccount");
-  await zkappWorkerClient.fetchAccount({
-    publicKey: PublicKey.fromBase58(connectedAddress),
-  });
+  await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
   console.log("createDeployTransaction");
-  if (context.state.usingAuro) {
-    await zkappWorkerClient.createInitTransactionAuro();
-  } else {
-    if (context.state.actorPublicKey === null) {
-      throw Error("Private key is not defined");
-    }
-    await zkappWorkerClient.createInitTransaction(context.state.actorPublicKey);
-  }
-  context.setState({
+  await zkappWorkerClient.createInitTransaction(connectedAddress);
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
   await zkappWorkerClient.proveTransaction();
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Initiating...",
   });
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
-  console.log("sendTransaction");
   console.log(transactionJSON);
   const { hash } = await (window as any).mina.sendTransaction({
     transaction: transactionJSON,
@@ -123,6 +111,9 @@ export async function contractInit(context: MacContextType) {
       memo: "",
     },
   });
+  await context.setTxHash(hash);
+  console.log("done");
+  console.log(hash);
   await context.setTxHash(hash);
   await context.setState({
     ...context.state,
@@ -136,7 +127,7 @@ export async function contractInit(context: MacContextType) {
 export async function contractDeposit(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   const transactionFee = 0.1;
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Preparing...",
@@ -145,35 +136,28 @@ export async function contractDeposit(context: MacContextType) {
   if (!context.state.finalized) {
     await finalizeContract(context);
   }
-  let connectedAddress = context.connectedAddress;
-  if (!context.state.usingAuro) {
-    connectedAddress = context.state.actorPublicKey.toBase58();
-  }
+  const connectedAddress58: string = context.connectedAddress;
+  const connectedAddress: PublicKey = PublicKey.fromBase58(connectedAddress58);
   console.log("fetchAccount");
-  await zkappWorkerClient.fetchAccount({
-    publicKey: PublicKey.fromBase58(connectedAddress),
-  });
+  await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
   console.log("createDeployTransaction");
-  await zkappWorkerClient.createDepositTransactionAuro(
-    context.state.actorPublicKey,
-  );
-  context.setState({
+  await zkappWorkerClient.createDepositTransaction(connectedAddress);
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
   await zkappWorkerClient.proveTransaction();
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Initiating...",
   });
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
-  console.log("sendTransaction");
   console.log(transactionJSON);
   const { hash } = await (window as any).mina.sendTransaction({
     transaction: transactionJSON,
@@ -181,6 +165,9 @@ export async function contractDeposit(context: MacContextType) {
       memo: "",
     },
   });
+  await context.setTxHash(hash);
+  console.log("done");
+  console.log(hash);
   await context.setTxHash(hash);
   await context.setState({
     ...context.state,
@@ -194,47 +181,37 @@ export async function contractDeposit(context: MacContextType) {
 export async function contractWithdraw(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   const transactionFee = 0.1;
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Preparing...",
+    tx_command: "withdraw",
   });
   if (!context.state.finalized) {
     await finalizeContract(context);
   }
-  let connectedAddress = context.connectedAddress;
-  if (!context.state.usingAuro) {
-    connectedAddress = context.state.actorPublicKey.toBase58();
-  }
+  const connectedAddress58: string = context.connectedAddress;
+  const connectedAddress: PublicKey = PublicKey.fromBase58(connectedAddress58);
   console.log("fetchAccount");
-  await zkappWorkerClient.fetchAccount({
-    publicKey: PublicKey.fromBase58(connectedAddress),
-  });
+  await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
   console.log("createDeployTransaction");
-
-  if (context.state.actorPublicKey === null) {
-    throw Error("Private key is not defined");
-  }
-  await zkappWorkerClient.createWithdrawTransactionAuro(
-    context.state.actorPublicKey,
-  );
-  context.setState({
+  await zkappWorkerClient.createWithdrawTransaction(connectedAddress);
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
   await zkappWorkerClient.proveTransaction();
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Initiating...",
   });
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
-  console.log("sendTransaction");
   console.log(transactionJSON);
   const { hash } = await (window as any).mina.sendTransaction({
     transaction: transactionJSON,
@@ -243,58 +220,52 @@ export async function contractWithdraw(context: MacContextType) {
     },
   });
   await context.setTxHash(hash);
+  console.log("done");
+  console.log(hash);
+  await context.setTxHash(hash);
   await context.setState({
     ...context.state,
     creatingTransaction: false,
     deployed: true,
     tx_building_state: "",
+    tx_command: "",
   });
 }
 
 export async function contractCancel(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   const transactionFee = 0.1;
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Preparing...",
+    tx_command: "cancel",
   });
   if (!context.state.finalized) {
     await finalizeContract(context);
   }
-  let connectedAddress = context.connectedAddress;
-  if (!context.state.usingAuro) {
-    connectedAddress = context.state.actorPublicKey.toBase58();
-  }
+  const connectedAddress58: string = context.connectedAddress;
+  const connectedAddress: PublicKey = PublicKey.fromBase58(connectedAddress58);
   console.log("fetchAccount");
-  await zkappWorkerClient.fetchAccount({
-    publicKey: PublicKey.fromBase58(connectedAddress),
-  });
+  await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
   console.log("createDeployTransaction");
-
-  if (context.state.actorPublicKey === null) {
-    throw Error("Private key is not defined");
-  }
-  await zkappWorkerClient.createCancelTransactionAuro(
-    context.state.actorPublicKey,
-  );
-  context.setState({
+  await zkappWorkerClient.createCancelTransaction(connectedAddress);
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
   await zkappWorkerClient.proveTransaction();
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Initiating...",
   });
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
-  console.log("sendTransaction");
   console.log(transactionJSON);
   const { hash } = await (window as any).mina.sendTransaction({
     transaction: transactionJSON,
@@ -303,53 +274,52 @@ export async function contractCancel(context: MacContextType) {
     },
   });
   await context.setTxHash(hash);
+  console.log("done");
+  console.log(hash);
+  await context.setTxHash(hash);
   await context.setState({
     ...context.state,
     creatingTransaction: false,
     deployed: true,
     tx_building_state: "",
+    tx_command: "",
   });
 }
 
 export async function contractSuccess(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   const transactionFee = 0.1;
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Preparing...",
+    tx_command: "success",
   });
   if (!context.state.finalized) {
     await finalizeContract(context);
   }
-  let connectedAddress = context.connectedAddress;
-  if (!context.state.usingAuro) {
-    connectedAddress = context.state.actorPublicKey.toBase58();
-  }
+  const connectedAddress58: string = context.connectedAddress;
+  const connectedAddress: PublicKey = PublicKey.fromBase58(connectedAddress58);
   console.log("fetchAccount");
-  await zkappWorkerClient.fetchAccount({
-    publicKey: PublicKey.fromBase58(connectedAddress),
-  });
+  await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
   console.log("createDeployTransaction");
-  await zkappWorkerClient.createSuccessTransactionAuro();
-  context.setState({
+  await zkappWorkerClient.createSuccessTransaction(connectedAddress);
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
   await zkappWorkerClient.proveTransaction();
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Initiating...",
   });
   console.log("getTransactionJSON");
-  let _hash = "";
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
-  console.log("sendTransaction");
   console.log(transactionJSON);
   const { hash } = await (window as any).mina.sendTransaction({
     transaction: transactionJSON,
@@ -358,52 +328,52 @@ export async function contractSuccess(context: MacContextType) {
     },
   });
   await context.setTxHash(hash);
+  console.log("done");
+  console.log(hash);
+  await context.setTxHash(hash);
   await context.setState({
     ...context.state,
     creatingTransaction: false,
     deployed: true,
     tx_building_state: "",
+    tx_command: "",
   });
 }
 
 export async function contractFailure(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   const transactionFee = 0.1;
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Preparing...",
+    tx_command: "failure",
   });
   if (!context.state.finalized) {
     await finalizeContract(context);
   }
-  let connectedAddress = context.connectedAddress;
-  if (!context.state.usingAuro) {
-    connectedAddress = context.state.actorPublicKey.toBase58();
-  }
+  const connectedAddress58: string = context.connectedAddress;
+  const connectedAddress: PublicKey = PublicKey.fromBase58(connectedAddress58);
   console.log("fetchAccount");
-  await zkappWorkerClient.fetchAccount({
-    publicKey: PublicKey.fromBase58(connectedAddress),
-  });
+  await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
   console.log("createDeployTransaction");
-  await zkappWorkerClient.createFailureTransactionAuro();
-  context.setState({
+  await zkappWorkerClient.createFailureTransaction(connectedAddress);
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
   await zkappWorkerClient.proveTransaction();
-  context.setState({
+  await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Initiating...",
   });
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
-  console.log("sendTransaction");
   console.log(transactionJSON);
   const { hash } = await (window as any).mina.sendTransaction({
     transaction: transactionJSON,
@@ -412,10 +382,14 @@ export async function contractFailure(context: MacContextType) {
     },
   });
   await context.setTxHash(hash);
+  console.log("done");
+  console.log(hash);
+  await context.setTxHash(hash);
   await context.setState({
     ...context.state,
     creatingTransaction: false,
     deployed: true,
     tx_building_state: "",
+    tx_command: "",
   });
 }

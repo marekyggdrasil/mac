@@ -187,206 +187,126 @@ const functions = {
     transaction.sign([zkAppPrivateKey]);
     state.transaction = transaction;
   },
-  createInitTransaction: async (args: { deployerPublicKey58: string }) => {
+  createInitTransaction: async (args: { actorPublicKey58: string }) => {
     if (state === null) {
       throw Error("state is null");
     }
-    const deployerPublicKey: PublicKey = PublicKey.fromBase58(
-      args.deployerPublicKey58,
-    );
+    if (state.preimage === null) {
+      throw Error("state.preimage is null");
+    }
+    const feePayer: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
     let transactionFee = 100_000_000;
-    /*
-      const _commitment: Field = state.Preimage.hash(
-        castPreimageValue(state.preimage));
-      const transaction = await Mina.transaction(
-        { feePayerKey: deployerPrivateKey, fee: transactionFee },
-        () => {
-          if (state === null) {
-            throw Error('state is null');
-          }
-            state.zkapp!.initialize(_commitment);
-          });
-        state.transaction = transaction;
-        */
-    // TODO
-  },
-  sendTransaction: async (args: {}) => {
-    if (state === null) {
-      throw Error("state is null");
-    }
-    if (state.transaction === null) {
-      throw Error("state.transaction is null");
-    }
-    const res = await state.transaction.send();
-    const hash = await res.hash();
-    return JSON.stringify({
-      hash: hash,
-    });
-  },
-  createDepositTransaction: async (args: {
-    actorPublicKey58: string;
-    deployerPrivateKey58: string;
-  }) => {
-    if (state === null) {
-      throw Error("state is null");
-    }
-    const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(
-      args.deployerPrivateKey58,
-    );
-    let transactionFee = 100_000_000;
-    const actor: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
+    const _commitment: Field = state.Preimage.hash(state.preimage);
     const transaction = await Mina.transaction(
-      { feePayerKey: feePayerPrivateKey, fee: transactionFee },
+      { sender: feePayer, fee: transactionFee },
+      () => {
+        if (state === null) {
+          throw Error("state is null");
+        }
+        state.zkapp!.initialize(_commitment);
+      },
+    );
+    state.transaction = transaction;
+  },
+  createDepositTransaction: async (args: { actorPublicKey58: string }) => {
+    if (state === null) {
+      throw Error("state is null");
+    }
+    const feePayer: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
+    let transactionFee = 100_000_000;
+    const transaction = await Mina.transaction(
+      { sender: feePayer, fee: transactionFee },
       () => {
         if (state === null) {
           throw Error("state is null");
         }
         if (state.preimage === null) {
-          throw Error("Preimage is null");
+          throw Error("state.preimage is null");
         }
-        state.zkapp!.deposit(state.preimage, actor);
+        state.zkapp!.deposit(state.preimage, feePayer);
       },
     );
     state.transaction = transaction;
   },
-  createDepositTransactionAuro: async (args: { actorPublicKey58: string }) => {
+  createWithdrawTransaction: async (args: { actorPublicKey58: string }) => {
     if (state === null) {
       throw Error("state is null");
     }
-    const actor: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
-    const transaction = await Mina.transaction(() => {
-      if (state === null) {
-        throw Error("state is null");
-      }
-      if (state.preimage === null) {
-        throw Error("Preimage is null");
-      }
-      state.zkapp!.deposit(state.preimage, actor);
-    });
-    state.transaction = transaction;
-  },
-  createWithdrawTransactionAuro: async (args: { actorPublicKey58: string }) => {
-    /*
-      if (state === null) {
-        throw Error('state is null');
-      }
-        const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
-      const transaction = await Mina.transaction(() => {
-        if (state === null) {
-          throw Error('state is null');
-        }
-        if (state.preimage === null) {
-          throw Error('Preimage is null');
-        }
-            state.zkapp!.withdraw(state.preimage, actor);
-        });
-        state.transaction = transaction;
-        */
-  },
-  createSuccessTransaction: async (args: {
-    actorPublicKey58: string;
-    deployerPrivateKey58: string;
-  }) => {
-    if (state === null) {
-      throw Error("state is null");
-    }
-    const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(
-      args.deployerPrivateKey58,
-    );
+    const feePayer: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
     let transactionFee = 100_000_000;
-    const actor: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
     const transaction = await Mina.transaction(
-      { feePayerKey: feePayerPrivateKey, fee: transactionFee },
+      { sender: feePayer, fee: transactionFee },
       () => {
         if (state === null) {
           throw Error("state is null");
         }
         if (state.preimage === null) {
-          throw Error("Preimage is null");
+          throw Error("state.preimage is null");
         }
-        state.zkapp!.success(state.preimage, actor);
+        state.zkapp!.withdraw(state.preimage, feePayer);
       },
     );
     state.transaction = transaction;
   },
-  createSuccessTransactionAuro: async (args: { publicKey58: string }) => {
+  createSuccessTransaction: async (args: { actorPublicKey58: string }) => {
     if (state === null) {
       throw Error("state is null");
     }
-    const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
-    const transaction = await Mina.transaction(() => {
-      if (state === null) {
-        throw Error("state is null");
-      }
-      if (state.preimage === null) {
-        throw Error("Preimage is null");
-      }
-      state.zkapp!.success(state.preimage, actor);
-    });
-    state.transaction = transaction;
-  },
-  createFailureTransaction: async (args: {
-    actorPublicKey58: string;
-    deployerPrivateKey58: string;
-  }) => {
-    if (state === null) {
-      throw Error("state is null");
-    }
-    const feePayerPrivateKey: PrivateKey = PrivateKey.fromBase58(
-      args.deployerPrivateKey58,
-    );
+    const feePayer: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
     let transactionFee = 100_000_000;
-    const actor: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
     const transaction = await Mina.transaction(
-      { feePayerKey: feePayerPrivateKey, fee: transactionFee },
+      { sender: feePayer, fee: transactionFee },
       () => {
         if (state === null) {
           throw Error("state is null");
         }
         if (state.preimage === null) {
-          throw Error("Preimage is null");
+          throw Error("state.preimage is null");
         }
-        state.zkapp!.failure(state.preimage, actor);
+        state.zkapp!.success(state.preimage, feePayer);
       },
     );
     state.transaction = transaction;
   },
-  createFailureTransactionAuro: async (args: { publicKey58: string }) => {
+  createFailureTransaction: async (args: { actorPublicKey58: string }) => {
     if (state === null) {
       throw Error("state is null");
     }
-    const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
-    const transaction = await Mina.transaction(() => {
-      if (state === null) {
-        throw Error("state is null");
-      }
-      if (state.preimage === null) {
-        throw Error("Preimage is null");
-      }
-      state.zkapp!.failure(state.preimage, actor);
-    });
-    state.transaction = transaction;
-  },
-  createCancelTransactionAuro: async (args: { actorPublicKey58: string }) => {
-    /*
-      if (state === null) {
-        throw Error('state is null');
-      }
-      if (state.preimage === null) {
-        throw Error('Preimage is null');
-      }
-        const actor: PublicKey = PublicKey.fromBase58(args.publicKey58);
-      const transaction = await Mina.transaction(() => {
+    const feePayer: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
+    let transactionFee = 100_000_000;
+    const transaction = await Mina.transaction(
+      { sender: feePayer, fee: transactionFee },
+      () => {
         if (state === null) {
-          throw Error('state is null');
+          throw Error("state is null");
         }
         if (state.preimage === null) {
-          throw Error('Preimage is null');
+          throw Error("state.preimage is null");
         }
-            state.zkapp!.cancel(state.preimage, actor);
-        });
-        state.transaction = transaction;
-        */
+        state.zkapp!.failure(state.preimage, feePayer);
+      },
+    );
+    state.transaction = transaction;
+  },
+  createCancelTransaction: async (args: { actorPublicKey58: string }) => {
+    if (state === null) {
+      throw Error("state is null");
+    }
+    const feePayer: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
+    let transactionFee = 100_000_000;
+    const transaction = await Mina.transaction(
+      { sender: feePayer, fee: transactionFee },
+      () => {
+        if (state === null) {
+          throw Error("state is null");
+        }
+        if (state.preimage === null) {
+          throw Error("state.preimage is null");
+        }
+        state.zkapp!.cancel(state.preimage, feePayer);
+      },
+    );
+    state.transaction = transaction;
   },
   getContractState: async (args: {}) => {
     if (state === null) {
