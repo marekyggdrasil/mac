@@ -114,17 +114,11 @@ async function localDeploy(
   const tx_deploy = await Mina.transaction(deployer_pk, () => {
     AccountUpdate.fundNewAccount(deployer_pk);
     zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
+    zkAppInstance.initialize(Preimage.hash(mac_contract));
   });
   await tx_deploy.prove();
   await tx_deploy.sign([zkAppPrivateKey, deployerAccount]);
   await tx_deploy.send();
-
-  const tx_init = await Mina.transaction(deployer_pk, () => {
-    zkAppInstance.initialize(Preimage.hash(mac_contract));
-  });
-  await tx_init.prove();
-  await tx_init.sign([deployerAccount]);
-  await tx_init.send();
 }
 
 describe('Mac tests', () => {
