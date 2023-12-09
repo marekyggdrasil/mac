@@ -11,7 +11,6 @@ import {
 import { MinaValue } from "./highlights";
 import {
   contractDeploy,
-  contractInit,
   contractDeposit,
   contractWithdraw,
   contractCancel,
@@ -115,34 +114,6 @@ const DeployButton = () => {
     );
   }
   return <button className="btn btn-disabled">Deploy</button>;
-};
-
-const InitButton = () => {
-  const context: MacContextType = CastContext();
-  if (!context.state.deployed) {
-    return <button className="btn btn-disabled">Initialize</button>;
-  } else if (context.state.tx_building_state == "") {
-    return (
-      <button
-        className="btn btn-primary"
-        onClick={async () => {
-          await contractInit(context);
-        }}
-      >
-        Initialize
-      </button>
-    );
-  } else if (
-    context.state.tx_building_state != "" &&
-    context.state.tx_command != "init"
-  ) {
-    return <button className="btn btn-primary btn-disabled">Initialize</button>;
-  }
-  return (
-    <button className="btn btn-disabled animate-pulse">
-      {context.state.tx_building_state}
-    </button>
-  );
 };
 
 const DepositButton = () => {
@@ -296,14 +267,6 @@ const GodMode = () => {
         }}
       >
         God Mode Deploy
-      </button>
-      <button
-        className="btn btn-primary"
-        onClick={async () => {
-          await contractInit(context);
-        }}
-      >
-        God Mode Initialize
       </button>
       <button
         className="btn btn-primary"
@@ -576,7 +539,6 @@ const InteractionUI = () => {
       <WhoActed />
       <TxIds />
       <DeployButton />
-      <InitButton />
       <DepositButton />
       <WithdrawButton />
       <SuccessButton />

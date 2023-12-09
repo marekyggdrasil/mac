@@ -169,32 +169,13 @@ const functions = {
     if (state === null) {
       throw Error("state is null");
     }
+    if (state.preimage === null) {
+      throw Error("state.preimage is null");
+    }
     const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(
       args.zkAppPrivateKey58,
     );
     const feePayer: PublicKey = PublicKey.fromBase58(args.feePayerAddress58);
-    let transactionFee = 100_000_000;
-    const transaction = await Mina.transaction(
-      { sender: feePayer, fee: transactionFee },
-      () => {
-        if (state === null) {
-          throw Error("state is null");
-        }
-        AccountUpdate.fundNewAccount(feePayer);
-        state.zkapp!.deploy({ zkappKey: zkAppPrivateKey });
-      },
-    );
-    transaction.sign([zkAppPrivateKey]);
-    state.transaction = transaction;
-  },
-  createInitTransaction: async (args: { actorPublicKey58: string }) => {
-    if (state === null) {
-      throw Error("state is null");
-    }
-    if (state.preimage === null) {
-      throw Error("state.preimage is null");
-    }
-    const feePayer: PublicKey = PublicKey.fromBase58(args.actorPublicKey58);
     let transactionFee = 100_000_000;
     const _commitment: Field = state.Preimage.hash(state.preimage);
     const transaction = await Mina.transaction(
@@ -203,9 +184,12 @@ const functions = {
         if (state === null) {
           throw Error("state is null");
         }
+        AccountUpdate.fundNewAccount(feePayer);
+        state.zkapp!.deploy({ zkappKey: zkAppPrivateKey });
         state.zkapp!.initialize(_commitment);
       },
     );
+    transaction.sign([zkAppPrivateKey]);
     state.transaction = transaction;
   },
   createDepositTransaction: async (args: { actorPublicKey58: string }) => {

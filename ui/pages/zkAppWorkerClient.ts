@@ -135,12 +135,6 @@ export default class ZkappWorkerClient {
     });
   }
 
-  async createInitTransaction(actor: PublicKey) {
-    return await this._call("createInitTransaction", {
-      deployerPublicKey58: actor.toBase58(),
-    });
-  }
-
   async createDepositTransaction(actor: PublicKey) {
     return await this._call("createDepositTransaction", {
       actorPublicKey58: actor.toBase58(),
