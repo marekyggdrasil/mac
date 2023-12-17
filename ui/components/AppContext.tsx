@@ -74,6 +74,8 @@ export type MacContextType = {
   setConnectionButtonState: Function;
   blockchainLength: number;
   setBlockchainLength: Function;
+  connectionError: string;
+  setConnectionError: Function;
   connectedAddress: string;
   setConnectedAddress: Function;
   txHash: string;

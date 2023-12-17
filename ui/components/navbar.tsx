@@ -4,6 +4,23 @@ import { MacContextType, CastContext } from "./AppContext";
 const CircuitCompileButton = () => {
   const context: MacContextType = CastContext();
   if (context.compilationButtonState == 0) {
+    if (context.connectionError !== "") {
+      return (
+        <div
+          className="tooltip tooltip-open tooltip-bottom tooltip-error"
+          data-tip={context.connectionError}
+        >
+          <button
+            className="btn"
+            onClick={() => {
+              context.state.runLoadSnarkyJS(context);
+            }}
+          >
+            Load o1js
+          </button>
+        </div>
+      );
+    }
     return (
       <button
         className="btn"
@@ -15,6 +32,18 @@ const CircuitCompileButton = () => {
       </button>
     );
   } else if (context.compilationButtonState == 1) {
+    if (context.connectionError !== "") {
+      return (
+        <div
+          className="tooltip tooltip-open tooltip-bottom tooltip-error"
+          data-tip={context.connectionError}
+        >
+          <button className="btn btn-disabled animate-pulse">
+            Loading o1js...
+          </button>
+        </div>
+      );
+    }
     return (
       <button className="btn btn-disabled animate-pulse">
         Loading o1js...
@@ -52,6 +81,19 @@ const CircuitCompileButton = () => {
 
 const currentBlock = (blockchainLength: number) => {
   return "Block " + blockchainLength.toString();
+};
+
+const ConnectionError = () => {
+  const context: MacContextType = CastContext();
+  if (context.connectionError !== "") {
+    return (
+      <div
+        className="tooltip tooltip-open tooltip-bottom tooltip-error"
+        data-tip={context.connectionError}
+      ></div>
+    );
+  }
+  return <div></div>;
 };
 
 const ConnectButton = () => {

@@ -8,7 +8,7 @@ import type {
 
 export default class ZkappWorkerClient {
   setActiveInstanceToBerkeley() {
-    return this._call("setActiveInstanceToBerkeley", {});
+    return this._callSetActiveInstance("setActiveInstanceToBerkeley", {});
   }
 
   loadContract() {
@@ -212,6 +212,28 @@ export default class ZkappWorkerClient {
       this.worker.postMessage(message);
 
       this.nextId++;
+    });
+  }
+
+  _callSetActiveInstance(fn: WorkerFunctions, args: any): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.promises[this.nextId] = { resolve, reject };
+
+      const message: ZkappWorkerRequest = {
+        id: this.nextId,
+        fn,
+        args,
+      };
+
+      this.worker.postMessage(message);
+
+      this.nextId++;
+      return "reachable";
+    }).then(() => {
+      //console.log('oh no it did not work');
+      //throw "setTimeout's callback error";
+      //  ^^^^^ here, it will lead to a rejection
+      return "unreachable";
     });
   }
 

@@ -88,14 +88,10 @@ let state: null | zkAppWorkerState = null;
 
 const functions = {
   setActiveInstanceToBerkeley: async (args: {}) => {
-    try {
-      const Berkeley = Mina.BerkeleyQANet(
-        "https://proxy.berkeley.minaexplorer.com/graphql",
-      );
-      Mina.setActiveInstance(Berkeley);
-    } catch (e: unknown) {
-      throw e;
-    }
+    const Berkeley = Mina.BerkeleyQANet(
+      "https://proxy.berkeley.minaexplorer.com/graphql",
+    );
+    Mina.setActiveInstance(Berkeley);
   },
   loadContract: async (args: {}) => {
     const { Mac } = await import("../../contracts/build/Mac.js");

@@ -37,6 +37,7 @@ async function runLoadSnarkyJS(context: MacContextType) {
   console.log("runLoadSnarkyJS");
   // indicate it is compiling now
   await context.setCompilationButtonState(1);
+  await context.setConnectionError("");
   console.log("loading web worker");
   const zkappWorkerClient = new ZkappWorkerClient();
   await timeout(5);
@@ -46,16 +47,25 @@ async function runLoadSnarkyJS(context: MacContextType) {
     zkappWorkerClient: zkappWorkerClient,
   });
   console.log("setting active instance to berkeley");
-  await zkappWorkerClient.setActiveInstanceToBerkeley();
-  console.log("berkeley loaded");
-  console.log("loading contract");
-  await zkappWorkerClient.loadContract();
-  console.log("contract loaded");
-  console.log("blockchain length");
-  const length = await zkappWorkerClient.fetchBlockchainLength();
-  console.log(length);
-  await context.setBlockchainLength(length);
-  await context.setCompilationButtonState(2);
+  const berkeley_state = await zkappWorkerClient.setActiveInstanceToBerkeley();
+  if (berkeley_state !== "reachable") {
+    console.log(
+      "unfortunately the Berkeley network is not reachable right now",
+    );
+    await context.setCompilationButtonState(0);
+    await context.setConnectionError("Failed to reach Berkeley");
+  } else {
+    console.log("berkeley loaded");
+    console.log("loading contract");
+    await zkappWorkerClient.loadContract();
+    console.log("contract loaded");
+    console.log("blockchain length");
+    const length = await zkappWorkerClient.fetchBlockchainLength();
+    console.log(length);
+    await context.setBlockchainLength(length);
+    await context.setCompilationButtonState(2);
+    await context.setConnectionError("");
+  }
 }
 
 async function runCompile(context: MacContextType) {
@@ -170,6 +180,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   let [connectionButtonState, setConnectionButtonState] = useState(0);
   let [blockchainLength, setBlockchainLength] = useState(0);
   let [connectedAddress, setConnectedAddress] = useState("");
+  let [connectionError, setConnectionError] = useState("");
   let [txHash, setTxHash] = useState("");
 
   // -------------------------------------------------------
@@ -193,12 +204,18 @@ function MyApp({ Component, pageProps }: AppProps) {
         // let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
       });
       const interval = setInterval(async () => {
-        const block = await fetchLastBlock(
-          "https://proxy.berkeley.minaexplorer.com/graphql",
-        );
-        const length = parseInt(block.blockchainLength.toString());
-        if (length) {
-          setBlockchainLength(length);
+        if (compilationButtonState > 1) {
+          try {
+            const block = await fetchLastBlock(
+              "https://proxy.berkeley.minaexplorer.com/graphql",
+            );
+            const length = parseInt(block.blockchainLength.toString());
+            if (length) {
+              setBlockchainLength(length);
+            }
+          } catch (e: unknown) {
+            console.log("failed to fetch block :(");
+          }
         }
       }, 60000);
       // return () => clearInterval(interval);
@@ -218,6 +235,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         setConnectionButtonState,
         blockchainLength,
         setBlockchainLength,
+        connectionError,
+        setConnectionError,
         connectedAddress,
         setConnectedAddress,
         txHash,
