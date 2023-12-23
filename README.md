@@ -41,3 +41,11 @@ and run the app locally
 ```sh
 npm run dev
 ```
+
+## Running the build
+
+```sh
+cd ui/
+npm run build
+npm run export
+```

@@ -9,6 +9,7 @@ const nextConfig = {
       ...config.resolve.alias,
       o1js: require('path').resolve('node_modules/o1js'),
     }
+    config.experiments = { ...config.experiments, topLevelAwait: true };
     config.optimization.minimizer = [];
     return config;
   },
