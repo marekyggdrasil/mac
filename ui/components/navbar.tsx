@@ -1,6 +1,31 @@
 import Link from "next/link";
 import { MacContextType, CastContext } from "./AppContext";
 
+const NetworkSelectionComponent = () => {
+  const context: MacContextType = CastContext();
+  if (context.compilationButtonState == 0) {
+    return (
+      <select
+      className="select select-bordered"
+      onChange={async (event) => {
+        await context.setNetwork(event.target.value);
+      }}
+      defaultValue="berkeley">
+      <option value="berkeley">Berkeley</option>
+      <option value="testworld">TestWorld</option>
+      <option disabled>Mainnet</option>
+      </select>
+    );
+  }
+  return (
+    <select className="select select-bordered" defaultValue="berkeley" disabled>
+      <option value="berkeley">Berkeley</option>
+      <option value="testworld">TestWorld</option>
+      <option disabled>Mainnet</option>
+    </select>
+  );
+};
+
 const CircuitCompileButton = () => {
   const context: MacContextType = CastContext();
   if (context.compilationButtonState == 0) {
@@ -181,28 +206,39 @@ const Navbar = () => {
         </Link>
       </div>
       <div className="navbar-center hidden lg:flex">
+        <div className="dropdown">
+          <label tabIndex={1} className="btn btn-ghost">
+            <Link href="">zkApp</Link>
+          </label>
+          <ul
+            tabIndex={1}
+            className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
+          >
+            <li>
+              <Link href="/create">New</Link>
+            </li>
+            <li>
+              <Link href="/current">Interact</Link>
+            </li>
+            <li>
+              <Link href="/close">Close</Link>
+            </li>
+            <li>
+              <Link href="/import">Import</Link>
+            </li>
+            <li>
+              <Link href="/export">Export</Link>
+            </li>
+          </ul>
+        </div>
         <ul className="menu menu-horizontal px-1">
-          <li>
-            <Link href="/create">New zkApp</Link>
-          </li>
-          <li>
-            <Link href="/current">Interact</Link>
-          </li>
-          <li>
-            <Link href="/close">Close</Link>
-          </li>
-          <li>
-            <Link href="/import">Import zkApp</Link>
-          </li>
-          <li>
-            <Link href="/export">Export zkApp</Link>
-          </li>
           <li>
             <Link href="/about">About</Link>
           </li>
         </ul>
       </div>
       <div className="navbar-end">
+        <NetworkSelectionComponent />
         <CircuitCompileButton />
         <ConnectButton />
       </div>

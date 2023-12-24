@@ -39,54 +39,15 @@ function castPreimageValue(preimage: Preimage | null): Preimage {
   return preimage;
 }
 
-/*
-function castState(state: null | zkAppWorkerState): zkAppWorkerState {
-  if (state === null) {
-    throw Error('state is null');
-  }
-  return state;
-}
-
-function castStateTypes(state: zkAppWorkerState) {
-  return state;
-  if (state.Mac === null) {
-    throw Error('Mac is null');
-  }
-  if (state.Outcome === null) {
-    throw Error('Outcome is null');
-  }
-  if (state.Preimage === null) {
-    throw Error('Preimage is null');
-  }
-  if (state.Preimage === null) {
-    throw Error('Failed to initiate the smart contract');
-  }
-}
-
-function castStateValues(state: zkAppWorkerState) {
-  if (state.zkapp === null) {
-    throw Error('zkapp is null');
-  }
-  if (state.preimage === null) {
-    throw Error('preimage is null');
-  }
-  if (state.transaction === null) {
-    throw Error('transaction is null');
-  }
-  if (state.fromMacPack === null) {
-    throw Error('fromMacPack is null');
-  }
-  if (state.toMacPack === null) {
-    throw Error('toMacPack is null');
-  }
-}
-*/
-
 let state: null | zkAppWorkerState = null;
 
 // ---------------------------------------------------------------------------------------
 
 const functions = {
+  setActiveInstanceToNetwork: async (args: { endpoint: string }) => {
+    const connection = Mina.BerkeleyQANet(args.endpoint);
+    Mina.setActiveInstance(connection);
+  },
   setActiveInstanceToBerkeley: async (args: {}) => {
     const Berkeley = Mina.BerkeleyQANet(
       "https://proxy.berkeley.minaexplorer.com/graphql",

@@ -78,6 +78,8 @@ export type MacContextType = {
   setConnectionError: Function;
   connectedAddress: string;
   setConnectedAddress: Function;
+  network: string;
+  setNetwork: Function;
   txHash: string;
   setTxHash: Function;
 };
@@ -104,4 +106,32 @@ export function castZkAppWorkerClient(
     );
   }
   return context.state.zkappWorkerClient;
+}
+
+export function getNetworkFromName(
+  name: string,
+): string {
+  if (name === "berkeley") {
+    return "https://proxy.berkeley.minaexplorer.com/graphql";
+  }
+  if (name === "testworld") {
+    return "https://proxy.testworld.minaexplorer.com/graphql";
+  }
+  throw Error(
+    "unknown network",
+  );
+}
+
+export function getNetworkNiceName(
+  name: string,
+): string {
+  if (name === "berkeley") {
+    return "Berkeley";
+  }
+  if (name === "testworld") {
+    return "TestWorld 2";
+  }
+  throw Error(
+    "unknown network",
+  );
 }

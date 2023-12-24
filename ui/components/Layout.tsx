@@ -42,7 +42,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
               />
             </a>
             <p>
-              Copyright © 2022 - All right reserved by{" "}
+              Copyright © 2024 - All right reserved by{" "}
               <a href="https://sqrtxx.com/" target="_blank" rel="noreferrer">
                 sqrtxx.com
               </a>{" "}

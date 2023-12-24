@@ -7,6 +7,12 @@ import type {
 } from "./zkAppWorker";
 
 export default class ZkappWorkerClient {
+    setActiveInstanceToNetwork(endpoint: string) {
+    return this._callSetActiveInstance("setActiveInstanceToNetwork", {
+      endpoint: endpoint
+    });
+  }
+
   setActiveInstanceToBerkeley() {
     return this._callSetActiveInstance("setActiveInstanceToBerkeley", {});
   }

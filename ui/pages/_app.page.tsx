@@ -7,6 +7,8 @@ import {
   CastContext,
   castZkAppWorkerClient,
   AppContext,
+  getNetworkFromName,
+  getNetworkNiceName,
 } from "../components/AppContext";
 
 import Layout from "../components/Layout";
@@ -47,13 +49,16 @@ async function runLoadSnarkyJS(context: MacContextType) {
     zkappWorkerClient: zkappWorkerClient,
   });
   console.log("setting active instance to berkeley");
-  const berkeley_state = await zkappWorkerClient.setActiveInstanceToBerkeley();
+  const network_endpoint = getNetworkFromName(context.network);
+  const berkeley_state = await zkappWorkerClient.setActiveInstanceToNetwork(
+    network_endpoint);
   if (berkeley_state !== "reachable") {
     console.log(
       "unfortunately the Berkeley network is not reachable right now",
     );
     await context.setCompilationButtonState(0);
-    await context.setConnectionError("Failed to reach Berkeley");
+    const nice_name = getNetworkNiceName(context.network);
+    await context.setConnectionError("Failed to reach " + nice_name);
   } else {
     console.log("berkeley loaded");
     console.log("loading contract");
@@ -181,6 +186,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   let [blockchainLength, setBlockchainLength] = useState(0);
   let [connectedAddress, setConnectedAddress] = useState("");
   let [connectionError, setConnectionError] = useState("");
+  let [network, setNetwork] = useState("berkeley");
   let [txHash, setTxHash] = useState("");
 
   // -------------------------------------------------------
@@ -206,9 +212,8 @@ function MyApp({ Component, pageProps }: AppProps) {
       const interval = setInterval(async () => {
         if (compilationButtonState > 1) {
           try {
-            const block = await fetchLastBlock(
-              "https://proxy.berkeley.minaexplorer.com/graphql",
-            );
+            const endpoint = getNetworkFromName(network);
+            const block = await fetchLastBlock(endpoint);
             const length = parseInt(block.blockchainLength.toString());
             if (length) {
               setBlockchainLength(length);
@@ -239,6 +244,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         setConnectionError,
         connectedAddress,
         setConnectedAddress,
+        network,
+        setNetwork,
         txHash,
         setTxHash,
       }}
