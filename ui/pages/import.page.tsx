@@ -11,9 +11,12 @@ import {
 import { PublicKey } from "o1js";
 
 async function runImport(context: MacContextType) {
-  let element = document.getElementById("import-macpack");
+  let element = document.getElementById("import-macpack") as HTMLInputElement;
   if (element === null) {
-    throw Error("Macpack container is missing");
+    throw Error("Macpack textarea is missing");
+  }
+  if (element.value === null) {
+    throw Error("Macpack textarea.value is null");
   }
   let macpack = element.value;
   console.log(macpack);
