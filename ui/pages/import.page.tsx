@@ -15,9 +15,9 @@ async function runImport(context: MacContextType) {
   if (element === null) {
     throw Error("Macpack container is missing");
   }
-  let zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
-  let macpack = element.innerText || element.textContent;
+  let macpack = element.value;
   console.log(macpack);
+  let zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   try {
     if (macpack === null) {
       throw Error("Macpack value is null");
@@ -126,6 +126,20 @@ const ImportCases = () => {
         </div>
       </div>
       <p>Then hit the import button below!</p>
+      <button
+        className="btn"
+        onClick={async () => {
+          await runImport(context);
+        }}
+      >
+        Import
+      </button>
+    </div>
+  );
+  return (
+    <div>
+      <textarea className="rounded-md not-prose bg-primary text-primary-content macpack-editor" id="import-macpack" placeholder="Paste your MACPACK here..."></textarea>
+      <p>then hit the import button below!</p>
       <button
         className="btn"
         onClick={async () => {
