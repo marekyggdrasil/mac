@@ -234,12 +234,16 @@ export default class ZkappWorkerClient {
       this.worker.postMessage(message);
 
       this.nextId++;
-      return "reachable";
+    }).catch(err => {
+      console.log(".catch");
+      console.log(err);
+      return "unreachable";
     }).then(() => {
+      console.log(".then");
       //console.log('oh no it did not work');
       //throw "setTimeout's callback error";
       //  ^^^^^ here, it will lead to a rejection
-      return "unreachable";
+      return "reachable";
     });
   }
 

@@ -48,16 +48,16 @@ async function runLoadSnarkyJS(context: MacContextType) {
     ...context.state,
     zkappWorkerClient: zkappWorkerClient,
   });
-  console.log("setting active instance to berkeley");
+  const nice_name = getNetworkNiceName(context.network);
   const network_endpoint = getNetworkFromName(context.network);
+  console.log("setting active instance to " + nice_name);
   const berkeley_state = await zkappWorkerClient.setActiveInstanceToNetwork(
     network_endpoint);
   if (berkeley_state !== "reachable") {
     console.log(
-      "unfortunately the Berkeley network is not reachable right now",
+      "unfortunately the " + nice_name + " network is not reachable right now",
     );
     await context.setCompilationButtonState(0);
-    const nice_name = getNetworkNiceName(context.network);
     await context.setConnectionError("Failed to reach " + nice_name);
   } else {
     console.log("berkeley loaded");
