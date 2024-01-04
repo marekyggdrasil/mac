@@ -42,7 +42,7 @@ const FinalizeButton = () => {
   } else {
     return (
       <button
-        className="btn btn-disabled"
+        className="btn"
         onClick={async () => {
           await runExport(context);
         }}
