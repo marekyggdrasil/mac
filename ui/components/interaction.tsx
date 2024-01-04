@@ -86,6 +86,13 @@ async function contractRefreshState(context: MacContextType) {
 const DeployButton = () => {
   const context: MacContextType = CastContext();
   if (!context.state.deployed) {
+    if (context.state.zkappPrivateKey === null) {
+      return (
+        <div
+          className="tooltip tooltip-open tooltip-bottom tooltip-error"
+          data-tip="zkApp private key is missing. Are you deploying macpack import?"
+        ><button className="btn btn-disabled">Deploy</button></div>);
+    }
     if (
       context.state.tx_building_state != "" &&
       context.state.tx_command != "deploy"
@@ -104,13 +111,21 @@ const DeployButton = () => {
     }
     return (
       <button
-        className="btn btn-primary"
-        onClick={async () => {
+      className="btn btn-primary"
+      onClick={async () => {
+        try {
           await contractDeploy(context);
-        }}
-      >
+        } catch (error) {
+          await context.setState({
+            ...context.state,
+            tx_building_state: "",
+            tx_command: "deploy"
+          });
+        }
+      }}
+        >
         Deploy
-      </button>
+        </button>
     );
   }
   return <button className="btn btn-disabled">Deploy</button>;
