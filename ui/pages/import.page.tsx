@@ -117,18 +117,8 @@ const ImportCases = () => {
   }
   return (
     <div>
-      <p>
-        The code section below is editable. Click on it and paste your MACPACK
-        message.
-      </p>
-      <div className="rounded-md not-prose bg-primary text-primary-content">
-        <div className="p-4">
-          <code contentEditable="true" id="import-macpack">
-            Paste your MACPACK here...
-          </code>
-        </div>
-      </div>
-      <p>Then hit the import button below!</p>
+      <textarea className="rounded-md not-prose bg-primary text-primary-content macpack-editor" id="import-macpack" placeholder="Paste your MACPACK here..."></textarea>
+      <p>then hit the import button below!</p>
       <button
         className="btn"
         onClick={async () => {
