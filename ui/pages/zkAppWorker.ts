@@ -21,6 +21,8 @@ import type { Mac } from "../../contracts/src/Mac";
 import type { Outcome, Preimage } from "../../contracts/src/strpreim";
 import type { fromMacPack, toMacPack } from "../../contracts/src/helpers";
 
+import CompilationCacheJSONList from "./compilation_cache_list.json";
+
 type zkAppWorkerState = {
   Mac: typeof Mac;
   Outcome: typeof Outcome;
@@ -31,6 +33,10 @@ type zkAppWorkerState = {
   fromMacPack: typeof fromMacPack;
   toMacPack: typeof toMacPack;
 };
+
+type CompilationCacheJSONList = {
+  files: string[]
+}
 
 function castPreimageValue(preimage: Preimage | null): Preimage {
   if (preimage === null) {
