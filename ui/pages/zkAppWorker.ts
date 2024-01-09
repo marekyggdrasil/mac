@@ -52,8 +52,8 @@ function fetchFiles() {
   const cache_list: CompilationCacheJSONList = CompilationCacheJSONList;
   return Promise.all(cache_list.files.map((file) => {
     return Promise.all([
-      fetch(`http://localhost:3000/cache/${file}.header`).then(res => res.text()),
-      fetch(`http://localhost:3000/cache/${file}`).then(res => res.text())
+      fetch(`/cache/${file}.header`).then(res => res.text()),
+      fetch(`/cache/${file}`).then(res => res.text())
     ]).then(([header, data]) => ({ file, header, data }));
   }))
     .then((cacheList) => cacheList.reduce((acc: any, { file, header, data }) => {
