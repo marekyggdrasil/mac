@@ -27,7 +27,9 @@ let cache_object: CompilationCacheJSONList = {
 }
 
 fs.readdirSync(cache_directory).forEach((file_name: string) => {
-  cache_object["files"].push(file_name);
+  if (!file_name.endsWith(".header")) {
+    cache_object["files"].push(file_name);
+  }
 });
 
 // console.log(cache_object);

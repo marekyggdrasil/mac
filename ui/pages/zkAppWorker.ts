@@ -1,5 +1,6 @@
 import {
   Mina,
+  Cache,
   isReady,
   PublicKey,
   PrivateKey,
@@ -46,6 +47,57 @@ function castPreimageValue(preimage: Preimage | null): Preimage {
 }
 
 let state: null | zkAppWorkerState = null;
+
+function fetchFiles() {
+  const cache_list: CompilationCacheJSONList = CompilationCacheJSONList;
+  return Promise.all(cache_list.files.map((file) => {
+    return Promise.all([
+      fetch(`http://localhost:3000/cache/${file}.header`).then(res => res.text()),
+      fetch(`http://localhost:3000/cache/${file}`).then(res => res.text())
+    ]).then(([header, data]) => ({ file, header, data }));
+  }))
+    .then((cacheList) => cacheList.reduce((acc: any, { file, header, data }) => {
+      acc[file] = { file, header, data };
+      return acc;
+    }, {}));
+}
+
+const FileSystem = (files: any): Cache => ({
+  read({ persistentId, uniqueId, dataType }: any) {
+    // read current uniqueId, return data if it matches
+    if (!files[persistentId]) {
+      console.log('read');
+      console.log({ persistentId, uniqueId, dataType });
+
+      return undefined;
+    }
+
+    const currentId = files[persistentId].header;
+
+    if (currentId !== uniqueId) {
+      console.log('current id did not match persistent id');
+
+      return undefined;
+    }
+
+    if (dataType === 'string') {
+      console.log('found in cache', { persistentId, uniqueId, dataType });
+
+      return new TextEncoder().encode(files[persistentId].data);
+    }
+    // else {
+    //   let buffer = readFileSync(resolve(cacheDirectory, persistentId));
+    //   return new Uint8Array(buffer.buffer);
+    // }
+
+    return undefined;
+  },
+  write({ persistentId, uniqueId, dataType }: any, data: any) {
+    console.log('write');
+    console.log({ persistentId, uniqueId, dataType });
+  },
+  canWrite: true,
+});
 
 // ---------------------------------------------------------------------------------------
 
@@ -100,7 +152,8 @@ const functions = {
     if (state === null) {
       throw Error("state is null");
     }
-    await state.Mac!.compile();
+    const cacheFiles = await fetchFiles();
+    await state.Mac!.compile({ cache: FileSystem(cacheFiles) });
   },
   fetchAccount: async (args: { publicKey58: string }) => {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
