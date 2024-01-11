@@ -135,3 +135,15 @@ export function getNetworkNiceName(
     "unknown network",
   );
 }
+
+export function getTransactionBlockExplorerURL(name: string, txid: string): string {
+  if (name === "berkeley") {
+    return "https://berkeley.minaexplorer.com/transaction/" + txid;
+  }
+  if (name === "testworld") {
+    return "https://minascan.io/testworld/tx/" + txid;
+  }
+  throw Error(
+    "unknown network",
+  );
+}

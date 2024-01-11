@@ -6,6 +6,7 @@ import {
   MacContextType,
   CastContext,
   castZkAppWorkerClient,
+  getTransactionBlockExplorerURL,
 } from "./AppContext";
 
 import { MinaValue } from "./highlights";
@@ -344,8 +345,8 @@ const DeploymentInformation = () => {
 const TxIds = () => {
   const context: MacContextType = CastContext();
   if (context.txHash != "") {
-    const url =
-      "https://berkeley.minaexplorer.com/transaction/" + context.txHash;
+    const url = getTransactionBlockExplorerURL(
+      context.network, context.txHash);
     console.log(url);
     return (
       <div>
