@@ -24,10 +24,25 @@ and build it
 npm run build
 ```
 
+generate the cache
+
+```sh
+npx tsx scripts/gencompilecache.ts
+```
+
+( re-run it few times to see how the compile time improves with the cache )
+
+and copy the cache to speed-up the compilation in the UI
+
+```sh
+cd ../
+sh copy_cache_ui.sh
+```
+
 now to prepare the UI of the MAC! app, from same directory run
 
 ```sh
-cd ../ui
+cd ui
 ```
 
 to change the UI directory, now install the dependencies

@@ -1,4 +1,5 @@
 import {
+  Cache,
   isReady,
   shutdown,
   Bool,
@@ -17,6 +18,9 @@ import {
 import { Outcome, Preimage } from './strpreim';
 import { makeDummyPreimage } from './strdummy';
 import { Mac } from './Mac';
+
+const cache_directory = 'compile-cache';
+const cache: Cache = Cache.FileSystem(cache_directory);
 
 const state_initial: number = 0;
 const state_deposited: number = 1;
@@ -147,7 +151,7 @@ describe('Mac tests', () => {
 
   beforeAll(async () => {
     await isReady;
-    await Mac.compile();
+    await Mac.compile({ cache });
   });
 
   beforeEach(async () => {
