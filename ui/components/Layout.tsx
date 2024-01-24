@@ -57,7 +57,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
           </div>
           <div className="grid-flow-col gap-4 md:place-self-center md:justify-self-end">
             <a
-              href="https://twitter.com/MarekNarozniak/status/1603899192815935489"
+              href="https://twitter.com/MarekNarozniak/status/1710581027020636472"
               target="_blank"
               rel="noreferrer"
             >
@@ -72,7 +72,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
               </svg>
             </a>
             <a
-              href="https://youtu.be/08VD7Rz7Yfo"
+              href="https://youtu.be/5940Ja8CbC0"
               target="_blank"
               rel="noreferrer"
             >
@@ -87,7 +87,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
               </svg>
             </a>
             <a
-              href="https://www.facebook.com/marekstreams/posts/pfbid02xq36jZ3CnCaHL3GAKqugkD7VHbFoBbbz3s8Lg4ggCDvxB3vnw6g6kvrU5aDmX8Znl"
+              href="https://www.facebook.com/marekstreams/posts/pfbid02AVGwF3mPsS8v2Swv6EkqjYXJBEu5jBxjMjJw63uG9S8NktrKAM2tUJvy52Vn8iCEl"
               target="_blank"
               rel="noreferrer"
             >
