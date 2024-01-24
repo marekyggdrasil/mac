@@ -197,6 +197,9 @@ const Navbar = () => {
               <Link href="/export">Export zkApp</Link>
             </li>
             <li>
+              <Link href="/funding">Funding</Link>
+            </li>
+            <li>
               <Link href="/about">About</Link>
             </li>
           </ul>
@@ -232,6 +235,9 @@ const Navbar = () => {
           </ul>
         </div>
         <ul className="menu menu-horizontal px-1">
+          <li>
+            <Link href="/funding">Funding</Link>
+          </li>
           <li>
             <Link href="/about">About</Link>
           </li>
