@@ -1,3 +1,5 @@
+package-lock.json
+
 public/cache
 out/*
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.

@@ -1,3 +1,5 @@
+package-lock.json
+
 compilation_cache_list.json
 compile-cache/*
 !compile-cache/README.md
