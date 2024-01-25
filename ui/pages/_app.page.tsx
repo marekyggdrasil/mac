@@ -90,6 +90,17 @@ async function runCompile(context: MacContextType) {
   }
 }
 
+async function connectAURO(): Promise<string[]> {
+  const mina = (window as any).mina;
+  if (mina == null) {
+    return [];
+  }
+  const publicKeyBase58: string[] = await mina.requestAccounts();
+  console.log("auro connected");
+  console.log(publicKeyBase58);
+  return publicKeyBase58;
+}
+
 async function connectWallet(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   console.log("connectWallet");
@@ -98,17 +109,13 @@ async function connectWallet(context: MacContextType) {
     await context.setConnectionButtonState(1);
     try {
       await zkappWorkerClient.setActiveInstanceToBerkeley();
-      const mina = (window as any).mina;
-      if (mina == null) {
+      const publicKeyBase58: string[] = await connectAURO();
+      if (publicKeyBase58.length === 0) {
         context.setState({
           ...context.state,
           hasWallet: false,
         });
-        return;
       }
-      const publicKeyBase58: string[] = await mina.requestAccounts();
-      console.log("auro connected");
-      console.log(publicKeyBase58);
       context.setConnectedAddress(publicKeyBase58[0]);
       await context.setConnectionButtonState(2);
     } catch (e: any) {
@@ -203,9 +210,14 @@ function MyApp({ Component, pageProps }: AppProps) {
         if (accounts.length > 0) {
           setConnectedAddress(accounts[0]);
         } else {
-          return alert(
-            "AURO wallet failed to provide MAC! with this account...",
-          );
+          accounts = await connectAURO();
+          if (accounts.length > 0) {
+            setConnectedAddress(accounts[0]);
+          } else {
+            return alert(
+              "AURO wallet failed to provide MAC! with this account...",
+            );
+          }
         }
         // let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
       });
