@@ -174,9 +174,9 @@ const functions = {
     //const network_state = await Mina.getNetworkState();
     //return network_state.blockchainLength.toString();
     try {
-      throw new Error("just testing");
-      // const network_state = await Mina.getNetworkState();
-      // return network_state.blockchainLength.toString();
+      // throw new Error("just testing");
+      const network_state = await Mina.getNetworkState();
+      return network_state.blockchainLength.toString();
     } catch (error) {
       // Handle the error and return a rejected promise
       return Promise.reject(error.message);
