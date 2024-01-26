@@ -147,3 +147,8 @@ export function getTransactionBlockExplorerURL(name: string, txid: string): stri
     "unknown network",
   );
 }
+
+// the MINA block time for real-time contract interaction estimations
+export function getBlockTime(): number {
+  return 180.0;
+}
