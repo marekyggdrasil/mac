@@ -47,7 +47,7 @@ export default class ZkappWorkerClient {
   }
 
   async fetchBlockchainLength(): Promise<number> {
-    const value: string = await this._call("fetchBlockchainLength", {});
+    const value: string = await this._call("getBlockchainLength", {});
     return parseInt(value);
   }
 
@@ -240,9 +240,6 @@ export default class ZkappWorkerClient {
       return "unreachable";
     }).then(() => {
       console.log(".then");
-      //console.log('oh no it did not work');
-      //throw "setTimeout's callback error";
-      //  ^^^^^ here, it will lead to a rejection
       return "reachable";
     });
   }

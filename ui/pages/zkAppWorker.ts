@@ -171,11 +171,15 @@ const functions = {
     state.zkapp = new state.Mac!(publicKey);
   },
   getBlockchainLength: async (args: {}) => {
+    //const network_state = await Mina.getNetworkState();
+    //return network_state.blockchainLength.toString();
     try {
-      const network_state = await Mina.getNetworkState();
-      return network_state.blockchainLength.toString();
-    } catch (e: unknown) {
-      throw Error("nope!");
+      throw new Error("just testing");
+      // const network_state = await Mina.getNetworkState();
+      // return network_state.blockchainLength.toString();
+    } catch (error) {
+      // Handle the error and return a rejected promise
+      return Promise.reject(error.message);
     }
   },
   createDeployTransaction: async (args: {
@@ -566,13 +570,23 @@ if (process.browser) {
   addEventListener(
     "message",
     async (event: MessageEvent<ZkappWorkerRequest>) => {
-      const returnData = await functions[event.data.fn](event.data.args);
+      try {
+        const returnData = await functions[event.data.fn](event.data.args);
 
-      const message: ZkappWorkerReponse = {
-        id: event.data.id,
-        data: returnData,
-      };
-      postMessage(message);
+        const message: ZkappWorkerReponse = {
+          id: event.data.id,
+          data: returnData,
+        };
+        postMessage(message);
+      } catch (error) {
+        // If an error occurs, create a response with an error flag and message
+        const errorMessage: ZkappWorkerResponse = {
+          id: event.data.id,
+          error: true,
+          errorMessage: error.message,
+        };
+        postMessage(errorMessage);
+      }
     },
   );
 }

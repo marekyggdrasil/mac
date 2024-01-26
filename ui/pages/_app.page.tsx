@@ -66,10 +66,18 @@ async function runLoadSnarkyJS(context: MacContextType) {
     console.log("contract loaded");
     console.log("blockchain length");
     const length = await zkappWorkerClient.fetchBlockchainLength();
-    console.log(length);
-    await context.setBlockchainLength(length);
-    await context.setCompilationButtonState(2);
-    await context.setConnectionError("");
+    if (isNaN(length)) {
+      console.log(
+        "unfortunately the " + nice_name + " network is not reachable right now and we were not able to fetch the blockchain length",
+      );
+      await context.setCompilationButtonState(0);
+      await context.setConnectionError("Failed to fetch blockchain length from " + nice_name);
+    } else {
+      console.log(length);
+      await context.setBlockchainLength(length);
+      await context.setCompilationButtonState(2);
+      await context.setConnectionError("");
+    }
   }
 }
 
