@@ -99,11 +99,14 @@ const FileSystem = (files: any): Cache => ({
   canWrite: true,
 });
 
+let endpointGraphQL: string = "";
+
 // ---------------------------------------------------------------------------------------
 
 const functions = {
   setActiveInstanceToNetwork: async (args: { endpoint: string }) => {
-    const connection = Mina.BerkeleyQANet(args.endpoint);
+    endpointGraphQL = args.endpoint;
+    const connection = Mina.BerkeleyQANet(endpointGraphQL);
     Mina.setActiveInstance(connection);
   },
   setActiveInstanceToBerkeley: async (args: {}) => {
@@ -137,7 +140,7 @@ const functions = {
       preimage: null,
       transaction: null,
       fromMacPack: fromMacPack,
-      toMacPack: toMacPack,
+      toMacPack: toMacPack
     };
     state.fromMacPack = fromMacPack;
     state.toMacPack = toMacPack;
@@ -171,12 +174,11 @@ const functions = {
     state.zkapp = new state.Mac!(publicKey);
   },
   getBlockchainLength: async (args: {}) => {
-    //const network_state = await Mina.getNetworkState();
-    //return network_state.blockchainLength.toString();
     try {
-      // throw new Error("just testing");
-      const network_state = await Mina.getNetworkState();
-      return network_state.blockchainLength.toString();
+      console.log(endpointGraphQL);
+      let block = await fetchLastBlock(
+        endpointGraphQL);
+      return block.blockchainLength.toJSON();
     } catch (error) {
       // Handle the error and return a rejected promise
       return Promise.reject(error.message);
