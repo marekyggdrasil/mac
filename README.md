@@ -64,3 +64,23 @@ cd ui/
 npm run build
 npm run export
 ```
+
+## Testing the network
+
+If you notice problems connecting to the network via the frontend you can double check possibility to connect via command line as follows
+
+```sh
+npx tsx contracts/scripts/networkcheck.ts 
+```
+
+example output
+
+```
+testing https://proxy.testworld.minaexplorer.com/graphql
+successfully set active instance
+failed to fetch last block
+
+testing https://proxy.berkeley.minaexplorer.com/graphql
+successfully set active instance
+blockchain length 37605
+```
