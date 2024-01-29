@@ -7,14 +7,10 @@ import type {
 } from "./zkAppWorker";
 
 export default class ZkappWorkerClient {
-    setActiveInstanceToNetwork(endpoint: string) {
-    return this._callSetActiveInstance("setActiveInstanceToNetwork", {
+  setActiveInstanceToNetwork(endpoint: string) {
+    return this._call("setActiveInstanceToNetwork", {
       endpoint: endpoint
     });
-  }
-
-  setActiveInstanceToBerkeley() {
-    return this._callSetActiveInstance("setActiveInstanceToBerkeley", {});
   }
 
   loadContract() {
@@ -200,8 +196,13 @@ export default class ZkappWorkerClient {
     this.nextId = 0;
 
     this.worker.onmessage = (event: MessageEvent<ZkappWorkerReponse>) => {
-      this.promises[event.data.id].resolve(event.data.data);
-      delete this.promises[event.data.id];
+      const response = event.data;
+      if (response.error) {
+        this.promises[response.id].reject(new Error(response.errorMessage));
+      } else {
+        this.promises[response.id].resolve(response.data);
+      }
+      delete this.promises[response.id];
     };
   }
 
@@ -218,29 +219,6 @@ export default class ZkappWorkerClient {
       this.worker.postMessage(message);
 
       this.nextId++;
-    });
-  }
-
-  _callSetActiveInstance(fn: WorkerFunctions, args: any): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.promises[this.nextId] = { resolve, reject };
-
-      const message: ZkappWorkerRequest = {
-        id: this.nextId,
-        fn,
-        args,
-      };
-
-      this.worker.postMessage(message);
-
-      this.nextId++;
-    }).catch(err => {
-      console.log(".catch");
-      console.log(err);
-      return "unreachable";
-    }).then(() => {
-      console.log(".then");
-      return "reachable";
     });
   }
 

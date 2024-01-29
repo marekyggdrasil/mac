@@ -174,15 +174,9 @@ const functions = {
     state.zkapp = new state.Mac!(publicKey);
   },
   getBlockchainLength: async (args: {}) => {
-    try {
-      console.log(endpointGraphQL);
-      let block = await fetchLastBlock(
-        endpointGraphQL);
-      return block.blockchainLength.toJSON();
-    } catch (error) {
-      // Handle the error and return a rejected promise
-      return Promise.reject(error.message);
-    }
+    let block = await fetchLastBlock(
+      endpointGraphQL);
+    return block.blockchainLength.toJSON();
   },
   createDeployTransaction: async (args: {
     zkAppPrivateKey58: string;

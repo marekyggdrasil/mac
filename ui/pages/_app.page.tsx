@@ -51,34 +51,38 @@ async function runLoadSnarkyJS(context: MacContextType) {
   const nice_name = getNetworkNiceName(context.network);
   const network_endpoint = getNetworkFromName(context.network);
   console.log("setting active instance to " + nice_name);
-  const berkeley_state = await zkappWorkerClient.setActiveInstanceToNetwork(
-    network_endpoint);
-  if (berkeley_state !== "reachable") {
+  try {
+    await zkappWorkerClient.setActiveInstanceToNetwork(
+      network_endpoint);
+  } catch (error) {
     console.log(
       "unfortunately the " + nice_name + " network is not reachable right now",
     );
+    console.error(error);
     await context.setCompilationButtonState(0);
     await context.setConnectionError("Failed to reach " + nice_name);
-  } else {
-    console.log("berkeley loaded");
-    console.log("loading contract");
-    await zkappWorkerClient.loadContract();
-    console.log("contract loaded");
-    console.log("blockchain length");
-    const length = await zkappWorkerClient.fetchBlockchainLength();
-    if (isNaN(length)) {
-      console.log(
-        "unfortunately the " + nice_name + " network is not reachable right now and we were not able to fetch the blockchain length",
-      );
-      await context.setCompilationButtonState(0);
-      await context.setConnectionError("Failed to fetch blockchain length from " + nice_name);
-    } else {
-      console.log(length);
-      await context.setBlockchainLength(length);
-      await context.setCompilationButtonState(2);
-      await context.setConnectionError("");
-    }
+    return;
   }
+
+  // network reachable, proceed
+  console.log("berkeley loaded");
+  console.log("loading contract");
+  await zkappWorkerClient.loadContract();
+  console.log("contract loaded");
+  console.log("blockchain length");
+  let length = 0;
+  try {
+    length = await zkappWorkerClient.fetchBlockchainLength();
+  } catch (error) {
+    console.log(
+      "unfortunately the " + nice_name + " network is not reachable right now and we were not able to fetch the blockchain length",
+    );
+    await context.setCompilationButtonState(0);
+    await context.setConnectionError("Failed to fetch blockchain length from " + nice_name);
+  }
+  await context.setBlockchainLength(length);
+  await context.setCompilationButtonState(2);
+  await context.setConnectionError("");
 }
 
 async function runCompile(context: MacContextType) {
@@ -116,7 +120,7 @@ async function connectWallet(context: MacContextType) {
   setTimeout(async () => {
     await context.setConnectionButtonState(1);
     try {
-      await zkappWorkerClient.setActiveInstanceToBerkeley();
+      // await zkappWorkerClient.setActiveInstanceToBerkeley();
       const publicKeyBase58: string[] = await connectAURO();
       if (publicKeyBase58.length === 0) {
         context.setState({
