@@ -560,6 +560,8 @@ export type ZkappWorkerRequest = {
 export type ZkappWorkerReponse = {
   id: number;
   data: any;
+  error: boolean;
+  errorMessage: string;
 };
 
 if (process.browser) {
@@ -572,14 +574,18 @@ if (process.browser) {
         const message: ZkappWorkerReponse = {
           id: event.data.id,
           data: returnData,
+          error: false,
+          errorMessage: ""
         };
         postMessage(message);
-      } catch (error) {
+      } catch (error: unknown) {
         // If an error occurs, create a response with an error flag and message
-        const errorMessage: ZkappWorkerResponse = {
+        const message: string = (error as Error).message;
+        const errorMessage: ZkappWorkerReponse = {
           id: event.data.id,
+          data: null,
           error: true,
-          errorMessage: error.message,
+          errorMessage: message,
         };
         postMessage(errorMessage);
       }
