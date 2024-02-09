@@ -1,1 +1,22 @@
-{"files":["lagrange-basis-fp-1024","lagrange-basis-fp-16384","srs-fp-65536","srs-fq-32768","step-pk-mac-cancel","step-pk-mac-deposit","step-pk-mac-failure","step-pk-mac-initialize","step-pk-mac-success","step-pk-mac-withdraw","step-vk-mac-cancel","step-vk-mac-deposit","step-vk-mac-failure","step-vk-mac-initialize","step-vk-mac-success","step-vk-mac-withdraw","wrap-pk-mac","wrap-vk-mac"]}
+{
+  "files": [
+    "lagrange-basis-fp-1024",
+    "lagrange-basis-fp-16384",
+    "srs-fp-65536",
+    "srs-fq-32768",
+    "step-pk-mac-cancel",
+    "step-pk-mac-deposit",
+    "step-pk-mac-failure",
+    "step-pk-mac-initialize",
+    "step-pk-mac-success",
+    "step-pk-mac-withdraw",
+    "step-vk-mac-cancel",
+    "step-vk-mac-deposit",
+    "step-vk-mac-failure",
+    "step-vk-mac-initialize",
+    "step-vk-mac-success",
+    "step-vk-mac-withdraw",
+    "wrap-pk-mac",
+    "wrap-vk-mac"
+  ]
+}

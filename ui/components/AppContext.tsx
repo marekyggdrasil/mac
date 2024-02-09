@@ -108,44 +108,37 @@ export function castZkAppWorkerClient(
   return context.state.zkappWorkerClient;
 }
 
-export function getNetworkFromName(
-  name: string,
-): string {
+export function getNetworkFromName(name: string): string {
   if (name === "berkeley") {
     return "https://proxy.berkeley.minaexplorer.com/graphql";
   }
   if (name === "testworld") {
     return "https://proxy.testworld.minaexplorer.com/graphql";
   }
-  throw Error(
-    "unknown network",
-  );
+  throw Error("unknown network");
 }
 
-export function getNetworkNiceName(
-  name: string,
-): string {
+export function getNetworkNiceName(name: string): string {
   if (name === "berkeley") {
     return "Berkeley";
   }
   if (name === "testworld") {
     return "TestWorld 2";
   }
-  throw Error(
-    "unknown network",
-  );
+  throw Error("unknown network");
 }
 
-export function getTransactionBlockExplorerURL(name: string, txid: string): string {
+export function getTransactionBlockExplorerURL(
+  name: string,
+  txid: string,
+): string {
   if (name === "berkeley") {
     return "https://berkeley.minaexplorer.com/transaction/" + txid;
   }
   if (name === "testworld") {
     return "https://minascan.io/testworld/tx/" + txid;
   }
-  throw Error(
-    "unknown network",
-  );
+  throw Error("unknown network");
 }
 
 // the MINA block time for real-time contract interaction estimations

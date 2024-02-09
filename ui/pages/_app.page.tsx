@@ -52,8 +52,7 @@ async function runLoadSnarkyJS(context: MacContextType) {
   const network_endpoint = getNetworkFromName(context.network);
   console.log("setting active instance to " + nice_name);
   try {
-    await zkappWorkerClient.setActiveInstanceToNetwork(
-      network_endpoint);
+    await zkappWorkerClient.setActiveInstanceToNetwork(network_endpoint);
   } catch (error) {
     console.log(
       "unfortunately the " + nice_name + " network is not reachable right now",
@@ -75,10 +74,14 @@ async function runLoadSnarkyJS(context: MacContextType) {
     length = await zkappWorkerClient.fetchBlockchainLength();
   } catch (error) {
     console.log(
-      "unfortunately the " + nice_name + " network is not reachable right now and we were not able to fetch the blockchain length",
+      "unfortunately the " +
+        nice_name +
+        " network is not reachable right now and we were not able to fetch the blockchain length",
     );
     await context.setCompilationButtonState(0);
-    await context.setConnectionError("Failed to fetch blockchain length from " + nice_name);
+    await context.setConnectionError(
+      "Failed to fetch blockchain length from " + nice_name,
+    );
   }
   await context.setBlockchainLength(length);
   await context.setCompilationButtonState(2);

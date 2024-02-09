@@ -9,7 +9,7 @@ import type {
 export default class ZkappWorkerClient {
   setActiveInstanceToNetwork(endpoint: string) {
     return this._call("setActiveInstanceToNetwork", {
-      endpoint: endpoint
+      endpoint: endpoint,
     });
   }
 

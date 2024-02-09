@@ -92,7 +92,10 @@ const DeployButton = () => {
         <div
           className="tooltip tooltip-open tooltip-bottom tooltip-error"
           data-tip="zkApp private key is missing. Are you deploying macpack import?"
-        ><button className="btn btn-disabled">Deploy</button></div>);
+        >
+          <button className="btn btn-disabled">Deploy</button>
+        </div>
+      );
     }
     if (
       context.state.tx_building_state != "" &&
@@ -112,21 +115,21 @@ const DeployButton = () => {
     }
     return (
       <button
-      className="btn btn-primary"
-      onClick={async () => {
-        try {
-          await contractDeploy(context);
-        } catch (error) {
-          await context.setState({
-            ...context.state,
-            tx_building_state: "",
-            tx_command: "deploy"
-          });
-        }
-      }}
-        >
+        className="btn btn-primary"
+        onClick={async () => {
+          try {
+            await contractDeploy(context);
+          } catch (error) {
+            await context.setState({
+              ...context.state,
+              tx_building_state: "",
+              tx_command: "deploy",
+            });
+          }
+        }}
+      >
         Deploy
-        </button>
+      </button>
     );
   }
   return <button className="btn btn-disabled">Deploy</button>;
@@ -345,8 +348,7 @@ const DeploymentInformation = () => {
 const TxIds = () => {
   const context: MacContextType = CastContext();
   if (context.txHash != "") {
-    const url = getTransactionBlockExplorerURL(
-      context.network, context.txHash);
+    const url = getTransactionBlockExplorerURL(context.network, context.txHash);
     console.log(url);
     return (
       <div>

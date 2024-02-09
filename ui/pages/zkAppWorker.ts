@@ -36,8 +36,8 @@ type zkAppWorkerState = {
 };
 
 type CompilationCacheJSONList = {
-  files: string[]
-}
+  files: string[];
+};
 
 function castPreimageValue(preimage: Preimage | null): Preimage {
   if (preimage === null) {
@@ -50,23 +50,26 @@ let state: null | zkAppWorkerState = null;
 
 function fetchFiles() {
   const cache_list: CompilationCacheJSONList = CompilationCacheJSONList;
-  return Promise.all(cache_list.files.map((file) => {
-    return Promise.all([
-      fetch(`/cache/${file}.header`).then(res => res.text()),
-      fetch(`/cache/${file}`).then(res => res.text())
-    ]).then(([header, data]) => ({ file, header, data }));
-  }))
-    .then((cacheList) => cacheList.reduce((acc: any, { file, header, data }) => {
+  return Promise.all(
+    cache_list.files.map((file) => {
+      return Promise.all([
+        fetch(`/cache/${file}.header`).then((res) => res.text()),
+        fetch(`/cache/${file}`).then((res) => res.text()),
+      ]).then(([header, data]) => ({ file, header, data }));
+    }),
+  ).then((cacheList) =>
+    cacheList.reduce((acc: any, { file, header, data }) => {
       acc[file] = { file, header, data };
       return acc;
-    }, {}));
+    }, {}),
+  );
 }
 
 const FileSystem = (files: any): Cache => ({
   read({ persistentId, uniqueId, dataType }: any) {
     // read current uniqueId, return data if it matches
     if (!files[persistentId]) {
-      console.log('read');
+      console.log("read");
       console.log({ persistentId, uniqueId, dataType });
 
       return undefined;
@@ -75,13 +78,13 @@ const FileSystem = (files: any): Cache => ({
     const currentId = files[persistentId].header;
 
     if (currentId !== uniqueId) {
-      console.log('current id did not match persistent id');
+      console.log("current id did not match persistent id");
 
       return undefined;
     }
 
-    if (dataType === 'string') {
-      console.log('found in cache', { persistentId, uniqueId, dataType });
+    if (dataType === "string") {
+      console.log("found in cache", { persistentId, uniqueId, dataType });
 
       return new TextEncoder().encode(files[persistentId].data);
     }
@@ -93,7 +96,7 @@ const FileSystem = (files: any): Cache => ({
     return undefined;
   },
   write({ persistentId, uniqueId, dataType }: any, data: any) {
-    console.log('write');
+    console.log("write");
     console.log({ persistentId, uniqueId, dataType });
   },
   canWrite: true,
@@ -140,7 +143,7 @@ const functions = {
       preimage: null,
       transaction: null,
       fromMacPack: fromMacPack,
-      toMacPack: toMacPack
+      toMacPack: toMacPack,
     };
     state.fromMacPack = fromMacPack;
     state.toMacPack = toMacPack;
@@ -174,8 +177,7 @@ const functions = {
     state.zkapp = new state.Mac!(publicKey);
   },
   getBlockchainLength: async (args: {}) => {
-    let block = await fetchLastBlock(
-      endpointGraphQL);
+    let block = await fetchLastBlock(endpointGraphQL);
     return block.blockchainLength.toJSON();
   },
   createDeployTransaction: async (args: {
@@ -575,7 +577,7 @@ if (process.browser) {
           id: event.data.id,
           data: returnData,
           error: false,
-          errorMessage: ""
+          errorMessage: "",
         };
         postMessage(message);
       } catch (error: unknown) {

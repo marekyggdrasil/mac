@@ -117,7 +117,11 @@ const ImportCases = () => {
   }
   return (
     <div>
-      <textarea className="rounded-md not-prose bg-primary text-primary-content macpack-editor" id="import-macpack" placeholder="Paste your MACPACK here..."></textarea>
+      <textarea
+        className="rounded-md not-prose bg-primary text-primary-content macpack-editor"
+        id="import-macpack"
+        placeholder="Paste your MACPACK here..."
+      ></textarea>
       <p>then hit the import button below!</p>
       <button
         className="btn"
@@ -131,7 +135,11 @@ const ImportCases = () => {
   );
   return (
     <div>
-      <textarea className="rounded-md not-prose bg-primary text-primary-content macpack-editor" id="import-macpack" placeholder="Paste your MACPACK here..."></textarea>
+      <textarea
+        className="rounded-md not-prose bg-primary text-primary-content macpack-editor"
+        id="import-macpack"
+        placeholder="Paste your MACPACK here..."
+      ></textarea>
       <p>then hit the import button below!</p>
       <button
         className="btn"
