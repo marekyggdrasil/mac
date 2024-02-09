@@ -1,129 +1,3 @@
-import { PublicKey, PrivateKey } from "o1js";
-
-import { MacContextType, CastContext } from "./AppContext";
-import { MinaValue, MinaBlockchainLength, MinaSecretValue } from "./highlights";
-
-async function generateKeyPair(context: MacContextType) {
-  const sk: PrivateKey = PrivateKey.random();
-  const pk: PublicKey = sk.toPublicKey();
-  context.setState({
-    ...context.state,
-    zkappPrivateKeyCandidate: sk,
-    zkappPublicKeyCandidate: pk,
-  });
-}
-
-const KeyGenerator = () => {
-  const context: MacContextType = CastContext();
-  if (context.state.zkappPublicKeyCandidate.isEmpty().toBoolean()) {
-    return (
-      <p>
-        Your MAC! contract does not have a private key. Click on{" "}
-        <button
-          className="btn"
-          onClick={async (event) => {
-            event.preventDefault();
-            await generateKeyPair(context);
-            return;
-          }}
-        >
-          Generate
-        </button>{" "}
-        to prepare a new key pair.
-      </p>
-    );
-  }
-  let zkapp_pk = "";
-  if (context.state.zkappPublicKeyCandidate !== null) {
-    zkapp_pk = context.state.zkappPublicKeyCandidate.toBase58();
-  }
-  let zkapp_sk = "";
-  if (context.state.zkappPrivateKeyCandidate !== null) {
-    zkapp_sk = context.state.zkappPrivateKeyCandidate.toBase58();
-  }
-  return (
-    <p>
-      Your MAC! contract public key and address is{" "}
-      <MinaValue>{zkapp_pk}</MinaValue> and corresponding private key is{" "}
-      <MinaSecretValue>{zkapp_sk}</MinaSecretValue>
-    </p>
-  );
-};
-
-const Editor = () => {
-  const context: MacContextType = CastContext();
-  return (
-    <form
-      onSubmit={async (event) => {
-        event.preventDefault();
-        console.log(event);
-        const max_string_length = 128;
-        const t = 1; // 2520 is a week, time unit
-        const m = 1000000000; // mina denomination
-
-        // addresses
-        const private_key = (event.target as any).base58sk.value;
-        console.log(private_key);
-        try {
-          PrivateKey.fromBase58(private_key);
-        } catch (e: any) {
-          return alert("Invalid private key");
-        }
-
-        // addresses
-        const employer = (event.target as any).base58employer.value;
-        try {
-          PublicKey.fromBase58(employer);
-        } catch (e: any) {
-          return alert("Invalid employer address");
-        }
-
-        const contractor = (event.target as any).base58contractor.value;
-        try {
-          PublicKey.fromBase58(contractor);
-        } catch (e: any) {
-          return alert("Invalid contractor address");
-        }
-
-        const arbiter = (event.target as any).base58arbiter.value;
-        try {
-          PublicKey.fromBase58(arbiter);
-        } catch (e: any) {
-          return alert("Invalid arbiter address");
-        }
-
-        const contract_subject = (event.target as any).contract_subject.value;
-
-        // contractor
-        const contractor_payment = Math.round(
-          parseFloat((event.target as any).contractor_payment.value) * m,
-        );
-        const contractor_deposit = Math.round(
-          parseFloat((event.target as any).contractor_deposit.value) * m,
-        );
-        const contracor_penalty_failure_percent = parseInt(
-          (event.target as any).contractor_failure_penalty.value,
-        );
-        const contracor_penalty_cancel_percent = parseInt(
-          (event.target as any).contractor_cancel_penalty.value,
-        );
-
-        // employer
-        const employer_deposit = Math.round(
-          parseFloat((event.target as any).employer_deposit.value) * m,
-        );
-        const employer_arbitration_fee_percent = parseInt(
-          (event.target as any).employer_arbitration_fee_percent.value,
-        );
-
-        // arbiter
-        const arbiter_payment = Math.round(
-          parseFloat((event.target as any).arbiter_payment.value) * m,
-        );
-        const arbiter_deposit = Math.round(
-          parseFloat((event.target as any).arbiter_deposit.value) * m,
-        );
-        const arbiter_penalty_non_acting_percent = parseInt(
           (event.target as any).arbiter_penalty_non_acting_percent.value,
         );
 
@@ -241,40 +115,40 @@ const Editor = () => {
 
         // set the preimage
         /*
-         await context.state.zkappWorkerClient.definePreimage(
-         pk.toBase58(),
-         employer,
-         contractor,
-         arbiter,
-         contract_subject,
-         contract_outcome_deposit_description,
-         contract_outcome_deposit_after,
-         contract_outcome_deposit_before,
-         contract_outcome_deposit_employer,
-         contract_outcome_deposit_contractor,
-         contract_outcome_deposit_arbiter,
-         contract_outcome_success_description,
-         contract_outcome_success_after,
-         contract_outcome_success_before,
-         contract_outcome_success_employer,
-         contract_outcome_success_contractor,
-         contract_outcome_success_arbiter,
-         contract_outcome_failure_description,
-         contract_outcome_failure_after,
-         contract_outcome_failure_before,
-         contract_outcome_failure_employer,
-         contract_outcome_failure_contractor,
-         contract_outcome_failure_arbiter,
-         contract_outcome_cancel_description,
-         contract_outcome_cancel_after,
-         contract_outcome_cancel_before,
-         contract_outcome_cancel_employer,
-         contract_outcome_cancel_contractor,
-         contract_outcome_cancel_arbiter);
+           await context.state.zkappWorkerClient.definePreimage(
+           pk.toBase58(),
+           employer,
+           contractor,
+           arbiter,
+           contract_subject,
+           contract_outcome_deposit_description,
+           contract_outcome_deposit_after,
+           contract_outcome_deposit_before,
+           contract_outcome_deposit_employer,
+           contract_outcome_deposit_contractor,
+           contract_outcome_deposit_arbiter,
+           contract_outcome_success_description,
+           contract_outcome_success_after,
+           contract_outcome_success_before,
+           contract_outcome_success_employer,
+           contract_outcome_success_contractor,
+           contract_outcome_success_arbiter,
+           contract_outcome_failure_description,
+           contract_outcome_failure_after,
+           contract_outcome_failure_before,
+           contract_outcome_failure_employer,
+           contract_outcome_failure_contractor,
+           contract_outcome_failure_arbiter,
+           contract_outcome_cancel_description,
+           contract_outcome_cancel_after,
+           contract_outcome_cancel_before,
+           contract_outcome_cancel_employer,
+           contract_outcome_cancel_contractor,
+           contract_outcome_cancel_arbiter);
 
-         // now get its macpack
-         const macpack = await context.state.zkappWorkerClient.toMacPack();
-       */
+           // now get its macpack
+           const macpack = await context.state.zkappWorkerClient.toMacPack();
+         */
 
         // set the state
         await context.setState({
@@ -619,15 +493,18 @@ const Editor = () => {
             <label className="label">
               <span className="label-text">Warm-up time</span>
             </label>
-            <input
-              name="deadline_warmup"
-              type="range"
-              min="1"
-              max="10"
-              defaultValue="5"
-              className="range"
-              step="1"
-            />
+            <label className="input-group">
+              <input
+                name="deadline_warmup"
+                type="number"
+                min="1"
+                max=""
+                defaultValue="480"
+                className="input input-bordered"
+                step="1"
+              />
+              <span>Blocks</span>
+            </label>
             <label className="label">
               <span className="label-text-alt">
                 How much time from now before the contract starts to accept the
@@ -639,15 +516,18 @@ const Editor = () => {
             <label className="label">
               <span className="label-text">Deposit time</span>
             </label>
-            <input
-              name="deadline_deposit"
-              type="range"
-              min="1"
-              max="10"
-              defaultValue="5"
-              className="range"
-              step="1"
-            />
+            <label className="input-group">
+              <input
+                name="deadline_deposit"
+                type="number"
+                min="1"
+                max=""
+                defaultValue="480"
+                className="input input-bordered"
+                step="1"
+              />
+              <span>Blocks</span>
+            </label>
             <label className="label">
               <span className="label-text-alt">
                 How much time everyone has to deposit. Within this time window
@@ -659,15 +539,18 @@ const Editor = () => {
             <label className="label">
               <span className="label-text">Execution time</span>
             </label>
-            <input
-              name="deadline_execution"
-              type="range"
-              min="1"
-              max="10"
-              defaultValue="5"
-              className="range"
-              step="1"
-            />
+            <label className="input-group">
+              <input
+                name="deadline_execution"
+                type="number"
+                min="1"
+                max=""
+                defaultValue="480"
+                className="input input-bordered"
+                step="1"
+              />
+              <span>Blocks</span>
+            </label>
             <label className="label">
               <span className="label-text-alt">
                 How much time does the Contractor have to do the work.
@@ -678,15 +561,18 @@ const Editor = () => {
             <label className="label">
               <span className="label-text">Failure declaration time</span>
             </label>
-            <input
-              name="deadline_failure"
-              type="range"
-              min="1"
-              max="10"
-              defaultValue="5"
-              className="range"
-              step="1"
-            />
+            <label className="input-group">
+              <input
+                name="deadline_failure"
+                type="number"
+                min="1"
+                max=""
+                defaultValue="480"
+                className="input input-bordered"
+                step="1"
+              />
+              <span>Blocks</span>
+            </label>
             <label className="label">
               <span className="label-text-alt">
                 If after deadline, how much time the arbiter has to declare
