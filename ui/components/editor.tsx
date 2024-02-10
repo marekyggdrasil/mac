@@ -1,3 +1,129 @@
+import { PublicKey, PrivateKey } from "o1js";
+
+import { MacContextType, CastContext } from "./AppContext";
+import { MinaValue, MinaBlockchainLength, MinaSecretValue } from "./highlights";
+
+async function generateKeyPair(context: MacContextType) {
+  const sk: PrivateKey = PrivateKey.random();
+  const pk: PublicKey = sk.toPublicKey();
+  context.setState({
+    ...context.state,
+    zkappPrivateKeyCandidate: sk,
+    zkappPublicKeyCandidate: pk,
+  });
+}
+
+const KeyGenerator = () => {
+  const context: MacContextType = CastContext();
+  if (context.state.zkappPublicKeyCandidate.isEmpty().toBoolean()) {
+    return (
+      <p>
+        Your MAC! contract does not have a private key. Click on{" "}
+        <button
+          className="btn"
+          onClick={async (event) => {
+            event.preventDefault();
+            await generateKeyPair(context);
+            return;
+          }}
+        >
+          Generate
+        </button>{" "}
+        to prepare a new key pair.
+      </p>
+    );
+  }
+  let zkapp_pk = "";
+  if (context.state.zkappPublicKeyCandidate !== null) {
+    zkapp_pk = context.state.zkappPublicKeyCandidate.toBase58();
+  }
+  let zkapp_sk = "";
+  if (context.state.zkappPrivateKeyCandidate !== null) {
+    zkapp_sk = context.state.zkappPrivateKeyCandidate.toBase58();
+  }
+  return (
+    <p>
+      Your MAC! contract public key and address is{" "}
+      <MinaValue>{zkapp_pk}</MinaValue> and corresponding private key is{" "}
+      <MinaSecretValue>{zkapp_sk}</MinaSecretValue>
+    </p>
+  );
+};
+
+const Editor = () => {
+  const context: MacContextType = CastContext();
+  return (
+    <form
+      onSubmit={async (event) => {
+        event.preventDefault();
+        console.log(event);
+        const max_string_length = 128;
+        const t = 1; // 2520 is a week, time unit
+        const m = 1000000000; // mina denomination
+
+        // addresses
+        const private_key = (event.target as any).base58sk.value;
+        console.log(private_key);
+        try {
+          PrivateKey.fromBase58(private_key);
+        } catch (e: any) {
+          return alert("Invalid private key");
+        }
+
+        // addresses
+        const employer = (event.target as any).base58employer.value;
+        try {
+          PublicKey.fromBase58(employer);
+        } catch (e: any) {
+          return alert("Invalid employer address");
+        }
+
+        const contractor = (event.target as any).base58contractor.value;
+        try {
+          PublicKey.fromBase58(contractor);
+        } catch (e: any) {
+          return alert("Invalid contractor address");
+        }
+
+        const arbiter = (event.target as any).base58arbiter.value;
+        try {
+          PublicKey.fromBase58(arbiter);
+        } catch (e: any) {
+          return alert("Invalid arbiter address");
+        }
+
+        const contract_subject = (event.target as any).contract_subject.value;
+
+        // contractor
+        const contractor_payment = Math.round(
+          parseFloat((event.target as any).contractor_payment.value) * m,
+        );
+        const contractor_deposit = Math.round(
+          parseFloat((event.target as any).contractor_deposit.value) * m,
+        );
+        const contracor_penalty_failure_percent = parseInt(
+          (event.target as any).contractor_failure_penalty.value,
+        );
+        const contracor_penalty_cancel_percent = parseInt(
+          (event.target as any).contractor_cancel_penalty.value,
+        );
+
+        // employer
+        const employer_deposit = Math.round(
+          parseFloat((event.target as any).employer_deposit.value) * m,
+        );
+        const employer_arbitration_fee_percent = parseInt(
+          (event.target as any).employer_arbitration_fee_percent.value,
+        );
+
+        // arbiter
+        const arbiter_payment = Math.round(
+          parseFloat((event.target as any).arbiter_payment.value) * m,
+        );
+        const arbiter_deposit = Math.round(
+          parseFloat((event.target as any).arbiter_deposit.value) * m,
+        );
+        const arbiter_penalty_non_acting_percent = parseInt(
           (event.target as any).arbiter_penalty_non_acting_percent.value,
         );
 
