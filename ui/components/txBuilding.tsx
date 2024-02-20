@@ -32,10 +32,29 @@ export async function contractDeploy(context: MacContextType) {
   if (context.state.zkappPrivateKey === null) {
     throw Error("Private key is not defined");
   }
-  await zkappWorkerClient.createDeployTransaction(
-    context.state.zkappPrivateKey,
-    connectedAddress,
-  );
+  await context.setState({
+    ...context.state,
+    creatingTransaction: true,
+    tx_building_state: "Building...",
+  });
+  try {
+    await zkappWorkerClient.createDeployTransaction(
+      context.state.zkappPrivateKey,
+      connectedAddress,
+    );
+  } catch (e: any) {
+    console.log("failed to create deploy transaction!");
+    console.log(e);
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
+  console.log("setState");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -89,7 +108,20 @@ export async function contractDeposit(context: MacContextType) {
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
   console.log("createDeployTransaction");
-  await zkappWorkerClient.createDepositTransaction(connectedAddress);
+  try {
+    await zkappWorkerClient.createDepositTransaction(connectedAddress);
+  } catch (e: any) {
+    console.log("failed to create the transaction!");
+    console.log(e);
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -142,8 +174,21 @@ export async function contractWithdraw(context: MacContextType) {
   await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
-  console.log("createDeployTransaction");
-  await zkappWorkerClient.createWithdrawTransaction(connectedAddress);
+  console.log("createWithdrawTransaction");
+  try {
+    await zkappWorkerClient.createWithdrawTransaction(connectedAddress);
+  } catch (e: any) {
+    console.log("failed to create the transaction!");
+    console.log(e);
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -196,8 +241,21 @@ export async function contractCancel(context: MacContextType) {
   await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
-  console.log("createDeployTransaction");
-  await zkappWorkerClient.createCancelTransaction(connectedAddress);
+  console.log("createCancelTransaction");
+  try {
+    await zkappWorkerClient.createCancelTransaction(connectedAddress);
+  } catch (e: any) {
+    console.log("failed to create the transaction!");
+    console.log(e);
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -250,8 +308,21 @@ export async function contractSuccess(context: MacContextType) {
   await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
-  console.log("createDeployTransaction");
-  await zkappWorkerClient.createSuccessTransaction(connectedAddress);
+  console.log("createSuccessTransaction");
+  try {
+    await zkappWorkerClient.createSuccessTransaction(connectedAddress);
+  } catch (e: any) {
+    console.log("failed to create the transaction!");
+    console.log(e);
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -304,8 +375,21 @@ export async function contractFailure(context: MacContextType) {
   await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
-  console.log("createDeployTransaction");
-  await zkappWorkerClient.createFailureTransaction(connectedAddress);
+  console.log("createFailureTransaction");
+  try {
+    await zkappWorkerClient.createFailureTransaction(connectedAddress);
+  } catch (e: any) {
+    console.log("failed to create the transaction!");
+    console.log(e);
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
   await context.setState({
     ...context.state,
     creatingTransaction: true,
