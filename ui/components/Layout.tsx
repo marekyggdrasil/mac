@@ -1,5 +1,9 @@
 import { ReactNode } from "react";
 
+import { ToastContainer } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.minimal.css";
+
 import { MacContextType, CastContext } from "./AppContext";
 import { MinaValue } from "./highlights";
 
@@ -25,6 +29,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <Head>
         <title>MAC!</title>
       </Head>
+      <ToastContainer />
       <section className="flex flex-row-reverse">
         <Navbar />
       </section>
