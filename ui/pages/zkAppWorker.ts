@@ -102,13 +102,11 @@ const FileSystem = (files: any): Cache => ({
   canWrite: true,
 });
 
-let endpointGraphQL: string = "";
-
 // ---------------------------------------------------------------------------------------
 
 const functions = {
   setActiveInstanceToNetwork: async (args: { endpoint: string }) => {
-    endpointGraphQL = args.endpoint;
+    const endpointGraphQL = args.endpoint;
     const connection = Mina.BerkeleyQANet(endpointGraphQL);
     Mina.setActiveInstance(connection);
   },
@@ -176,7 +174,8 @@ const functions = {
     const publicKey = PublicKey.fromBase58(args.publicKey58);
     state.zkapp = new state.Mac!(publicKey);
   },
-  getBlockchainLength: async (args: {}) => {
+  getBlockchainLength: async (args: { endpoint: string }) => {
+    const endpointGraphQL = args.endpoint;
     let block = await fetchLastBlock(endpointGraphQL);
     return block.blockchainLength.toJSON();
   },

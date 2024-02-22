@@ -42,8 +42,10 @@ export default class ZkappWorkerClient {
     });
   }
 
-  async fetchBlockchainLength(): Promise<number> {
-    const value: string = await this._call("getBlockchainLength", {});
+  async fetchBlockchainLength(endpoint: string): Promise<number> {
+    const value: string = await this._call("getBlockchainLength", {
+      endpoint: endpoint,
+    });
     return parseInt(value);
   }
 

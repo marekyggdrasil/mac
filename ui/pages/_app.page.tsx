@@ -39,7 +39,7 @@ async function timeout(seconds: number): Promise<void> {
   });
 }
 
-
+// https://fkhadra.github.io/react-toastify/how-to-style
 function ExampleToast({ closeToast, toastProps }){
   return (
     <div role="alert" className="alert alert-error">
@@ -91,8 +91,9 @@ async function runLoadSnarkyJS(context: MacContextType) {
   console.log("blockchain length");
   let length = 0;
   try {
-    length = await zkappWorkerClient.fetchBlockchainLength();
+    length = await zkappWorkerClient.fetchBlockchainLength(network_endpoint);
   } catch (error) {
+    console.log(error);
     console.log(
       "unfortunately the " +
         nice_name +
@@ -102,6 +103,7 @@ async function runLoadSnarkyJS(context: MacContextType) {
     await context.setConnectionError(
       "Failed to fetch blockchain length from " + nice_name,
     );
+    return;
   }
   await context.setBlockchainLength(length);
   await context.setCompilationButtonState(2);
