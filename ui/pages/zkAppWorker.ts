@@ -160,8 +160,8 @@ const functions = {
     await state.Mac!.compile({ cache: FileSystem(cacheFiles) });
   },
   fetchAccount: async (args: { publicKey58: string }) => {
-    const publicKey = PublicKey.fromBase58(args.publicKey58);
-    return await fetchAccount({ publicKey });
+    const pk = PublicKey.fromBase58(args.publicKey58);
+    return await fetchAccount({ publicKey: pk });
   },
   generatePrivateKey: async (args: {}) => {
     const privateKey: PrivateKey = PrivateKey.random();

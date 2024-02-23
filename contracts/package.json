@@ -49,7 +49,7 @@
   "dependencies": {
     "bs58": "^5.0.0",
     "byteify": "4.1.4",
-    "o1js": "0.14.1",
+    "o1js": "0.16.2",
     "prompt-sync": "^4.2.0",
     "readline-sync": "^1.4.10",
     "tsx": "^4.7.0"
