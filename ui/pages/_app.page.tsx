@@ -3,7 +3,6 @@ import React from "react";
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 
-import { toast } from 'react-toastify';
 
 import {
   MacContextStateType,
@@ -16,6 +15,7 @@ import {
 } from "../components/AppContext";
 
 import Layout from "../components/Layout";
+import { toastInfo, toastWarning, toastError, toastSuccess } from "../components/toast";
 
 import { createContext, useEffect, useState, useContext } from "react";
 import type { Mac } from "../../contracts/src/Mac";
@@ -39,22 +39,9 @@ async function timeout(seconds: number): Promise<void> {
   });
 }
 
-// https://fkhadra.github.io/react-toastify/how-to-style
-function ExampleToast({ closeToast, toastProps }){
-  return (
-    <div role="alert" className="alert alert-error">
-      <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-      <span>Error! Task failed successfully.</span>
-      <div>
-        <button className="btn btn-sm btn-error" onClick={closeToast}>Dismiss</button>
-      </div>
-    </div>
-  );
-}
-
 async function runLoadSnarkyJS(context: MacContextType) {
   // toast.error("failed to create deploy transaction!");
-  toast(<ExampleToast />, {hideProgressBar: true});
+  // toast(<ExampleToast />, {hideProgressBar: true});
   // toast("failed", {className: "alert alert-error"})
   console.log("runLoadSnarkyJS");
   // indicate it is compiling now
@@ -77,6 +64,7 @@ async function runLoadSnarkyJS(context: MacContextType) {
     console.log(
       "unfortunately the " + nice_name + " network is not reachable right now",
     );
+    toastError("Failed to connect to " + nice_name);
     console.error(error);
     await context.setCompilationButtonState(0);
     await context.setConnectionError("Failed to reach " + nice_name);
@@ -99,6 +87,7 @@ async function runLoadSnarkyJS(context: MacContextType) {
         nice_name +
         " network is not reachable right now and we were not able to fetch the blockchain length",
     );
+    toastError("Failed to fetch blockchain length from " + nice_name);
     await context.setCompilationButtonState(0);
     await context.setConnectionError(
       "Failed to fetch blockchain length from " + nice_name,
@@ -108,6 +97,7 @@ async function runLoadSnarkyJS(context: MacContextType) {
   await context.setBlockchainLength(length);
   await context.setCompilationButtonState(2);
   await context.setConnectionError("");
+  toastSuccess("Successfully connected to " + nice_name);
 }
 
 async function runCompile(context: MacContextType) {
@@ -121,9 +111,11 @@ async function runCompile(context: MacContextType) {
     console.timeEnd("contract-compilation");
     console.log("compiled");
     await context.setCompilationButtonState(4);
+    toastSuccess("Successfully compiled the smart contract");
   } catch (e: any) {
     console.log(e);
     await context.setCompilationButtonState(2);
+    toastError("Failed to compile the smart contract");
   }
 }
 

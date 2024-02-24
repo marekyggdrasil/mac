@@ -1,3 +1,4 @@
+import { toastInfo, toastWarning, toastError, toastSuccess } from "../components/toast";
 import ZkappWorkerClient from "../pages/zkAppWorkerClient";
 
 import {
@@ -31,6 +32,7 @@ export async function contractDeploy(context: MacContextType) {
   console.log("createDeployTransaction");
   if (context.state.zkappPrivateKey === null) {
     throw Error("Private key is not defined");
+    toastError("Smart contract private key is missing");
   }
   await context.setState({
     ...context.state,
@@ -45,6 +47,7 @@ export async function contractDeploy(context: MacContextType) {
   } catch (e: any) {
     console.log("failed to create deploy transaction!");
     console.log(e);
+    toastError("Failed to construct the transaction");
     await context.setState({
       ...context.state,
       creatingTransaction: false,
@@ -54,6 +57,7 @@ export async function contractDeploy(context: MacContextType) {
     });
     return;
   }
+  toastInfo("Transaction constructed, now wait for proving.");
   console.log("setState");
   await context.setState({
     ...context.state,
@@ -61,7 +65,20 @@ export async function contractDeploy(context: MacContextType) {
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
-  await zkappWorkerClient.proveTransaction();
+  try {
+    await zkappWorkerClient.proveTransaction();
+  } catch (e: any) {
+    toastError("Failed to prove the transaction");
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
+  toastInfo("Transaction proved!");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -87,6 +104,7 @@ export async function contractDeploy(context: MacContextType) {
     tx_building_state: "",
     tx_command: "",
   });
+  toastSuccess("Transaction sent!");
 }
 
 export async function contractDeposit(context: MacContextType) {
@@ -113,6 +131,7 @@ export async function contractDeposit(context: MacContextType) {
   } catch (e: any) {
     console.log("failed to create the transaction!");
     console.log(e);
+    toastError("Failed to construct the transaction");
     await context.setState({
       ...context.state,
       creatingTransaction: false,
@@ -122,13 +141,27 @@ export async function contractDeposit(context: MacContextType) {
     });
     return;
   }
+  toastInfo("Transaction constructed, now wait for proving.");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
-  await zkappWorkerClient.proveTransaction();
+  try {
+    await zkappWorkerClient.proveTransaction();
+  } catch (e: any) {
+    toastError("Failed to prove the transaction");
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
+  toastInfo("Transaction proved!");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -154,6 +187,7 @@ export async function contractDeposit(context: MacContextType) {
     tx_building_state: "",
     tx_command: "",
   });
+  toastSuccess("Transaction sent!");
 }
 
 export async function contractWithdraw(context: MacContextType) {
@@ -180,6 +214,7 @@ export async function contractWithdraw(context: MacContextType) {
   } catch (e: any) {
     console.log("failed to create the transaction!");
     console.log(e);
+    toastError("Failed to construct the transaction");
     await context.setState({
       ...context.state,
       creatingTransaction: false,
@@ -189,13 +224,27 @@ export async function contractWithdraw(context: MacContextType) {
     });
     return;
   }
+  toastInfo("Transaction constructed, now wait for proving.");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
-  await zkappWorkerClient.proveTransaction();
+  try {
+    await zkappWorkerClient.proveTransaction();
+  } catch (e: any) {
+    toastError("Failed to prove the transaction");
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
+  toastInfo("Transaction proved!");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -221,6 +270,7 @@ export async function contractWithdraw(context: MacContextType) {
     tx_building_state: "",
     tx_command: "",
   });
+  toastSuccess("Transaction sent!");
 }
 
 export async function contractCancel(context: MacContextType) {
@@ -247,6 +297,7 @@ export async function contractCancel(context: MacContextType) {
   } catch (e: any) {
     console.log("failed to create the transaction!");
     console.log(e);
+    toastError("Failed to construct the transaction");
     await context.setState({
       ...context.state,
       creatingTransaction: false,
@@ -256,13 +307,27 @@ export async function contractCancel(context: MacContextType) {
     });
     return;
   }
+  toastInfo("Transaction constructed, now wait for proving.");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
-  await zkappWorkerClient.proveTransaction();
+  try {
+    await zkappWorkerClient.proveTransaction();
+  } catch (e: any) {
+    toastError("Failed to prove the transaction");
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
+  toastInfo("Transaction proved!");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -288,6 +353,7 @@ export async function contractCancel(context: MacContextType) {
     tx_building_state: "",
     tx_command: "",
   });
+  toastSuccess("Transaction sent!");
 }
 
 export async function contractSuccess(context: MacContextType) {
@@ -314,6 +380,7 @@ export async function contractSuccess(context: MacContextType) {
   } catch (e: any) {
     console.log("failed to create the transaction!");
     console.log(e);
+    toastError("Failed to construct the transaction");
     await context.setState({
       ...context.state,
       creatingTransaction: false,
@@ -323,13 +390,27 @@ export async function contractSuccess(context: MacContextType) {
     });
     return;
   }
+  toastInfo("Transaction constructed, now wait for proving.");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
-  await zkappWorkerClient.proveTransaction();
+  try {
+    await zkappWorkerClient.proveTransaction();
+  } catch (e: any) {
+    toastError("Failed to prove the transaction");
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
+  toastInfo("Transaction proved!");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -355,6 +436,7 @@ export async function contractSuccess(context: MacContextType) {
     tx_building_state: "",
     tx_command: "",
   });
+  toastSuccess("Transaction sent!");
 }
 
 export async function contractFailure(context: MacContextType) {
@@ -381,6 +463,7 @@ export async function contractFailure(context: MacContextType) {
   } catch (e: any) {
     console.log("failed to create the transaction!");
     console.log(e);
+    toastError("Failed to construct the transaction");
     await context.setState({
       ...context.state,
       creatingTransaction: false,
@@ -390,13 +473,27 @@ export async function contractFailure(context: MacContextType) {
     });
     return;
   }
+  toastInfo("Transaction constructed, now wait for proving.");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
     tx_building_state: "Proving...",
   });
   console.log("proveTransaction");
-  await zkappWorkerClient.proveTransaction();
+  try {
+    await zkappWorkerClient.proveTransaction();
+  } catch (e: any) {
+    toastError("Failed to prove the transaction");
+    await context.setState({
+      ...context.state,
+      creatingTransaction: false,
+      deployed: false,
+      tx_building_state: "",
+      tx_command: "",
+    });
+    return;
+  }
+  toastInfo("Transaction proved!");
   await context.setState({
     ...context.state,
     creatingTransaction: true,
@@ -422,4 +519,5 @@ export async function contractFailure(context: MacContextType) {
     tx_building_state: "",
     tx_command: "",
   });
+  toastSuccess("Transaction sent!");
 }
