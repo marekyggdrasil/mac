@@ -601,7 +601,7 @@ const InteractionEditor = () => {
 const InteractionCases = () => {
   const context: MacContextType = CastContext();
   if (context.compilationButtonState < 2) {
-    return <div>Make sure you load the SnarkyJS library!</div>;
+    return <div>Make sure you load the o1js library!</div>;
   } else if (context.connectionButtonState < 2) {
     return <div>Make sure you connect your AuroWallet!</div>;
   } else if (!context.state.loaded) {

@@ -58,7 +58,7 @@ const ExportCases = () => {
   if (context.compilationButtonState < 2) {
     return (
       <div>
-        <p>You need to load the SnarkyJS library first!</p>
+        <p>You need to load the o1js library first!</p>
       </div>
     );
   }
