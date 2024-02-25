@@ -84,3 +84,51 @@ testing https://proxy.berkeley.minaexplorer.com/graphql
 successfully set active instance
 blockchain length 37605
 ```
+
+check the address
+
+```sh
+npx tsx contracts/scripts/accountcheck.ts https://proxy.berkeley.minaexplorer.com/graphql B62qkThtJWtKXN56efqC4ZXqv5NMD3mvjoVg5GpLLHRv9b3z2uMrkN4
+```
+
+example output
+
+```
+{
+  account: {
+    publicKey: PublicKey { x: [Field], isOdd: [Bool] },
+    tokenId: Field { value: [Array] },
+    tokenSymbol: '',
+    balance: UInt64 { value: [Field] },
+    nonce: UInt32 { value: [Field] },
+    receiptChainHash: Field { value: [Array] },
+    delegate: PublicKey { x: [Field], isOdd: [Bool] },
+    votingFor: Field { value: [Array] },
+    timing: {
+      isTimed: [Bool],
+      initialMinimumBalance: [UInt64],
+      cliffTime: [UInt32],
+      cliffAmount: [UInt64],
+      vestingPeriod: [UInt32],
+      vestingIncrement: [UInt64]
+    },
+    permissions: {
+      editState: [Object],
+      access: [Object],
+      send: [Object],
+      receive: [Object],
+      setDelegate: [Object],
+      setPermissions: [Object],
+      setVerificationKey: [Object],
+      setZkappUri: [Object],
+      editActionState: [Object],
+      setTokenSymbol: [Object],
+      incrementNonce: [Object],
+      setVotingFor: [Object],
+      setTiming: [Object]
+    },
+    zkapp: undefined
+  },
+  error: undefined
+}
+```
