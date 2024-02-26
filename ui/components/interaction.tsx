@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { toastInfo, toastWarning, toastError, toastSuccess } from "../components/toast";
 import ZkappWorkerClient from "../pages/zkAppWorkerClient";
 
 import {
@@ -7,6 +8,7 @@ import {
   CastContext,
   castZkAppWorkerClient,
   getTransactionBlockExplorerURL,
+  getNetworkFromName,
 } from "./AppContext";
 
 import { MinaValue } from "./highlights";
@@ -73,6 +75,13 @@ export async function finalizeContract(context: MacContextType) {
 
 async function contractRefreshState(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
+
+  // refresh the blockchain length
+  const network_endpoint = getNetworkFromName(context.network);
+  const length = await zkappWorkerClient.fetchBlockchainLength(network_endpoint);
+  await context.setBlockchainLength(length);
+
+  // refresh the contract state
   const contract_state = await zkappWorkerClient.getContractState();
   const contract_state_parsed = JSON.parse(contract_state) as ContractStateType;
   context.setState({
@@ -84,8 +93,39 @@ async function contractRefreshState(context: MacContextType) {
   });
 }
 
-const DeployButton = () => {
+const ContractRefreshButton = () => {
   const context: MacContextType = CastContext();
+  if (!context.state.loaded) {
+    return (
+      <div
+        className="tooltip tooltip-open tooltip-bottom"
+        data-tip="zkApp contract not loaded"
+      >
+        <button className="btn btn-disabled">Refresh</button>
+      </div>
+    );
+  }
+  return (
+    <button
+      className="btn btn-primary"
+      onClick={async () => {
+        try {
+          await contractRefreshState(context);
+        } catch (error) {
+          throw error;
+          toastError("Failed to refresh the smart contract state");
+          return;
+        }
+        toastSuccess("Smart contract state refreshed successfully!");
+      }}
+    >
+      Refresh
+    </button>
+  );
+}
+
+const DeployButton = () => {
+    const context: MacContextType = CastContext();
   if (!context.state.deployed) {
     if (context.state.zkappPrivateKey === null) {
       return (
@@ -556,6 +596,7 @@ const InteractionUI = () => {
       <ContractTimeline />
       <WhoActed />
       <TxIds />
+      <ContractRefreshButton />
       <DeployButton />
       <DepositButton />
       <WithdrawButton />
