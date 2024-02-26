@@ -125,7 +125,7 @@ export async function contractDeposit(context: MacContextType) {
   await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
   console.log("initZkappInstance");
   await zkappWorkerClient.initZkappInstance(context.state.zkappPublicKey);
-  console.log("createDeployTransaction");
+  console.log("createDepositTransaction");
   try {
     await zkappWorkerClient.createDepositTransaction(connectedAddress);
   } catch (e: any) {
