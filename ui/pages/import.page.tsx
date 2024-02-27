@@ -6,6 +6,8 @@ import {
   MacContextType,
   CastContext,
   castZkAppWorkerClient,
+  ContractStateActedType,
+  ContractStateType
 } from "../components/AppContext";
 
 import { PublicKey } from "o1js";
@@ -39,11 +41,19 @@ async function runImport(context: MacContextType) {
     const account = await zkappWorkerClient.fetchAccount({
       publicKey: zkAppPublicKey,
     });
-    let is_deployed = false;
+    let is_deployed: boolean = false;
+    let employerActed: boolean = false;
+    let contractorActed: boolean = false;
+    let arbiterActed: boolean = false;
+    let automatonState: string = "";
     if (account.account !== undefined) {
       is_deployed = true;
-      const on_chain_state = await zkappWorkerClient.getContractState();
-      console.log(on_chain_state);
+      const contract_state = await zkappWorkerClient.getContractState();
+      const contract_state_parsed = JSON.parse(contract_state) as ContractStateType;
+      employerActed = contract_state_parsed.acted.employer;
+      contractorActed = contract_state_parsed.acted.contractor;
+      arbiterActed = contract_state_parsed.acted.arbiter;
+      automatonState = contract_state_parsed.automaton_state;
     }
 
     // set the state
@@ -57,6 +67,10 @@ async function runImport(context: MacContextType) {
       contract_employer: PublicKey.fromBase58(r.employer),
       contract_contractor: PublicKey.fromBase58(r.contractor),
       contract_arbiter: PublicKey.fromBase58(r.arbiter),
+      automatonState: automatonState,
+      employerActed: employerActed,
+      contractorActed: contractorActed,
+      arbiterActed: arbiterActed,
       contract_outcome_deposit_after: r.contract_outcome_deposit_after,
       contract_outcome_deposit_before: r.contract_outcome_deposit_before,
       contract_outcome_success_after: r.contract_outcome_success_after,

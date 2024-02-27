@@ -4,6 +4,17 @@ import { Field, PrivateKey, PublicKey } from "o1js";
 
 import ZkappWorkerClient from "../pages/zkAppWorkerClient";
 
+export interface ContractStateActedType {
+  employer: boolean;
+  contractor: boolean;
+  arbiter: boolean;
+}
+
+export interface ContractStateType {
+  acted: ContractStateActedType;
+  automaton_state: string;
+}
+
 export type MacContextStateType = {
   zkappWorkerClient: ZkappWorkerClient | null;
   finalized: boolean;
@@ -31,7 +42,7 @@ export type MacContextStateType = {
   employerActed: boolean;
   contractorActed: boolean;
   arbiterActed: boolean;
-  automatonState: boolean;
+  automatonState: string;
   employerBase58: string;
   contractorBase58: string;
   arbiterBase58: string;

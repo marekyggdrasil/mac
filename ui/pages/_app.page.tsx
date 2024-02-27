@@ -182,7 +182,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     employerActed: false,
     contractorActed: false,
     arbiterActed: false,
-    automatonState: false,
+    automatonState: "",
     employerBase58: "",
     contractorBase58: "",
     arbiterBase58: "",

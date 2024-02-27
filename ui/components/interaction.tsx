@@ -9,6 +9,8 @@ import {
   castZkAppWorkerClient,
   getTransactionBlockExplorerURL,
   getNetworkFromName,
+  ContractStateActedType,
+  ContractStateType
 } from "./AppContext";
 
 import { MinaValue } from "./highlights";
@@ -22,17 +24,6 @@ import {
 } from "./txBuilding";
 import { RenderContractDescription } from "./ContractRendering";
 import { PublicKey } from "o1js";
-
-interface ContractStateActedType {
-  employer: boolean;
-  contractor: boolean;
-  arbiter: boolean;
-}
-
-interface ContractStateType {
-  acted: ContractStateActedType;
-  automaton_state: string;
-}
 
 export async function finalizeContract(context: MacContextType) {
   // instantiate preimage via worker and compute macpack
@@ -84,6 +75,7 @@ async function contractRefreshState(context: MacContextType) {
   // refresh the contract state
   const contract_state = await zkappWorkerClient.getContractState();
   const contract_state_parsed = JSON.parse(contract_state) as ContractStateType;
+  console.log(contract_state_parsed);
   context.setState({
     ...context.state,
     employerActed: contract_state_parsed.acted.employer,
@@ -182,6 +174,9 @@ const DepositButton = () => {
     context.blockchainLength < context.state.contract_outcome_deposit_before
   ) {
     if (context.state.tx_building_state == "") {
+      if (context.state.automatonState != "initial") {
+        return <button className="btn btn-disabled">Deposit</button>;
+      }
       return (
         <button
           className="btn btn-primary"
@@ -208,6 +203,13 @@ const WithdrawButton = () => {
     context.connectedAddress === null ||
     context.blockchainLength < context.state.contract_outcome_deposit_after
   ) {
+    return <button className="btn btn-disabled">Withdraw</button>;
+  }
+  if (
+    context.state.automatonState != "canceled_early" &&
+    context.state.automatonState != "canceled" &&
+    context.state.automatonState != "succeeded" &&
+    context.state.automatonState != "failed") {
     return <button className="btn btn-disabled">Withdraw</button>;
   }
   return (
@@ -484,7 +486,7 @@ const ContractTimeline = () => {
     ) {
       return (
         <p>
-          The contract is in the <strong>warm-up</strong> stage
+          The contract is in the <strong>warm-up</strong> stage.
         </p>
       );
     } else if (
@@ -492,6 +494,14 @@ const ContractTimeline = () => {
         context.blockchainLength &&
       context.blockchainLength < context.state.contract_outcome_deposit_before
     ) {
+      if (context.state.automatonState == "deposited") {
+        return (
+          <p>
+            Everyone made their deposit but the contract is is still in the <strong>deposit</strong> stage. It is possible
+            to <strong>cancel</strong> for free with no consequences.
+          </p>
+        );
+      }
       return (
         <p>
           The contract is in the <strong>deposit</strong> stage. It is possible
@@ -503,6 +513,16 @@ const ContractTimeline = () => {
         context.blockchainLength &&
       context.blockchainLength < context.state.contract_outcome_success_before
     ) {
+      if (context.state.automatonState == "succeeded") {
+        return (
+          <div>
+            <p>
+              The contract was judged <strong>success</strong> but it is still in the <strong>success declaration</strong> stage.
+            </p>
+            <CancelTimeLine />
+          </div>
+        );
+      }
       return (
         <div>
           <p>
@@ -516,19 +536,25 @@ const ContractTimeline = () => {
         context.blockchainLength &&
       context.blockchainLength < context.state.contract_outcome_failure_before
     ) {
-      return (
-        <div>
-          <p>
-            The contract is in the <strong>failure declaration</strong> stage.
-          </p>
-          <CancelTimeLine />
-        </div>
-      );
-    } else if (
-      context.state.contract_outcome_failure_after <=
-        context.blockchainLength &&
-      context.blockchainLength < context.state.contract_outcome_failure_before
-    ) {
+      if (context.state.automatonState == "succeeded") {
+        return (
+          <div>
+            <p>
+              The contract was judged <strong>success</strong> but it is still in the <strong>failure declaration</strong> stage.
+            </p>
+            <CancelTimeLine />
+          </div>
+        );
+      } else if (context.state.automatonState == "failed") {
+        return (
+          <div>
+            <p>
+              The contract was judged <strong>failed</strong> but it is still in the <strong>failure declaration</strong> stage.
+            </p>
+            <CancelTimeLine />
+          </div>
+        );
+      }
       return (
         <div>
           <p>
