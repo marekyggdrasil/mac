@@ -10,9 +10,12 @@ import {
   ContractStateType
 } from "../components/AppContext";
 
-import { PublicKey } from "o1js";
+import { PublicKey, PrivateKey } from "o1js";
+
+import { toastInfo, toastWarning, toastError, toastSuccess } from "../components/toast";
 
 async function runImport(context: MacContextType) {
+  // get macpack
   let element = document.getElementById("import-macpack") as HTMLInputElement;
   if (element === null) {
     throw Error("Macpack textarea is missing");
@@ -22,12 +25,36 @@ async function runImport(context: MacContextType) {
   }
   let macpack = element.value;
   console.log(macpack);
+
+  // get private key
+  let private_key: string = "";
+  let element_pk = document.getElementById("import-macpack-private-key") as HTMLInputElement;
+  if (element_pk !== null) {
+    if (element_pk.value !== null && element_pk.value !== "") {
+      private_key = element_pk.value;
+      console.log(element_pk);
+      try {
+        const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(private_key);
+      } catch (e: any) {
+        console.log("failed to import");
+        console.log(e);
+        toastError("Invalid MINA private key");
+        return;
+      }
+    }
+  }
+
   let zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   try {
     if (macpack === null) {
       throw Error("Macpack value is null");
     }
-    await zkappWorkerClient.fromMacPack(macpack);
+    try {
+      await zkappWorkerClient.fromMacPack(macpack);
+    } catch (e: any) {
+      toastError("Failed to parse the macpack message...");
+      return;
+    }
     console.log("imported correctly");
     // get the preimage to app state for the display
     const r = await zkappWorkerClient.getPreimageData();
@@ -37,6 +64,18 @@ async function runImport(context: MacContextType) {
     // context.setState({ ...context.state, loaded: true, macpack: macpack });
 
     let zkAppPublicKey: PublicKey = PublicKey.fromBase58(r.address);
+    if (private_key !== "") {
+      const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(private_key);
+      const derivedPublicKey: string = zkAppPrivateKey.toPublicKey().toBase58();
+      if (derivedPublicKey !== r.address) {
+        toastError("Provided private key does not correspond to provided macpack");
+        return;
+      }
+      context.setState({
+        ...context.state,
+        zkappPrivateKey: zkAppPrivateKey
+      });
+    }
     await zkappWorkerClient.initZkappInstance(zkAppPublicKey);
     const account = await zkappWorkerClient.fetchAccount({
       publicKey: zkAppPublicKey,
@@ -136,24 +175,21 @@ const ImportCases = () => {
         id="import-macpack"
         placeholder="Paste your MACPACK here..."
       ></textarea>
-      <p>then hit the import button below!</p>
-      <button
-        className="btn"
-        onClick={async () => {
-          await runImport(context);
-        }}
-      >
-        Import
-      </button>
-    </div>
-  );
-  return (
-    <div>
-      <textarea
-        className="rounded-md not-prose bg-primary text-primary-content macpack-editor"
-        id="import-macpack"
-        placeholder="Paste your MACPACK here..."
-      ></textarea>
+      <div className="form-control">
+      <label className="label">Private key</label>
+      <input
+        type="password"
+        name="zkAppPrivateKeyImport"
+        id="import-macpack-private-key"
+        placeholder="Private key (optional)"
+        className="input input-bordered w-full max-w-xs"
+      />
+      <label className="label">
+      <span className="label-text-alt">
+        Optional, allows extra actions such as contract deployment.
+      </span>
+      </label>
+      </div>
       <p>then hit the import button below!</p>
       <button
         className="btn"
