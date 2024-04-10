@@ -8,6 +8,7 @@ import {
   castZkAppWorkerClient,
 } from "../components/AppContext";
 
+import { MinaSecretValue } from "../components/highlights";
 import { finalizeContract } from "../components/interaction";
 
 const MacPackContent = () => {
@@ -52,6 +53,20 @@ const FinalizeButton = () => {
     );
   }
 };
+
+const OptionalPrivateKey = () => {
+  const context: MacContextType = CastContext();
+  console.log(context.state)
+  if (context.state.zkappPrivateKey !== null) {
+    let zkapp_sk = context.state.zkappPrivateKey.toBase58();
+    return (
+      <p>The private key for this smart contract is known and you may back it up. Just copy <MinaSecretValue>{zkapp_sk}</MinaSecretValue></p>
+    )
+  }
+  return (
+    <p>The private key for this smart contract is not stored in this app and cannot be exported.</p>
+  )
+}
 
 const ExportCases = () => {
   const context: MacContextType = CastContext();
@@ -98,6 +113,7 @@ const ExportCases = () => {
         Send the above MacPack to the remaining parties of your zkApp and
         instruct them to import it in order to participate!
       </p>
+      <OptionalPrivateKey />
     </div>
   );
 };

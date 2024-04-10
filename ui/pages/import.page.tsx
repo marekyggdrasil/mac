@@ -64,18 +64,18 @@ async function runImport(context: MacContextType) {
     // context.setState({ ...context.state, loaded: true, macpack: macpack });
 
     let zkAppPublicKey: PublicKey = PublicKey.fromBase58(r.address);
+    let zkAppPrivateKey: PrivateKey | null = null;
     if (private_key !== "") {
-      const zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(private_key);
+      console.log("Private key is provided");
+      zkAppPrivateKey = PrivateKey.fromBase58(private_key);
       const derivedPublicKey: string = zkAppPrivateKey.toPublicKey().toBase58();
       if (derivedPublicKey !== r.address) {
         toastError("Provided private key does not correspond to provided macpack");
         return;
       }
-      context.setState({
-        ...context.state,
-        zkappPrivateKey: zkAppPrivateKey
-      });
     }
+    console.log("So the context is");
+    console.log(context.state);
     await zkappWorkerClient.initZkappInstance(zkAppPublicKey);
     const account = await zkappWorkerClient.fetchAccount({
       publicKey: zkAppPublicKey,
@@ -102,6 +102,7 @@ async function runImport(context: MacContextType) {
       finalized: true,
       deployed: is_deployed,
       macpack: macpack,
+      zkappPrivateKey: zkAppPrivateKey,
       zkappPublicKey: zkAppPublicKey,
       contract_employer: PublicKey.fromBase58(r.employer),
       contract_contractor: PublicKey.fromBase58(r.contractor),
