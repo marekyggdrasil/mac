@@ -1,4 +1,9 @@
-import { toastInfo, toastWarning, toastError, toastSuccess } from "../components/toast";
+import {
+  toastInfo,
+  toastWarning,
+  toastError,
+  toastSuccess,
+} from "../components/toast";
 import ZkappWorkerClient from "../pages/zkAppWorkerClient";
 
 import {

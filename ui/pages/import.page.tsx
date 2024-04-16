@@ -7,12 +7,17 @@ import {
   CastContext,
   castZkAppWorkerClient,
   ContractStateActedType,
-  ContractStateType
+  ContractStateType,
 } from "../components/AppContext";
 
 import { PublicKey, PrivateKey } from "o1js";
 
-import { toastInfo, toastWarning, toastError, toastSuccess } from "../components/toast";
+import {
+  toastInfo,
+  toastWarning,
+  toastError,
+  toastSuccess,
+} from "../components/toast";
 
 async function runImport(context: MacContextType) {
   // get macpack
@@ -28,7 +33,9 @@ async function runImport(context: MacContextType) {
 
   // get private key
   let private_key: string = "";
-  let element_pk = document.getElementById("import-macpack-private-key") as HTMLInputElement;
+  let element_pk = document.getElementById(
+    "import-macpack-private-key",
+  ) as HTMLInputElement;
   if (element_pk !== null) {
     if (element_pk.value !== null && element_pk.value !== "") {
       private_key = element_pk.value;
@@ -70,7 +77,9 @@ async function runImport(context: MacContextType) {
       zkAppPrivateKey = PrivateKey.fromBase58(private_key);
       const derivedPublicKey: string = zkAppPrivateKey.toPublicKey().toBase58();
       if (derivedPublicKey !== r.address) {
-        toastError("Provided private key does not correspond to provided macpack");
+        toastError(
+          "Provided private key does not correspond to provided macpack",
+        );
         return;
       }
     }
@@ -88,7 +97,9 @@ async function runImport(context: MacContextType) {
     if (account.account !== undefined) {
       is_deployed = true;
       const contract_state = await zkappWorkerClient.getContractState();
-      const contract_state_parsed = JSON.parse(contract_state) as ContractStateType;
+      const contract_state_parsed = JSON.parse(
+        contract_state,
+      ) as ContractStateType;
       employerActed = contract_state_parsed.acted.employer;
       contractorActed = contract_state_parsed.acted.contractor;
       arbiterActed = contract_state_parsed.acted.arbiter;
@@ -177,19 +188,19 @@ const ImportCases = () => {
         placeholder="Paste your MACPACK here..."
       ></textarea>
       <div className="form-control">
-      <label className="label">Private key</label>
-      <input
-        type="password"
-        name="zkAppPrivateKeyImport"
-        id="import-macpack-private-key"
-        placeholder="Private key (optional)"
-        className="input input-bordered w-full max-w-xs"
-      />
-      <label className="label">
-      <span className="label-text-alt">
-        Optional, allows extra actions such as contract deployment.
-      </span>
-      </label>
+        <label className="label">Private key</label>
+        <input
+          type="password"
+          name="zkAppPrivateKeyImport"
+          id="import-macpack-private-key"
+          placeholder="Private key (optional)"
+          className="input input-bordered w-full max-w-xs"
+        />
+        <label className="label">
+          <span className="label-text-alt">
+            Optional, allows extra actions such as contract deployment.
+          </span>
+        </label>
       </div>
       <p>then hit the import button below!</p>
       <button

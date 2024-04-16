@@ -1,6 +1,11 @@
 import Link from "next/link";
 
-import { toastInfo, toastWarning, toastError, toastSuccess } from "../components/toast";
+import {
+  toastInfo,
+  toastWarning,
+  toastError,
+  toastSuccess,
+} from "../components/toast";
 import ZkappWorkerClient from "../pages/zkAppWorkerClient";
 
 import {
@@ -10,7 +15,7 @@ import {
   getTransactionBlockExplorerURL,
   getNetworkFromName,
   ContractStateActedType,
-  ContractStateType
+  ContractStateType,
 } from "./AppContext";
 
 import { MinaValue } from "./highlights";
@@ -69,7 +74,8 @@ async function contractRefreshState(context: MacContextType) {
 
   // refresh the blockchain length
   const network_endpoint = getNetworkFromName(context.network);
-  const length = await zkappWorkerClient.fetchBlockchainLength(network_endpoint);
+  const length =
+    await zkappWorkerClient.fetchBlockchainLength(network_endpoint);
   await context.setBlockchainLength(length);
 
   // refresh the contract state
@@ -114,10 +120,10 @@ const ContractRefreshButton = () => {
       Refresh
     </button>
   );
-}
+};
 
 const DeployButton = () => {
-    const context: MacContextType = CastContext();
+  const context: MacContextType = CastContext();
   if (!context.state.deployed) {
     if (context.state.zkappPrivateKey === null) {
       return (
@@ -209,7 +215,8 @@ const WithdrawButton = () => {
     context.state.automatonState != "canceled_early" &&
     context.state.automatonState != "canceled" &&
     context.state.automatonState != "succeeded" &&
-    context.state.automatonState != "failed") {
+    context.state.automatonState != "failed"
+  ) {
     return <button className="btn btn-disabled">Withdraw</button>;
   }
   return (
@@ -497,8 +504,9 @@ const ContractTimeline = () => {
       if (context.state.automatonState == "deposited") {
         return (
           <p>
-            Everyone made their deposit but the contract is is still in the <strong>deposit</strong> stage. It is possible
-            to <strong>cancel</strong> for free with no consequences.
+            Everyone made their deposit but the contract is is still in the{" "}
+            <strong>deposit</strong> stage. It is possible to{" "}
+            <strong>cancel</strong> for free with no consequences.
           </p>
         );
       }
@@ -517,7 +525,8 @@ const ContractTimeline = () => {
         return (
           <div>
             <p>
-              The contract was judged <strong>success</strong> but it is still in the <strong>success declaration</strong> stage.
+              The contract was judged <strong>success</strong> but it is still
+              in the <strong>success declaration</strong> stage.
             </p>
             <CancelTimeLine />
           </div>
@@ -540,7 +549,8 @@ const ContractTimeline = () => {
         return (
           <div>
             <p>
-              The contract was judged <strong>success</strong> but it is still in the <strong>failure declaration</strong> stage.
+              The contract was judged <strong>success</strong> but it is still
+              in the <strong>failure declaration</strong> stage.
             </p>
             <CancelTimeLine />
           </div>
@@ -549,7 +559,8 @@ const ContractTimeline = () => {
         return (
           <div>
             <p>
-              The contract was judged <strong>failed</strong> but it is still in the <strong>failure declaration</strong> stage.
+              The contract was judged <strong>failed</strong> but it is still in
+              the <strong>failure declaration</strong> stage.
             </p>
             <CancelTimeLine />
           </div>

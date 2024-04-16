@@ -3,7 +3,6 @@ import React from "react";
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 
-
 import {
   MacContextStateType,
   MacContextType,
@@ -15,7 +14,12 @@ import {
 } from "../components/AppContext";
 
 import Layout from "../components/Layout";
-import { toastInfo, toastWarning, toastError, toastSuccess } from "../components/toast";
+import {
+  toastInfo,
+  toastWarning,
+  toastError,
+  toastSuccess,
+} from "../components/toast";
 
 import { createContext, useEffect, useState, useContext } from "react";
 import type { Mac } from "../../contracts/src/Mac";

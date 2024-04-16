@@ -1,3 +1,5 @@
+import React from "react";
+
 import { PublicKey, PrivateKey } from "o1js";
 
 import { MacContextType, CastContext } from "./AppContext";
@@ -50,7 +52,8 @@ const KeyGenerator = () => {
   );
 };
 
-async function EditorFormSubmission(event, context) {
+async function EditorFormSubmission(
+  event: React.SyntheticEvent, context: MacContextType) {
   event.preventDefault();
   console.log(event);
 

@@ -25,7 +25,7 @@ export type MacContextStateType = {
   tx_command: string;
   currentNum: Field | null;
   lastTxId: string;
-  contractBuildInterfaceType: string;  // either "wizard" or "advanced"
+  contractBuildInterfaceType: string; // either "wizard" or "advanced"
   contractBuildWizardPage: number;
   zkappPrivateKeyCandidate: PrivateKey | null;
   zkappPublicKeyCandidate: PublicKey;

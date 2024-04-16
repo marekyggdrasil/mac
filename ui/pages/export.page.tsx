@@ -56,17 +56,23 @@ const FinalizeButton = () => {
 
 const OptionalPrivateKey = () => {
   const context: MacContextType = CastContext();
-  console.log(context.state)
+  console.log(context.state);
   if (context.state.zkappPrivateKey !== null) {
     let zkapp_sk = context.state.zkappPrivateKey.toBase58();
     return (
-      <p>The private key for this smart contract is known and you may back it up. Just copy <MinaSecretValue>{zkapp_sk}</MinaSecretValue></p>
-    )
+      <p>
+        The private key for this smart contract is known and you may back it up.
+        Just copy <MinaSecretValue>{zkapp_sk}</MinaSecretValue>
+      </p>
+    );
   }
   return (
-    <p>The private key for this smart contract is not stored in this app and cannot be exported.</p>
-  )
-}
+    <p>
+      The private key for this smart contract is not stored in this app and
+      cannot be exported.
+    </p>
+  );
+};
 
 const ExportCases = () => {
   const context: MacContextType = CastContext();

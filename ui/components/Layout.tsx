@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import { MacContextType, CastContext } from "./AppContext";
 import { MinaValue } from "./highlights";
