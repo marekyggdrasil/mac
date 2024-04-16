@@ -50,279 +50,231 @@ const KeyGenerator = () => {
   );
 };
 
+async function EditorFormSubmission(event, context) {
+  event.preventDefault();
+  console.log(event);
+
+  const max_string_length = 128;
+  const t = 1; // 2520 is a week, time unit
+  const m = 1000000000; // mina denomination
+
+  // addresses
+  const private_key = (event.target as any).base58sk.value;
+  console.log(private_key);
+  try {
+    PrivateKey.fromBase58(private_key);
+  } catch (e: any) {
+    return alert("Invalid private key");
+  }
+
+  // addresses
+  const employer = (event.target as any).base58employer.value;
+  try {
+    PublicKey.fromBase58(employer);
+  } catch (e: any) {
+    return alert("Invalid employer address");
+  }
+
+  const contractor = (event.target as any).base58contractor.value;
+  try {
+    PublicKey.fromBase58(contractor);
+  } catch (e: any) {
+    return alert("Invalid contractor address");
+  }
+
+  const arbiter = (event.target as any).base58arbiter.value;
+  try {
+    PublicKey.fromBase58(arbiter);
+  } catch (e: any) {
+    return alert("Invalid arbiter address");
+  }
+
+  const contract_subject = (event.target as any).contract_subject.value;
+
+  // contractor
+  const contractor_payment = Math.round(
+    parseFloat((event.target as any).contractor_payment.value) * m,
+  );
+  const contractor_deposit = Math.round(
+    parseFloat((event.target as any).contractor_deposit.value) * m,
+  );
+  const contracor_penalty_failure_percent = parseInt(
+    (event.target as any).contractor_failure_penalty.value,
+  );
+  const contracor_penalty_cancel_percent = parseInt(
+    (event.target as any).contractor_cancel_penalty.value,
+  );
+
+  // employer
+  const employer_deposit = Math.round(
+    parseFloat((event.target as any).employer_deposit.value) * m,
+  );
+  const employer_arbitration_fee_percent = parseInt(
+    (event.target as any).employer_arbitration_fee_percent.value,
+  );
+
+  // arbiter
+  const arbiter_payment = Math.round(
+    parseFloat((event.target as any).arbiter_payment.value) * m,
+  );
+  const arbiter_deposit = Math.round(
+    parseFloat((event.target as any).arbiter_deposit.value) * m,
+  );
+  const arbiter_penalty_non_acting_percent = parseInt(
+    (event.target as any).arbiter_penalty_non_acting_percent.value,
+  );
+
+  // deadlines
+  const deadline_warmup = (event.target as any).deadline_warmup.value;
+  const deadline_deposit = (event.target as any).deadline_deposit.value;
+  const deadline_execution = (event.target as any).deadline_execution.value;
+  const deadline_failure = (event.target as any).deadline_failure.value;
+
+  // description
+  const subject_deposit = (event.target as any).subject_deposit.value;
+  const subject_success = (event.target as any).subject_success.value;
+  const subject_failure = (event.target as any).subject_failure.value;
+  const subject_cancel = (event.target as any).subject_cancel.value;
+
+  // compute the values
+  const l = context.blockchainLength;
+  const a = Math.round(deadline_warmup * t);
+  const b = Math.round(deadline_deposit * t);
+  const c = Math.round(deadline_execution * t);
+  const d = Math.round(deadline_failure * t);
+
+  // set the deadline values
+  const contract_outcome_deposit_after = l + a;
+  const contract_outcome_deposit_before = l + a + b;
+  const contract_outcome_success_after = l + a + b;
+  const contract_outcome_success_before = l + a + b + c;
+  const contract_outcome_failure_after = l + a + b + c;
+  const contract_outcome_failure_before = l + a + b + c + d;
+  const contract_outcome_cancel_after = l + a + b;
+  const contract_outcome_cancel_before = l + a + b + c;
+
+  // set the descriptions
+  const contract_description = contract_subject;
+  const contract_outcome_deposit_description = subject_deposit;
+  const contract_outcome_success_description = subject_success;
+  const contract_outcome_failure_description = subject_failure;
+  const contract_outcome_cancel_description = subject_cancel;
+
+  // compute the amounts
+  console.log("helper values");
+  const emp_arb = Math.round(
+    (employer_arbitration_fee_percent / 100) * arbiter_payment,
+  );
+
+  const con_arb = arbiter_payment - emp_arb;
+  const con_fail = Math.round(
+    (contracor_penalty_failure_percent / 100) * arbiter_payment,
+  );
+  const con_cancel = Math.round(
+    (contracor_penalty_cancel_percent / 100) * arbiter_payment,
+  );
+
+  console.log(emp_arb);
+  console.log(con_arb);
+  console.log(con_fail);
+  console.log(con_cancel);
+
+  console.log("outcomes amounts");
+  const contract_outcome_deposit_employer =
+    contractor_payment + employer_deposit + emp_arb;
+  const contract_outcome_deposit_contractor = contractor_deposit + con_arb;
+  const contract_outcome_deposit_arbiter = arbiter_deposit;
+
+  const contract_outcome_success_employer = employer_deposit;
+  const contract_outcome_success_contractor =
+    contractor_payment + contractor_deposit;
+  const contract_outcome_success_arbiter = arbiter_payment + arbiter_deposit;
+
+  const contract_outcome_failure_employer =
+    contractor_payment + employer_deposit + con_fail;
+  const contract_outcome_failure_contractor = contractor_deposit - con_fail;
+  const contract_outcome_failure_arbiter = arbiter_payment + arbiter_deposit;
+
+  const contract_outcome_cancel_employer =
+    contractor_payment + employer_deposit + con_cancel;
+  const contract_outcome_cancel_contractor = contractor_deposit - con_cancel;
+  const contract_outcome_cancel_arbiter = arbiter_payment + arbiter_deposit;
+
+  // validate values positive
+  const all_values = [
+    contract_outcome_deposit_employer,
+    contract_outcome_deposit_contractor,
+    contract_outcome_deposit_arbiter,
+    contract_outcome_success_employer,
+    contract_outcome_success_contractor,
+    contract_outcome_success_arbiter,
+    contract_outcome_failure_employer,
+    contract_outcome_failure_contractor,
+    contract_outcome_failure_arbiter,
+    contract_outcome_cancel_employer,
+    contract_outcome_cancel_contractor,
+    contract_outcome_cancel_arbiter,
+  ];
+  if (all_values.some((v) => v < 0)) {
+    return alert("One of the contract values ends up negative...");
+  }
+  // set the participants
+  const contract_employer = PublicKey.fromBase58(employer);
+  const contract_contractor = PublicKey.fromBase58(contractor);
+  const contract_arbiter = PublicKey.fromBase58(arbiter);
+
+  const sk = PrivateKey.fromBase58(private_key);
+  const pk = sk.toPublicKey();
+  console.log("sk");
+  console.log(sk);
+  console.log(pk);
+
+  // set the state
+  await context.setState({
+    ...context.state,
+    loaded: true,
+    deployed: false,
+    finalized: false,
+    zkappPrivateKey: sk,
+    zkappPublicKey: pk,
+    contract_employer: contract_employer,
+    contract_contractor: contract_contractor,
+    contract_arbiter: contract_arbiter,
+    contract_outcome_deposit_after: contract_outcome_deposit_after,
+    contract_outcome_deposit_before: contract_outcome_deposit_before,
+    contract_outcome_success_after: contract_outcome_success_after,
+    contract_outcome_success_before: contract_outcome_success_before,
+    contract_outcome_failure_after: contract_outcome_failure_after,
+    contract_outcome_failure_before: contract_outcome_failure_before,
+    contract_outcome_cancel_after: contract_outcome_cancel_after,
+    contract_outcome_cancel_before: contract_outcome_cancel_before,
+    contract_description: contract_subject,
+    contract_outcome_deposit_description: contract_outcome_deposit_description,
+    contract_outcome_success_description: contract_outcome_success_description,
+    contract_outcome_failure_description: contract_outcome_failure_description,
+    contract_outcome_cancel_description: contract_outcome_cancel_description,
+    contract_outcome_deposit_employer: -contract_outcome_deposit_employer,
+    contract_outcome_deposit_contractor: -contract_outcome_deposit_contractor,
+    contract_outcome_deposit_arbiter: -contract_outcome_deposit_arbiter,
+    contract_outcome_success_employer: contract_outcome_success_employer,
+    contract_outcome_success_contractor: contract_outcome_success_contractor,
+    contract_outcome_success_arbiter: contract_outcome_success_arbiter,
+    contract_outcome_failure_employer: contract_outcome_failure_employer,
+    contract_outcome_failure_contractor: contract_outcome_failure_contractor,
+    contract_outcome_failure_arbiter: contract_outcome_failure_arbiter,
+    contract_outcome_cancel_employer: contract_outcome_cancel_employer,
+    contract_outcome_cancel_contractor: contract_outcome_cancel_contractor,
+    contract_outcome_cancel_arbiter: contract_outcome_cancel_arbiter,
+  });
+}
+
 const Editor = () => {
   const context: MacContextType = CastContext();
   return (
-    <form
-      onSubmit={async (event) => {
-        event.preventDefault();
-        console.log(event);
-        const max_string_length = 128;
-        const t = 1; // 2520 is a week, time unit
-        const m = 1000000000; // mina denomination
-
-        // addresses
-        const private_key = (event.target as any).base58sk.value;
-        console.log(private_key);
-        try {
-          PrivateKey.fromBase58(private_key);
-        } catch (e: any) {
-          return alert("Invalid private key");
-        }
-
-        // addresses
-        const employer = (event.target as any).base58employer.value;
-        try {
-          PublicKey.fromBase58(employer);
-        } catch (e: any) {
-          return alert("Invalid employer address");
-        }
-
-        const contractor = (event.target as any).base58contractor.value;
-        try {
-          PublicKey.fromBase58(contractor);
-        } catch (e: any) {
-          return alert("Invalid contractor address");
-        }
-
-        const arbiter = (event.target as any).base58arbiter.value;
-        try {
-          PublicKey.fromBase58(arbiter);
-        } catch (e: any) {
-          return alert("Invalid arbiter address");
-        }
-
-        const contract_subject = (event.target as any).contract_subject.value;
-
-        // contractor
-        const contractor_payment = Math.round(
-          parseFloat((event.target as any).contractor_payment.value) * m,
-        );
-        const contractor_deposit = Math.round(
-          parseFloat((event.target as any).contractor_deposit.value) * m,
-        );
-        const contracor_penalty_failure_percent = parseInt(
-          (event.target as any).contractor_failure_penalty.value,
-        );
-        const contracor_penalty_cancel_percent = parseInt(
-          (event.target as any).contractor_cancel_penalty.value,
-        );
-
-        // employer
-        const employer_deposit = Math.round(
-          parseFloat((event.target as any).employer_deposit.value) * m,
-        );
-        const employer_arbitration_fee_percent = parseInt(
-          (event.target as any).employer_arbitration_fee_percent.value,
-        );
-
-        // arbiter
-        const arbiter_payment = Math.round(
-          parseFloat((event.target as any).arbiter_payment.value) * m,
-        );
-        const arbiter_deposit = Math.round(
-          parseFloat((event.target as any).arbiter_deposit.value) * m,
-        );
-        const arbiter_penalty_non_acting_percent = parseInt(
-          (event.target as any).arbiter_penalty_non_acting_percent.value,
-        );
-
-        // deadlines
-        const deadline_warmup = (event.target as any).deadline_warmup.value;
-        const deadline_deposit = (event.target as any).deadline_deposit.value;
-        const deadline_execution = (event.target as any).deadline_execution
-          .value;
-        const deadline_failure = (event.target as any).deadline_failure.value;
-
-        // description
-        const subject_deposit = (event.target as any).subject_deposit.value;
-        const subject_success = (event.target as any).subject_success.value;
-        const subject_failure = (event.target as any).subject_failure.value;
-        const subject_cancel = (event.target as any).subject_cancel.value;
-
-        // compute the values
-        const l = context.blockchainLength;
-        const a = Math.round(deadline_warmup * t);
-        const b = Math.round(deadline_deposit * t);
-        const c = Math.round(deadline_execution * t);
-        const d = Math.round(deadline_failure * t);
-
-        // set the deadline values
-        const contract_outcome_deposit_after = l + a;
-        const contract_outcome_deposit_before = l + a + b;
-        const contract_outcome_success_after = l + a + b;
-        const contract_outcome_success_before = l + a + b + c;
-        const contract_outcome_failure_after = l + a + b + c;
-        const contract_outcome_failure_before = l + a + b + c + d;
-        const contract_outcome_cancel_after = l + a + b;
-        const contract_outcome_cancel_before = l + a + b + c;
-
-        // set the descriptions
-        const contract_description = contract_subject;
-        const contract_outcome_deposit_description = subject_deposit;
-        const contract_outcome_success_description = subject_success;
-        const contract_outcome_failure_description = subject_failure;
-        const contract_outcome_cancel_description = subject_cancel;
-
-        // compute the amounts
-        console.log("helper values");
-        const emp_arb = Math.round(
-          (employer_arbitration_fee_percent / 100) * arbiter_payment,
-        );
-
-        const con_arb = arbiter_payment - emp_arb;
-        const con_fail = Math.round(
-          (contracor_penalty_failure_percent / 100) * arbiter_payment,
-        );
-        const con_cancel = Math.round(
-          (contracor_penalty_cancel_percent / 100) * arbiter_payment,
-        );
-
-        console.log(emp_arb);
-        console.log(con_arb);
-        console.log(con_fail);
-        console.log(con_cancel);
-
-        console.log("outcomes amounts");
-        const contract_outcome_deposit_employer =
-          contractor_payment + employer_deposit + emp_arb;
-        const contract_outcome_deposit_contractor =
-          contractor_deposit + con_arb;
-        const contract_outcome_deposit_arbiter = arbiter_deposit;
-
-        const contract_outcome_success_employer = employer_deposit;
-        const contract_outcome_success_contractor =
-          contractor_payment + contractor_deposit;
-        const contract_outcome_success_arbiter =
-          arbiter_payment + arbiter_deposit;
-
-        const contract_outcome_failure_employer =
-          contractor_payment + employer_deposit + con_fail;
-        const contract_outcome_failure_contractor =
-          contractor_deposit - con_fail;
-        const contract_outcome_failure_arbiter =
-          arbiter_payment + arbiter_deposit;
-
-        const contract_outcome_cancel_employer =
-          contractor_payment + employer_deposit + con_cancel;
-        const contract_outcome_cancel_contractor =
-          contractor_deposit - con_cancel;
-        const contract_outcome_cancel_arbiter =
-          arbiter_payment + arbiter_deposit;
-
-        // validate values positive
-        const all_values = [
-          contract_outcome_deposit_employer,
-          contract_outcome_deposit_contractor,
-          contract_outcome_deposit_arbiter,
-          contract_outcome_success_employer,
-          contract_outcome_success_contractor,
-          contract_outcome_success_arbiter,
-          contract_outcome_failure_employer,
-          contract_outcome_failure_contractor,
-          contract_outcome_failure_arbiter,
-          contract_outcome_cancel_employer,
-          contract_outcome_cancel_contractor,
-          contract_outcome_cancel_arbiter,
-        ];
-        if (all_values.some((v) => v < 0)) {
-          return alert("One of the contract values ends up negative...");
-        }
-        // set the participants
-        const contract_employer = PublicKey.fromBase58(employer);
-        const contract_contractor = PublicKey.fromBase58(contractor);
-        const contract_arbiter = PublicKey.fromBase58(arbiter);
-
-        const sk = PrivateKey.fromBase58(private_key);
-        const pk = sk.toPublicKey();
-        console.log("sk");
-        console.log(sk);
-        console.log(pk);
-
-        // set the preimage
-        /*
-           await context.state.zkappWorkerClient.definePreimage(
-           pk.toBase58(),
-           employer,
-           contractor,
-           arbiter,
-           contract_subject,
-           contract_outcome_deposit_description,
-           contract_outcome_deposit_after,
-           contract_outcome_deposit_before,
-           contract_outcome_deposit_employer,
-           contract_outcome_deposit_contractor,
-           contract_outcome_deposit_arbiter,
-           contract_outcome_success_description,
-           contract_outcome_success_after,
-           contract_outcome_success_before,
-           contract_outcome_success_employer,
-           contract_outcome_success_contractor,
-           contract_outcome_success_arbiter,
-           contract_outcome_failure_description,
-           contract_outcome_failure_after,
-           contract_outcome_failure_before,
-           contract_outcome_failure_employer,
-           contract_outcome_failure_contractor,
-           contract_outcome_failure_arbiter,
-           contract_outcome_cancel_description,
-           contract_outcome_cancel_after,
-           contract_outcome_cancel_before,
-           contract_outcome_cancel_employer,
-           contract_outcome_cancel_contractor,
-           contract_outcome_cancel_arbiter);
-
-           // now get its macpack
-           const macpack = await context.state.zkappWorkerClient.toMacPack();
-         */
-
-        // set the state
-        await context.setState({
-          ...context.state,
-          loaded: true,
-          deployed: false,
-          finalized: false,
-          zkappPrivateKey: sk,
-          zkappPublicKey: pk,
-          contract_employer: contract_employer,
-          contract_contractor: contract_contractor,
-          contract_arbiter: contract_arbiter,
-          contract_outcome_deposit_after: contract_outcome_deposit_after,
-          contract_outcome_deposit_before: contract_outcome_deposit_before,
-          contract_outcome_success_after: contract_outcome_success_after,
-          contract_outcome_success_before: contract_outcome_success_before,
-          contract_outcome_failure_after: contract_outcome_failure_after,
-          contract_outcome_failure_before: contract_outcome_failure_before,
-          contract_outcome_cancel_after: contract_outcome_cancel_after,
-          contract_outcome_cancel_before: contract_outcome_cancel_before,
-          contract_description: contract_subject,
-          contract_outcome_deposit_description:
-            contract_outcome_deposit_description,
-          contract_outcome_success_description:
-            contract_outcome_success_description,
-          contract_outcome_failure_description:
-            contract_outcome_failure_description,
-          contract_outcome_cancel_description:
-            contract_outcome_cancel_description,
-          contract_outcome_deposit_employer: -contract_outcome_deposit_employer,
-          contract_outcome_deposit_contractor:
-            -contract_outcome_deposit_contractor,
-          contract_outcome_deposit_arbiter: -contract_outcome_deposit_arbiter,
-          contract_outcome_success_employer: contract_outcome_success_employer,
-          contract_outcome_success_contractor:
-            contract_outcome_success_contractor,
-          contract_outcome_success_arbiter: contract_outcome_success_arbiter,
-          contract_outcome_failure_employer: contract_outcome_failure_employer,
-          contract_outcome_failure_contractor:
-            contract_outcome_failure_contractor,
-          contract_outcome_failure_arbiter: contract_outcome_failure_arbiter,
-          contract_outcome_cancel_employer: contract_outcome_cancel_employer,
-          contract_outcome_cancel_contractor:
-            contract_outcome_cancel_contractor,
-          contract_outcome_cancel_arbiter: contract_outcome_cancel_arbiter,
-        });
-      }}
-    >
+    <form onSubmit={
+    async (event) => {
+      await EditorFormSubmission(event, context);
+    }}>
       <div className="break-inside-avoid">
         <h2>Contract</h2>
         <p>
