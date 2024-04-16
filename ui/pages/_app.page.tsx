@@ -163,6 +163,8 @@ function MyApp({ Component, pageProps }: AppProps) {
     accountExists: false,
     currentNum: null,
     lastTxId: "",
+    contractBuildInterfaceType: "wizard", // either "wizard" or "advanced"
+    contractBuildWizardPage: 0,
     zkappPrivateKeyCandidate: null,
     zkappPublicKeyCandidate: PublicKey.empty(),
     zkappPrivateKey: null,
