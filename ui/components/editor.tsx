@@ -52,456 +52,389 @@ const KeyGenerator = () => {
   );
 };
 
-const EntrySecretKey = () => {
+const ComponentText = (
+  label: string,
+  name: string,
+  placeholder: string,
+  length: number,
+  alt: string
+) => {
   return <div className="form-control">
-    <label className="label">zkApp private key</label>
+    <label className="label">{label}</label>
+    <textarea
+      name={name}
+      className="textarea textarea-secondary"
+      placeholder={placeholder}
+      maxLength={length}
+    ></textarea>
+    <label className="label">
+      <span className="label-text-alt">
+        {alt}
+      </span>
+    </label>
+  </div>;
+}
+
+const ComponentDeadline = (
+  label: string,
+  name: string,
+  min_value: string,
+  max_value: string,
+  default_value: string,
+  step: string,
+  unit: string,
+  description: string
+) => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">{label}</span>
+    </label>
+    <label className="input-group">
+      <input
+        name={name}
+        type="number"
+        min={min_value}
+        max={max_value}
+        defaultValue={default_value}
+        className="input input-bordered"
+        step={step}
+      />
+      <span>{unit}</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        {description}
+      </span>
+    </label>
+  </div>;
+}
+
+const ComponentRange = (
+  label: string,
+  name: string,
+  min_value: string,
+  max_value: string,
+  default_value: string,
+  step: string,
+  description: string
+) => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">{label}</span>
+    </label>
+    <input
+      name={name}
+      type="range"
+      min={min_value}
+      max={max_value}
+      defaultValue="{default_value}"
+      className="range"
+      step={step}
+    />
+    <label className="label">
+      <span className="label-text-alt">
+        {description}
+      </span>
+    </label>
+  </div>;
+}
+
+const ComponentAmountMINA = (
+  label: string,
+  name: string,
+  placeholder: string,
+  unit: string,
+  description: string
+) => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">{label}</span>
+    </label>
+    <label className="input-group">
+      <input
+        name={name}
+        type="text"
+        placeholder={placeholder}
+        className="input input-bordered"
+      />
+      <span>{unit}</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        {description}
+      </span>
+    </label>
+  </div>;
+}
+
+const ComponentSecretKey = (label: string, name: string, description: string) => {
+  return <div className="form-control">
+    <label className="label">{label}</label>
     <input
       type="password"
-      name="base58sk"
+      name={name}
       className="input input-bordered w-full max-w-xs"
     />
     <label className="label">
-      <span className="label-text-alt">Required for deployment</span>
+      <span className="label-text-alt">{description}</span>
     </label>
   </div>;
+}
+
+const ComponentPublicKey = (
+  label: string,
+  name: string,
+  placeholder: string,
+  description: string) => {
+    return <div className="form-control">
+      <label className="label">{label}</label>
+      <input
+        type="text"
+        name={name}
+        placeholder={placeholder}
+        className="input input-bordered w-full max-w-xs"
+      />
+      <label className="label">
+        <span className="label-text-alt">
+          {description}
+        </span>
+      </label>
+    </div>;
+  }
+
+const EntrySecretKey = () => {
+  return ComponentSecretKey(
+    "zkApp private key",
+    "base58sk",
+    "Required for deployment"
+  );
 }
 
 const EntryEmployer = () => {
-  return <div className="form-control">
-    <label className="label">Employer</label>
-    <input
-      type="text"
-      name="base58employer"
-      placeholder="Type here"
-      className="input input-bordered w-full max-w-xs"
-    />
-    <label className="label">
-      <span className="label-text-alt">
-        Employer is one who needs the service and pays for it.
-      </span>
-    </label>
-  </div>;
+  return ComponentPublicKey(
+    "Employer",
+    "base58employer",
+    "Type here",
+    "Employer is one who needs the service and pays for it."
+  );
 }
 
 const EntryContractor = () => {
-  return <div className="form-control">
-    <label className="label">Contractor</label>
-    <input
-      type="text"
-      name="base58contractor"
-      placeholder="Type here"
-      className="input input-bordered w-full max-w-xs"
-    />
-    <label className="label">
-      <span className="label-text-alt">
-        Contractor is one who does the work in exchange for MINA
-        compensation.
-      </span>
-    </label>
-  </div>;
+  return ComponentPublicKey(
+    "Contractor",
+    "base58contractor",
+    "Type here",
+    "Contractor is one who does the work in exchange for MINA compensation."
+  );
 }
 
 const EntryArbiter = () => {
-  return <div className="form-control">
-    <label className="label">Arbiter</label>
-    <input
-      type="text"
-      name="base58arbiter"
-      placeholder="Type here"
-      className="input input-bordered w-full max-w-xs"
-    />
-    <label className="label">
-      <span className="label-text-alt">
-        A person who verifies the outcome of the work in exchange for
-        MINA compensation.
-      </span>
-    </label>
-  </div>;
+  return ComponentPublicKey(
+    "Arbiter",
+    "base58arbiter",
+    "Type here",
+    "A person who verifies the outcome of the work in exchange for MINA compensation."
+  );
 }
 
 const EntryContractSubject = () => {
-  return <div className="form-control">
-    <label className="label">Written description</label>
-    <textarea
-      name="contract_subject"
-      className="textarea textarea-secondary"
-      placeholder="What the employer should do?"
-      maxLength={128}
-    ></textarea>
-    <label className="label">
-      <span className="label-text-alt">
-        What kind of work needs to be done?
-      </span>
-    </label>
-  </div>;
+  return ComponentText(
+    "Written description",
+    "contract_subject",
+    "What the employer should do?",
+    128,
+    "What kind of work needs to be done?"
+  );
 }
 
 const EntryContractorPayment = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Contractor payment</span>
-    </label>
-    <label className="input-group">
-      <input
-        name="contractor_payment"
-        type="text"
-        placeholder="0.01"
-        className="input input-bordered"
-      />
-      <span>MINA</span>
-    </label>
-    <label className="label">
-      <span className="label-text-alt">
-        This is the amount contractor gets paid for doing the work
-        correctly within the deadline.
-      </span>
-    </label>
-  </div>
+  return ComponentAmountMINA(
+    "Contractor payment",
+    "contractor_payment",
+    "0.01",
+    "MINA",
+    "This is the amount contractor gets paid for doing the work correctly within the deadline."
+  );
 }
 
 const EntryContractorSecurityDeposit = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Contractor security deposit</span>
-    </label>
-    <label className="input-group">
-      <input
-        name="contractor_deposit"
-        type="text"
-        placeholder="0.01"
-        className="input input-bordered"
-      />
-      <span>MINA</span>
-    </label>
-    <label className="label">
-      <span className="label-text-alt">
-        This amount gives the contractor an incentive to play by the
-        rules.
-      </span>
-    </label>
-  </div>;
+  return ComponentAmountMINA(
+    "Contractor security deposit",
+    "contractor_deposit",
+    "0.01",
+    "MINA",
+    "This amount gives the contractor an incentive to play by the rules."
+  );
 }
 
 const EntryContractorNonActingPenalty = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Contractor failure penalty</span>
-    </label>
-    <input
-      name="contractor_failure_penalty"
-      type="range"
-      min="0"
-      max="100"
-      defaultValue="25"
-      className="range"
-      step="1"
-    />
-    <label className="label">
-      <span className="label-text-alt">
-        This is the amount of lost deposit for the contractor for not
-        doing the work. Percent of the deposit.
-      </span>
-    </label>
-  </div>;
+  return ComponentRange(
+    "Contractor failure penalty",
+    "contractor_failure_penalty",
+    "0",
+    "100",
+    "25",
+    "1",
+    "This is the amount of lost deposit for the contractor for not doing the work. Percent of the deposit."
+  );
 }
 
 const EntryContractorCancelPenalty = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Contractor cancel penalty</span>
-    </label>
-    <input
-      name="contractor_cancel_penalty"
-      type="range"
-      min="0"
-      max="100"
-      defaultValue="10"
-      className="range"
-      step="1"
-    />
-    <label className="label">
-      <span className="label-text-alt">
-        This is the amount of lost deposit for the contractor for
-        canceling the contract.
-      </span>
-    </label>
-  </div>;
+  return ComponentRange(
+    "Contractor cancel penalty",
+    "contractor_cancel_penalty",
+    "0",
+    "100",
+    "50",
+    "1",
+    "This is the amount of lost deposit for the contractor for canceling the contract."
+  );
 }
 
 const EntryEmployerSecurityDeposit = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Employer security deposit</span>
-    </label>
-    <label className="input-group">
-      <input
-        name="employer_deposit"
-        type="text"
-        placeholder="0.01"
-        className="input input-bordered"
-      />
-      <span>MINA</span>
-    </label>
-    <label className="label">
-      <span className="label-text-alt">
-        It need to be greater than the arbitration fee.
-      </span>
-    </label>
-  </div>;
+  return ComponentAmountMINA(
+    "Employer security deposit",
+    "employer_deposit",
+    "0.01",
+    "MINA",
+    "It need to be greater than the arbitration fee."
+  );
 }
 
 const EntryEmployerArbitrationFeeShare = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Employer arbitration fee share</span>
-    </label>
-    <input
-      name="employer_arbitration_fee_percent"
-      type="range"
-      min="0"
-      max="100"
-      defaultValue="50"
-      className="range"
-      step="1"
-    />
-    <label className="label">
-      <span className="label-text-alt">
-        How much of the arbitration fee does the employer pay?
-      </span>
-    </label>
-  </div>;
+  return ComponentRange(
+    "Employer arbitration fee share",
+    "employer_arbitration_fee_percent",
+    "0",
+    "100",
+    "50",
+    "1",
+    "How much of the arbitration fee does the employer pay?"
+  );
 }
 
 const EntryArbiterPayment = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Arbiter payment</span>
-    </label>
-    <label className="input-group">
-      <input
-        name="arbiter_payment"
-        type="text"
-        placeholder="0.01"
-        className="input input-bordered"
-      />
-      <span>MINA</span>
-    </label>
-    <label className="label">
-      <span className="label-text-alt">
-        How much the arbiter is paid for the arbitration service?
-      </span>
-    </label>
-  </div>;
+  return ComponentAmountMINA(
+    "Arbiter payment",
+    "arbiter_payment",
+    "0.01",
+    "MINA",
+    "How much the arbiter is paid for the arbitration service?"
+  );
 }
 
 const EntryArbiterSecurityDeposit = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Arbiter security deposit</span>
-    </label>
-    <label className="input-group">
-      <input
-        name="arbiter_deposit"
-        type="text"
-        placeholder="0.01"
-        className="input input-bordered"
-      />
-      <span>MINA</span>
-    </label>
-    <label className="label">
-      <span className="label-text-alt">
-        It need to be greater than the penalty.
-      </span>
-    </label>
-  </div>;
+  return ComponentAmountMINA(
+    "Arbiter security deposit",
+    "arbiter_deposit",
+    "0.01",
+    "MINA",
+    "It need to be greater than the penalty."
+  );
 }
 
 const EntryArbiterNonActingPenalty = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Non-acting penalty</span>
-    </label>
-    <input
-      name="arbiter_penalty_non_acting_percent"
-      type="range"
-      min="0"
-      max="100"
-      defaultValue="50"
-      className="range"
-      step="1"
-    />
-    <label className="label">
-      <span className="label-text-alt">
-        Penalty for not declaring the outcome within the deadline. Has
-        to be lower or equal to the sum of the arbitration fees from
-        the Employer and the Contractor.
-      </span>
-    </label>
-  </div>;
+  return ComponentRange(
+    "Non-acting penalty",
+    "arbiter_penalty_non_acting_percent",
+    "0",
+    "100",
+    "50",
+    "1",
+    "Penalty for not declaring the outcome within the deadline. Has to be lower or equal to the sum of the arbitration fees from the Employer and the Contractor."
+  );
 }
 
 const EntryDeadlineWarmUp = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Warm-up time</span>
-    </label>
-    <label className="input-group">
-      <input
-        name="deadline_warmup"
-        type="number"
-        min="1"
-        max=""
-        defaultValue="480"
-        className="input input-bordered"
-        step="1"
-      />
-      <span>Blocks</span>
-    </label>
-    <label className="label">
-      <span className="label-text-alt">
-        How much time from now before the contract starts to accept the
-        deposits.
-      </span>
-    </label>
-  </div>;
+  return ComponentDeadline(
+    "Warm-up time",
+    "deadline_warmup",
+    "1",
+    "",
+    "480",
+    "1",
+    "Blocks",
+    "How much time from now before the contract starts to accept the deposits."
+  );
 }
 
 const EntryDeadlineDeposit = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Deposit time</span>
-    </label>
-    <label className="input-group">
-      <input
-        name="deadline_deposit"
-        type="number"
-        min="1"
-        max=""
-        defaultValue="480"
-        className="input input-bordered"
-        step="1"
-      />
-      <span>Blocks</span>
-    </label>
-    <label className="label">
-      <span className="label-text-alt">
-        How much time everyone has to deposit. Within this time window
-        it is possible to cancel with no consequences.
-      </span>
-    </label>
-  </div>;
+  return ComponentDeadline(
+    "Deposit time",
+    "deadline_deposit",
+    "1",
+    "",
+    "480",
+    "1",
+    "Blocks",
+    "How much time everyone has to deposit. Within this time window it is possible to cancel with no consequences."
+  );
 }
 
 const EntryDeadlineExecution = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Execution time</span>
-    </label>
-    <label className="input-group">
-      <input
-        name="deadline_execution"
-        type="number"
-        min="1"
-        max=""
-        defaultValue="480"
-        className="input input-bordered"
-        step="1"
-      />
-      <span>Blocks</span>
-    </label>
-    <label className="label">
-      <span className="label-text-alt">
-        How much time does the Contractor have to do the work.
-      </span>
-    </label>
-  </div>;
+  return ComponentDeadline(
+    "Execution time",
+    "deadline_execution",
+    "1",
+    "",
+    "480",
+    "1",
+    "Blocks",
+    "How much time does the Contractor have to do the work."
+  );
 }
 
 const EntryDeadlineFailureDeclaration = () => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">Failure declaration time</span>
-    </label>
-    <label className="input-group">
-      <input
-        name="deadline_failure"
-        type="number"
-        min="1"
-        max=""
-        defaultValue="480"
-        className="input input-bordered"
-        step="1"
-      />
-      <span>Blocks</span>
-    </label>
-    <label className="label">
-      <span className="label-text-alt">
-        If after deadline, how much time the arbiter has to declare
-        failure.
-      </span>
-    </label>
-  </div>;
+  return ComponentDeadline(
+    "Failure declaration time",
+    "deadline_failure",
+    "1",
+    "",
+    "480",
+    "1",
+    "Blocks",
+    "If after deadline, how much time the arbiter has to declare failure."
+  );
 }
 
 const EntryOutcomesDeposited = () => {
-  return <div className="form-control">
-    <label className="label">Deposited</label>
-    <textarea
-      name="subject_deposit"
-      className="textarea textarea-secondary"
-      placeholder=""
-    ></textarea>
-    <label className="label">
-      <span className="label-text-alt">Justify the deposit policy</span>
-    </label>
-  </div>;
+  return ComponentText(
+    "Deposited",
+    "subject_deposit",
+    "",
+    128,
+    "Justify the deposit policy"
+  );
 }
 
 const EntryOutcomesSuccess = () => {
-  return <div className="form-control">
-    <label className="label">Success</label>
-    <textarea
-      name="subject_success"
-      className="textarea textarea-secondary"
-      placeholder=""
-      maxLength={128}
-    ></textarea>
-    <label className="label">
-      <span className="label-text-alt">Justify the success policy</span>
-    </label>
-  </div>;
+  return ComponentText(
+    "Success",
+    "subject_success",
+    "",
+    128,
+    "Justify the success policy"
+  );
 }
 
 const EntryOutcomesFailure = () => {
-  return <div className="form-control">
-    <label className="label">Failure</label>
-    <textarea
-      name="subject_failure"
-      className="textarea textarea-secondary"
-      placeholder=""
-      maxLength={128}
-    ></textarea>
-    <label className="label">
-      <span className="label-text-alt">Justify the failure policy</span>
-    </label>
-  </div>;
+  return ComponentText(
+    "Failure",
+    "subject_failure",
+    "",
+    128,
+    "Justify the failure policy"
+  );
 }
 
 const EntryOutcomesCancel = () => {
-  return <div className="form-control">
-    <label className="label">Cancel</label>
-    <textarea
-      name="subject_cancel"
-      className="textarea textarea-secondary"
-      placeholder=""
-      maxLength={128}
-    ></textarea>
-    <label className="label">
-      <span className="label-text-alt">
-        Justify the cancelation policy
-      </span>
-    </label>
-  </div>;
+  return ComponentText(
+    "Cancel",
+    "subject_cancel",
+    "",
+    128,
+    "Justify the cancelation policy"
+  );
 }
 
 async function EditorFormSubmission(
