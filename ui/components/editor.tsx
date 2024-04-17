@@ -52,6 +52,458 @@ const KeyGenerator = () => {
   );
 };
 
+const EntrySecretKey = () => {
+  return <div className="form-control">
+    <label className="label">zkApp private key</label>
+    <input
+      type="password"
+      name="base58sk"
+      className="input input-bordered w-full max-w-xs"
+    />
+    <label className="label">
+      <span className="label-text-alt">Required for deployment</span>
+    </label>
+  </div>;
+}
+
+const EntryEmployer = () => {
+  return <div className="form-control">
+    <label className="label">Employer</label>
+    <input
+      type="text"
+      name="base58employer"
+      placeholder="Type here"
+      className="input input-bordered w-full max-w-xs"
+    />
+    <label className="label">
+      <span className="label-text-alt">
+        Employer is one who needs the service and pays for it.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryContractor = () => {
+  return <div className="form-control">
+    <label className="label">Contractor</label>
+    <input
+      type="text"
+      name="base58contractor"
+      placeholder="Type here"
+      className="input input-bordered w-full max-w-xs"
+    />
+    <label className="label">
+      <span className="label-text-alt">
+        Contractor is one who does the work in exchange for MINA
+        compensation.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryArbiter = () => {
+  return <div className="form-control">
+    <label className="label">Arbiter</label>
+    <input
+      type="text"
+      name="base58arbiter"
+      placeholder="Type here"
+      className="input input-bordered w-full max-w-xs"
+    />
+    <label className="label">
+      <span className="label-text-alt">
+        A person who verifies the outcome of the work in exchange for
+        MINA compensation.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryContractSubject = () => {
+  return <div className="form-control">
+    <label className="label">Written description</label>
+    <textarea
+      name="contract_subject"
+      className="textarea textarea-secondary"
+      placeholder="What the employer should do?"
+      maxLength={128}
+    ></textarea>
+    <label className="label">
+      <span className="label-text-alt">
+        What kind of work needs to be done?
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryContractorPayment = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Contractor payment</span>
+    </label>
+    <label className="input-group">
+      <input
+        name="contractor_payment"
+        type="text"
+        placeholder="0.01"
+        className="input input-bordered"
+      />
+      <span>MINA</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        This is the amount contractor gets paid for doing the work
+        correctly within the deadline.
+      </span>
+    </label>
+  </div>
+}
+
+const EntryContractorSecurityDeposit = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Contractor security deposit</span>
+    </label>
+    <label className="input-group">
+      <input
+        name="contractor_deposit"
+        type="text"
+        placeholder="0.01"
+        className="input input-bordered"
+      />
+      <span>MINA</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        This amount gives the contractor an incentive to play by the
+        rules.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryContractorNonActingPenalty = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Contractor failure penalty</span>
+    </label>
+    <input
+      name="contractor_failure_penalty"
+      type="range"
+      min="0"
+      max="100"
+      defaultValue="25"
+      className="range"
+      step="1"
+    />
+    <label className="label">
+      <span className="label-text-alt">
+        This is the amount of lost deposit for the contractor for not
+        doing the work. Percent of the deposit.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryContractorCancelPenalty = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Contractor cancel penalty</span>
+    </label>
+    <input
+      name="contractor_cancel_penalty"
+      type="range"
+      min="0"
+      max="100"
+      defaultValue="10"
+      className="range"
+      step="1"
+    />
+    <label className="label">
+      <span className="label-text-alt">
+        This is the amount of lost deposit for the contractor for
+        canceling the contract.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryEmployerSecurityDeposit = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Employer security deposit</span>
+    </label>
+    <label className="input-group">
+      <input
+        name="employer_deposit"
+        type="text"
+        placeholder="0.01"
+        className="input input-bordered"
+      />
+      <span>MINA</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        It need to be greater than the arbitration fee.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryEmployerArbitrationFeeShare = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Employer arbitration fee share</span>
+    </label>
+    <input
+      name="employer_arbitration_fee_percent"
+      type="range"
+      min="0"
+      max="100"
+      defaultValue="50"
+      className="range"
+      step="1"
+    />
+    <label className="label">
+      <span className="label-text-alt">
+        How much of the arbitration fee does the employer pay?
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryArbiterPayment = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Arbiter payment</span>
+    </label>
+    <label className="input-group">
+      <input
+        name="arbiter_payment"
+        type="text"
+        placeholder="0.01"
+        className="input input-bordered"
+      />
+      <span>MINA</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        How much the arbiter is paid for the arbitration service?
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryArbiterSecurityDeposit = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Arbiter security deposit</span>
+    </label>
+    <label className="input-group">
+      <input
+        name="arbiter_deposit"
+        type="text"
+        placeholder="0.01"
+        className="input input-bordered"
+      />
+      <span>MINA</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        It need to be greater than the penalty.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryArbiterNonActingPenalty = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Non-acting penalty</span>
+    </label>
+    <input
+      name="arbiter_penalty_non_acting_percent"
+      type="range"
+      min="0"
+      max="100"
+      defaultValue="50"
+      className="range"
+      step="1"
+    />
+    <label className="label">
+      <span className="label-text-alt">
+        Penalty for not declaring the outcome within the deadline. Has
+        to be lower or equal to the sum of the arbitration fees from
+        the Employer and the Contractor.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryDeadlineWarmUp = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Warm-up time</span>
+    </label>
+    <label className="input-group">
+      <input
+        name="deadline_warmup"
+        type="number"
+        min="1"
+        max=""
+        defaultValue="480"
+        className="input input-bordered"
+        step="1"
+      />
+      <span>Blocks</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        How much time from now before the contract starts to accept the
+        deposits.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryDeadlineDeposit = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Deposit time</span>
+    </label>
+    <label className="input-group">
+      <input
+        name="deadline_deposit"
+        type="number"
+        min="1"
+        max=""
+        defaultValue="480"
+        className="input input-bordered"
+        step="1"
+      />
+      <span>Blocks</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        How much time everyone has to deposit. Within this time window
+        it is possible to cancel with no consequences.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryDeadlineExecution = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Execution time</span>
+    </label>
+    <label className="input-group">
+      <input
+        name="deadline_execution"
+        type="number"
+        min="1"
+        max=""
+        defaultValue="480"
+        className="input input-bordered"
+        step="1"
+      />
+      <span>Blocks</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        How much time does the Contractor have to do the work.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryDeadlineFailureDeclaration = () => {
+  return <div className="form-control">
+    <label className="label">
+      <span className="label-text">Failure declaration time</span>
+    </label>
+    <label className="input-group">
+      <input
+        name="deadline_failure"
+        type="number"
+        min="1"
+        max=""
+        defaultValue="480"
+        className="input input-bordered"
+        step="1"
+      />
+      <span>Blocks</span>
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        If after deadline, how much time the arbiter has to declare
+        failure.
+      </span>
+    </label>
+  </div>;
+}
+
+const EntryOutcomesDeposited = () => {
+  return <div className="form-control">
+    <label className="label">Deposited</label>
+    <textarea
+      name="subject_deposit"
+      className="textarea textarea-secondary"
+      placeholder=""
+    ></textarea>
+    <label className="label">
+      <span className="label-text-alt">Justify the deposit policy</span>
+    </label>
+  </div>;
+}
+
+const EntryOutcomesSuccess = () => {
+  return <div className="form-control">
+    <label className="label">Success</label>
+    <textarea
+      name="subject_success"
+      className="textarea textarea-secondary"
+      placeholder=""
+      maxLength={128}
+    ></textarea>
+    <label className="label">
+      <span className="label-text-alt">Justify the success policy</span>
+    </label>
+  </div>;
+}
+
+const EntryOutcomesFailure = () => {
+  return <div className="form-control">
+    <label className="label">Failure</label>
+    <textarea
+      name="subject_failure"
+      className="textarea textarea-secondary"
+      placeholder=""
+      maxLength={128}
+    ></textarea>
+    <label className="label">
+      <span className="label-text-alt">Justify the failure policy</span>
+    </label>
+  </div>;
+}
+
+const EntryOutcomesCancel = () => {
+  return <div className="form-control">
+    <label className="label">Cancel</label>
+    <textarea
+      name="subject_cancel"
+      className="textarea textarea-secondary"
+      placeholder=""
+      maxLength={128}
+    ></textarea>
+    <label className="label">
+      <span className="label-text-alt">
+        Justify the cancelation policy
+      </span>
+    </label>
+  </div>;
+}
+
 async function EditorFormSubmission(
   event: React.SyntheticEvent, context: MacContextType) {
   event.preventDefault();
@@ -298,369 +750,50 @@ const Editor = () => {
       <div className="columns-2">
         <div className="break-inside-avoid">
           <h2>Deployment</h2>
-          <div className="form-control">
-            <label className="label">zkApp private key</label>
-            <input
-              type="password"
-              name="base58sk"
-              className="input input-bordered w-full max-w-xs"
-            />
-            <label className="label">
-              <span className="label-text-alt">Required for deployment</span>
-            </label>
-          </div>
+          <EntrySecretKey />
         </div>
         <div className="break-inside-avoid">
           <h2>Participants</h2>
-          <div className="form-control">
-            <label className="label">Employer</label>
-            <input
-              type="text"
-              name="base58employer"
-              placeholder="Type here"
-              className="input input-bordered w-full max-w-xs"
-            />
-            <label className="label">
-              <span className="label-text-alt">
-                Employer is one who needs the service and pays for it.
-              </span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">Contractor</label>
-            <input
-              type="text"
-              name="base58contractor"
-              placeholder="Type here"
-              className="input input-bordered w-full max-w-xs"
-            />
-            <label className="label">
-              <span className="label-text-alt">
-                Contractor is one who does the work in exchange for MINA
-                compensation.
-              </span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">Arbiter</label>
-            <input
-              type="text"
-              name="base58arbiter"
-              placeholder="Type here"
-              className="input input-bordered w-full max-w-xs"
-            />
-            <label className="label">
-              <span className="label-text-alt">
-                A person who verifies the outcome of the work in exchange for
-                MINA compensation.
-              </span>
-            </label>
-          </div>
+          <EntryEmployer />
+          <EntryContractor />
+          <EntryArbiter />
         </div>
 
         <div className="break-inside-avoid">
           <h2>Contract subject</h2>
-          <div className="form-control">
-            <label className="label">Written description</label>
-            <textarea
-              name="contract_subject"
-              className="textarea textarea-secondary"
-              placeholder="What the employer should do?"
-              maxLength={128}
-            ></textarea>
-            <label className="label">
-              <span className="label-text-alt">
-                What kind of work needs to be done?
-              </span>
-            </label>
-          </div>
+          <EntryContractSubject />
         </div>
 
         <div className="break-inside-avoid">
           <h2>Amounts</h2>
           <h3>Contractor</h3>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Contractor payment</span>
-            </label>
-            <label className="input-group">
-              <input
-                name="contractor_payment"
-                type="text"
-                placeholder="0.01"
-                className="input input-bordered"
-              />
-              <span>MINA</span>
-            </label>
-            <label className="label">
-              <span className="label-text-alt">
-                This is the amount contractor gets paid for doing the work
-                correctly within the deadline.
-              </span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Contractor security deposit</span>
-            </label>
-            <label className="input-group">
-              <input
-                name="contractor_deposit"
-                type="text"
-                placeholder="0.01"
-                className="input input-bordered"
-              />
-              <span>MINA</span>
-            </label>
-            <label className="label">
-              <span className="label-text-alt">
-                This amount gives the contractor an incentive to play by the
-                rules.
-              </span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Contractor failure penalty</span>
-            </label>
-            <input
-              name="contractor_failure_penalty"
-              type="range"
-              min="0"
-              max="100"
-              defaultValue="25"
-              className="range"
-              step="1"
-            />
-            <label className="label">
-              <span className="label-text-alt">
-                This is the amount of lost deposit for the contractor for not
-                doing the work. Percent of the deposit.
-              </span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Contractor cancel penalty</span>
-            </label>
-            <input
-              name="contractor_cancel_penalty"
-              type="range"
-              min="0"
-              max="100"
-              defaultValue="10"
-              className="range"
-              step="1"
-            />
-            <label className="label">
-              <span className="label-text-alt">
-                This is the amount of lost deposit for the contractor for
-                canceling the contract.
-              </span>
-            </label>
-          </div>
+          <EntryContractorPayment />
+          <EntryContractorSecurityDeposit />
+          <EntryContractorNonActingPenalty />
+          <EntryContractorCancelPenalty />
         </div>
 
         <div className="break-inside-avoid">
           <h3>Employer</h3>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Employer security deposit</span>
-            </label>
-            <label className="input-group">
-              <input
-                name="employer_deposit"
-                type="text"
-                placeholder="0.01"
-                className="input input-bordered"
-              />
-              <span>MINA</span>
-            </label>
-            <label className="label">
-              <span className="label-text-alt">
-                It need to be greater than the arbitration fee.
-              </span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Employer arbitration fee share</span>
-            </label>
-            <input
-              name="employer_arbitration_fee_percent"
-              type="range"
-              min="0"
-              max="100"
-              defaultValue="50"
-              className="range"
-              step="1"
-            />
-            <label className="label">
-              <span className="label-text-alt">
-                How much of the arbitration fee does the employer pay?
-              </span>
-            </label>
-          </div>
+          <EntryEmployerSecurityDeposit />
+          <EntryEmployerArbitrationFeeShare />
         </div>
 
         <div className="break-inside-avoid">
           <div className="break-inside-avoid">
             <h3>Arbiter</h3>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Arbiter payment</span>
-              </label>
-              <label className="input-group">
-                <input
-                  name="arbiter_payment"
-                  type="text"
-                  placeholder="0.01"
-                  className="input input-bordered"
-                />
-                <span>MINA</span>
-              </label>
-              <label className="label">
-                <span className="label-text-alt">
-                  How much the arbiter is paid for the arbitration service?
-                </span>
-              </label>
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Arbiter security deposit</span>
-              </label>
-              <label className="input-group">
-                <input
-                  name="arbiter_deposit"
-                  type="text"
-                  placeholder="0.01"
-                  className="input input-bordered"
-                />
-                <span>MINA</span>
-              </label>
-              <label className="label">
-                <span className="label-text-alt">
-                  It need to be greater than the penalty.
-                </span>
-              </label>
-            </div>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Non-acting penalty</span>
-              </label>
-              <input
-                name="arbiter_penalty_non_acting_percent"
-                type="range"
-                min="0"
-                max="100"
-                defaultValue="50"
-                className="range"
-                step="1"
-              />
-              <label className="label">
-                <span className="label-text-alt">
-                  Penalty for not declaring the outcome within the deadline. Has
-                  to be lower or equal to the sum of the arbitration fees from
-                  the Employer and the Contractor.
-                </span>
-              </label>
-            </div>
+            <EntryArbiterPayment />
+            <EntryArbiterSecurityDeposit />
+            <EntryArbiterNonActingPenalty />
           </div>
         </div>
 
         <div className="break-inside-avoid">
           <h2>Deadlines</h2>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Warm-up time</span>
-            </label>
-            <label className="input-group">
-              <input
-                name="deadline_warmup"
-                type="number"
-                min="1"
-                max=""
-                defaultValue="480"
-                className="input input-bordered"
-                step="1"
-              />
-              <span>Blocks</span>
-            </label>
-            <label className="label">
-              <span className="label-text-alt">
-                How much time from now before the contract starts to accept the
-                deposits.
-              </span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Deposit time</span>
-            </label>
-            <label className="input-group">
-              <input
-                name="deadline_deposit"
-                type="number"
-                min="1"
-                max=""
-                defaultValue="480"
-                className="input input-bordered"
-                step="1"
-              />
-              <span>Blocks</span>
-            </label>
-            <label className="label">
-              <span className="label-text-alt">
-                How much time everyone has to deposit. Within this time window
-                it is possible to cancel with no consequences.
-              </span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Execution time</span>
-            </label>
-            <label className="input-group">
-              <input
-                name="deadline_execution"
-                type="number"
-                min="1"
-                max=""
-                defaultValue="480"
-                className="input input-bordered"
-                step="1"
-              />
-              <span>Blocks</span>
-            </label>
-            <label className="label">
-              <span className="label-text-alt">
-                How much time does the Contractor have to do the work.
-              </span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Failure declaration time</span>
-            </label>
-            <label className="input-group">
-              <input
-                name="deadline_failure"
-                type="number"
-                min="1"
-                max=""
-                defaultValue="480"
-                className="input input-bordered"
-                step="1"
-              />
-              <span>Blocks</span>
-            </label>
-            <label className="label">
-              <span className="label-text-alt">
-                If after deadline, how much time the arbiter has to declare
-                failure.
-              </span>
-            </label>
-          </div>
+          <EntryDeadlineWarmUp />
+          <EntryDeadlineDeposit />
+          <EntryDeadlineExecution />
+          <EntryDeadlineFailureDeclaration />
         </div>
 
         <div className="break-inside-avoid">
@@ -669,55 +802,10 @@ const Editor = () => {
             Optional, they provide a possibility to justify the amount and
             deadline choices for each of the outcomes.
           </p>
-          <div className="form-control">
-            <label className="label">Deposited</label>
-            <textarea
-              name="subject_deposit"
-              className="textarea textarea-secondary"
-              placeholder=""
-            ></textarea>
-            <label className="label">
-              <span className="label-text-alt">Justify the deposit policy</span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">Success</label>
-            <textarea
-              name="subject_success"
-              className="textarea textarea-secondary"
-              placeholder=""
-              maxLength={128}
-            ></textarea>
-            <label className="label">
-              <span className="label-text-alt">Justify the success policy</span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">Failure</label>
-            <textarea
-              name="subject_failure"
-              className="textarea textarea-secondary"
-              placeholder=""
-              maxLength={128}
-            ></textarea>
-            <label className="label">
-              <span className="label-text-alt">Justify the failure policy</span>
-            </label>
-          </div>
-          <div className="form-control">
-            <label className="label">Cancel</label>
-            <textarea
-              name="subject_cancel"
-              className="textarea textarea-secondary"
-              placeholder=""
-              maxLength={128}
-            ></textarea>
-            <label className="label">
-              <span className="label-text-alt">
-                Justify the cancelation policy
-              </span>
-            </label>
-          </div>
+          <EntryOutcomesDeposited />
+          <EntryOutcomesSuccess />
+          <EntryOutcomesFailure />
+          <EntryOutcomesCancel />
         </div>
 
         <div className="btn-group btn-group-vertical lg:btn-group-horizontal break-inside-avoid">
