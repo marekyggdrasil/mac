@@ -52,6 +52,28 @@ const KeyGenerator = () => {
   );
 };
 
+const ComponentAccordion = (props) => {
+  return (
+    <div className="accordion">
+      <div class="join join-vertical w-full">
+        { props.children }
+      </div>
+    </div>
+  );
+}
+
+const ComponentCollapse = (props) => {
+  return (
+    <div className="collapse collapse-arrow join-item border border-white-300">
+      <input type="radio" name={props.component_name} />
+      <div className="collapse-title font-bold">{ props.title }</div>
+      <div className="collapse-content">
+        { props.children }
+      </div>
+    </div>
+  );
+}
+
 const ComponentText = (
   label: string,
   name: string,
@@ -663,74 +685,54 @@ const Editor = () => {
     async (event) => {
       await EditorFormSubmission(event, context);
     }}>
-      <div className="break-inside-avoid">
-        <h2>Contract</h2>
-        <p>
-          As your are the contract creator, you{" "}
-          <MinaValue>{context.connectedAddress}</MinaValue> will take the
-          Employer role. You will still need to define Contractor and Arbiter by
-          providing their Mina base58 account addresses.
-        </p>
-        <p>
-          The time reference for all the deadlines is current blockchain length{" "}
-          <MinaBlockchainLength>
-            {context.blockchainLength}
-          </MinaBlockchainLength>
-          .
-        </p>
-        <KeyGenerator />
-      </div>
-      <div className="columns-2">
-        <div className="break-inside-avoid">
-          <h2>Deployment</h2>
+      <p>
+        As your are the contract creator, you{" "}
+        <MinaValue>{context.connectedAddress}</MinaValue> will take the
+        Employer role. You will still need to define Contractor and Arbiter by
+        providing their Mina base58 account addresses.
+      </p>
+      <p>
+        The time reference for all the deadlines is current blockchain length{" "}
+        <MinaBlockchainLength>
+          {context.blockchainLength}
+        </MinaBlockchainLength>
+        .
+      </p>
+      <KeyGenerator />
+      <ComponentAccordion>
+        <ComponentCollapse title="Deployment" component_name="my-accordion-1">
           <EntrySecretKey />
-        </div>
-        <div className="break-inside-avoid">
-          <h2>Participants</h2>
+        </ComponentCollapse>
+        <ComponentCollapse title="Participants" component_name="my-accordion-1">
           <EntryEmployer />
           <EntryContractor />
           <EntryArbiter />
-        </div>
-
-        <div className="break-inside-avoid">
-          <h2>Contract subject</h2>
+        </ComponentCollapse>
+        <ComponentCollapse title="Contract subject" component_name="my-accordion-1">
           <EntryContractSubject />
-        </div>
-
-        <div className="break-inside-avoid">
-          <h2>Amounts</h2>
-          <h3>Contractor</h3>
+        </ComponentCollapse>
+        <ComponentCollapse title="Amounts - Contractor" component_name="my-accordion-1">
           <EntryContractorPayment />
           <EntryContractorSecurityDeposit />
           <EntryContractorNonActingPenalty />
           <EntryContractorCancelPenalty />
-        </div>
-
-        <div className="break-inside-avoid">
-          <h3>Employer</h3>
+        </ComponentCollapse>
+        <ComponentCollapse title="Amounts - Employer" component_name="my-accordion-1">
           <EntryEmployerSecurityDeposit />
           <EntryEmployerArbitrationFeeShare />
-        </div>
-
-        <div className="break-inside-avoid">
-          <div className="break-inside-avoid">
-            <h3>Arbiter</h3>
-            <EntryArbiterPayment />
-            <EntryArbiterSecurityDeposit />
-            <EntryArbiterNonActingPenalty />
-          </div>
-        </div>
-
-        <div className="break-inside-avoid">
-          <h2>Deadlines</h2>
+        </ComponentCollapse>
+        <ComponentCollapse title="Amounts - Arbiter" component_name="my-accordion-1">
+          <EntryArbiterPayment />
+          <EntryArbiterSecurityDeposit />
+          <EntryArbiterNonActingPenalty />
+        </ComponentCollapse>
+        <ComponentCollapse title="Deadlines" component_name="my-accordion-1">
           <EntryDeadlineWarmUp />
           <EntryDeadlineDeposit />
           <EntryDeadlineExecution />
           <EntryDeadlineFailureDeclaration />
-        </div>
-
-        <div className="break-inside-avoid">
-          <h2>Outcomes written descriptions</h2>
+        </ComponentCollapse>
+        <ComponentCollapse title="Outcomes written descriptions" component_name="my-accordion-1">
           <p>
             Optional, they provide a possibility to justify the amount and
             deadline choices for each of the outcomes.
@@ -739,13 +741,12 @@ const Editor = () => {
           <EntryOutcomesSuccess />
           <EntryOutcomesFailure />
           <EntryOutcomesCancel />
-        </div>
-
-        <div className="btn-group btn-group-vertical lg:btn-group-horizontal break-inside-avoid">
-          <button type="submit" className="btn btn-active">
-            Next
-          </button>
-        </div>
+        </ComponentCollapse>
+      </ComponentAccordion>
+      <div className="btn-group btn-group-vertical lg:btn-group-horizontal break-inside-avoid">
+        <button type="submit" className="btn btn-active">
+          Next
+        </button>
       </div>
     </form>
   );

@@ -73,7 +73,6 @@ const CreateCases = () => {
   return (
     <article className="container gap-8 prose">
       <h1>Create a new MAC contract</h1>
-      <CreationSteps />
       <Editor />
     </article>
   );
