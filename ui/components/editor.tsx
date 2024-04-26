@@ -52,17 +52,19 @@ const KeyGenerator = () => {
   );
 };
 
-const ComponentAccordion = (props) => {
+type GenericComponentProps<T extends React.ElementType> = React.ComponentProps<T> & {}
+
+const ComponentAccordion: React.FC<GenericComponentProps<any>> = (props) => {
   return (
     <div className="accordion">
-      <div class="join join-vertical w-full">
+      <div className="join join-vertical w-full">
         { props.children }
       </div>
     </div>
   );
 }
 
-const ComponentCollapse = (props) => {
+const ComponentCollapse: React.FC<GenericComponentProps<any>> = (props) => {
   return (
     <div className="collapse collapse-arrow join-item border border-white-300">
       <input type="radio" name={props.component_name} />
