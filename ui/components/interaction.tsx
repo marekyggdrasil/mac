@@ -77,6 +77,7 @@ async function contractRefreshState(context: MacContextType) {
   const length =
     await zkappWorkerClient.fetchBlockchainLength(network_endpoint);
   await context.setBlockchainLength(length);
+  await context.setBlockFetchDate(new Date());
 
   // refresh the contract state
   const contract_state = await zkappWorkerClient.getContractState();

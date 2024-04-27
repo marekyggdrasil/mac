@@ -76,6 +76,10 @@ export type MacContextStateType = {
   contract_outcome_cancel_employer: number;
   contract_outcome_cancel_contractor: number;
   contract_outcome_cancel_arbiter: number;
+  editor_warm_up: number;
+  editor_deposit: number;
+  editor_execution: number;
+  editor_failure_declaraion: number;
 };
 
 export type MacContextType = {
@@ -87,6 +91,8 @@ export type MacContextType = {
   setConnectionButtonState: Function;
   blockchainLength: number;
   setBlockchainLength: Function;
+  blockFetchDate: Date;
+  setBlockFetchDate: Function;
   connectionError: string;
   setConnectionError: Function;
   connectedAddress: string;
@@ -96,6 +102,29 @@ export type MacContextType = {
   txHash: string;
   setTxHash: Function;
 };
+
+export type ContractDeadlineEstimate = {
+  warm_up_block_min: number;
+  warm_up_block_max: number;
+  warm_up_date_min: Date;
+  warm_up_date_max: Date;
+  deposit_block_min: number;
+  deposit_block_max: number;
+  deposit_date_min: Date;
+  deposit_date_max: Date;
+  success_block_min: number;
+  success_block_max: number;
+  success_date_min: Date;
+  success_date_max: Date;
+  failure_block_min: number;
+  failure_block_max: number;
+  failure_date_min: Date;
+  failure_date_max: Date;
+  cancel_block_min: number;
+  cancel_block_max: number;
+  cancel_date_min: Date;
+  cancel_date_max: Date;
+}
 
 export const AppContext = createContext<MacContextType | null>(null);
 

@@ -2,8 +2,20 @@ import React from "react";
 
 import { PublicKey, PrivateKey } from "o1js";
 
-import { MacContextType, CastContext } from "./AppContext";
-import { MinaValue, MinaBlockchainLength, MinaSecretValue } from "./highlights";
+import {
+  toastInfo,
+  toastWarning,
+  toastError,
+  toastSuccess,
+} from "../components/toast";
+
+import { MacContextType, CastContext, ContractDeadlineEstimate } from "./AppContext";
+import {
+  MinaValue,
+  MinaBlockchainLength,
+  MinaSecretValue,
+  MinaBlockTimeEstimate
+} from "./highlights";
 
 async function generateKeyPair(context: MacContextType) {
   const sk: PrivateKey = PrivateKey.random();
@@ -83,14 +95,19 @@ const ComponentText = (
   length: number,
   alt: string
 ) => {
-  return <div className="form-control">
-    <label className="label">{label}</label>
-    <textarea
-      name={name}
-      className="textarea textarea-secondary"
-      placeholder={placeholder}
-      maxLength={length}
-    ></textarea>
+  return <div>
+    <label className="form-control w-full max-w-xl">
+      <div className="label">
+        <span className="label-text">{label}</span>
+        <span className="label-text-alt"></span>
+      </div>
+      <textarea
+        name={name}
+        className="textarea textarea-secondary"
+        placeholder={placeholder}
+        maxLength={length}
+      ></textarea>
+    </label>
     <label className="label">
       <span className="label-text-alt">
         {alt}
@@ -142,19 +159,23 @@ const ComponentRange = (
   step: string,
   description: string
 ) => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">{label}</span>
+  return <div>
+    <label className="form-control w-full max-w-xl">
+      <div className="label">
+        <span className="label-text">{label}</span>
+        <span className="label-text-alt"></span>
+      </div>
+      <input
+        className="input input-bordered w-full max-w-xl"
+        name={name}
+        type="range"
+        min={min_value}
+        max={max_value}
+        defaultValue="{default_value}"
+        className="range"
+        step={step}
+      />
     </label>
-    <input
-      name={name}
-      type="range"
-      min={min_value}
-      max={max_value}
-      defaultValue="{default_value}"
-      className="range"
-      step={step}
-    />
     <label className="label">
       <span className="label-text-alt">
         {description}
@@ -170,18 +191,18 @@ const ComponentAmountMINA = (
   unit: string,
   description: string
 ) => {
-  return <div className="form-control">
-    <label className="label">
-      <span className="label-text">{label}</span>
-    </label>
-    <label className="input-group">
+  return <div>
+    <label className="form-control w-full max-w-xl">
+      <div className="label">
+        <span className="label-text">{label}</span>
+        <span className="label-text-alt">{unit}</span>
+      </div>
       <input
         name={name}
         type="text"
         placeholder={placeholder}
         className="input input-bordered"
       />
-      <span>{unit}</span>
     </label>
     <label className="label">
       <span className="label-text-alt">
@@ -192,13 +213,17 @@ const ComponentAmountMINA = (
 }
 
 const ComponentSecretKey = (label: string, name: string, description: string) => {
-  return <div className="form-control">
-    <label className="label">{label}</label>
-    <input
-      type="password"
-      name={name}
-      className="input input-bordered w-full max-w-xs"
-    />
+  return <div>
+    <label className="form-control w-full max-w-xl">
+      <div className="label">
+        <span className="label-text">{label}</span>
+      </div>
+      <input
+        className="input input-bordered w-full max-w-xl"
+        type="password"
+        name={name}
+      />
+    </label>
     <label className="label">
       <span className="label-text-alt">{description}</span>
     </label>
@@ -210,14 +235,18 @@ const ComponentPublicKey = (
   name: string,
   placeholder: string,
   description: string) => {
-    return <div className="form-control">
-      <label className="label">{label}</label>
-      <input
-        type="text"
-        name={name}
-        placeholder={placeholder}
-        className="input input-bordered w-full max-w-xs"
-      />
+    return <div>
+      <label className="form-control w-full max-w-xl">
+        <div className="label">
+          <span className="label-text">{label}</span>
+        </div>
+        <input
+          className="input input-bordered w-full max-w-xl"
+          type="text"
+          name={name}
+          placeholder={placeholder}
+        />
+      </label>
       <label className="label">
         <span className="label-text-alt">
           {description}
@@ -369,56 +398,183 @@ const EntryArbiterNonActingPenalty = () => {
   );
 }
 
+const computeBlockchainLengthDate = (context: MacContextType, value: number) => {
+  let computed = new Date();
+  let l = Number(context.blockchainLength);
+  let seconds: number = Number(value - l) * 3 * 60;
+  computed.setSeconds(context.blockFetchDate.getSeconds() + seconds);
+  return computed;
+}
+
+const formatDateWithoutSeconds = (value: Date) => {
+  return value.toLocaleString(
+    [], {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: "2-digit",
+      minute:"2-digit"
+  });
+}
+
+const computeDeadlineEstimate = (context: MacContextType) => {
+  // durations
+  const a = Number(context.state.editor_warm_up);
+  const b = Number(context.state.editor_deposit);
+  const c = Number(context.state.editor_execution);
+  const d = Number(context.state.editor_failure_declaraion);
+
+  // current blockchain length
+  const l = Number(context.blockchainLength);
+
+  // compute the deadlines and set their values
+  const deadline_estimate: ContractDeadlineEstimate = {
+    warm_up_block_min: l,
+    warm_up_block_max: l + a,
+    warm_up_date_min: context.blockFetchDate,
+    warm_up_date_max: computeBlockchainLengthDate(context, l + a),
+    deposit_block_min: l + a,
+    deposit_block_max: l + a + b,
+    deposit_date_min: computeBlockchainLengthDate(context, l + a),
+    deposit_date_max: computeBlockchainLengthDate(context, l + a + b),
+    success_block_min: l + a + b,
+    success_block_max: l + a + b + c,
+    success_date_min: computeBlockchainLengthDate(context, l + a + b),
+    success_date_max: computeBlockchainLengthDate(context, l + a + b + c),
+    failure_block_min: l + a + b + c,
+    failure_block_max: l + a + b + c + d,
+    failure_date_min: computeBlockchainLengthDate(context, l + a + b + c),
+    failure_date_max: computeBlockchainLengthDate(context, l + a + b + c + d),
+    cancel_block_min: l + a + b,
+    cancel_block_max: l + a + b + c,
+    cancel_date_min: computeBlockchainLengthDate(context, l + a + b),
+    cancel_date_max: computeBlockchainLengthDate(context, l + a + b + c)
+  }
+  return deadline_estimate;
+}
+
 const EntryDeadlineWarmUp = () => {
-  return ComponentDeadline(
-    "Warm-up time",
-    "deadline_warmup",
-    "1",
-    "",
-    "480",
-    "1",
-    "Blocks",
-    "How much time from now before the contract starts to accept the deposits."
-  );
+  const context: MacContextType = CastContext();
+  const deadline_estimate: ContractDeadlineEstimate = computeDeadlineEstimate(context);
+  return <div>
+    <label className="form-control w-full max-w-xl">
+      <div className="label">
+        <span className="label-text">Warm-up phase duration</span>
+        <span className="label-text-alt">Blocks</span>
+      </div>
+      <input
+        className="input input-bordered w-full max-w-xl"
+        name="deadline_warmup"
+        type="number"
+        min="1"
+        max=""
+        value={context.state.editor_warm_up}
+        className="input input-bordered"
+        step="1"
+        onChange={(event: React.SyntheticEvent) => {
+          context.setState({...context.state, editor_warm_up: (event.target as any).value});
+        }}
+      />
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        How much time from now before the contract starts to accept the deposits. Current value is <MinaBlockchainLength>{context.state.editor_warm_up}</MinaBlockchainLength> blocks. Current blockchain length is <MinaBlockchainLength>{context.blockchainLength}</MinaBlockchainLength>, so warm-up stage will end at <MinaBlockchainLength>{ deadline_estimate.warm_up_block_max }</MinaBlockchainLength> which is expected to occur around <MinaBlockTimeEstimate>{ formatDateWithoutSeconds(deadline_estimate.warm_up_date_max) }</MinaBlockTimeEstimate>.
+      </span>
+    </label>
+  </div>;
 }
 
 const EntryDeadlineDeposit = () => {
-  return ComponentDeadline(
-    "Deposit time",
-    "deadline_deposit",
-    "1",
-    "",
-    "480",
-    "1",
-    "Blocks",
-    "How much time everyone has to deposit. Within this time window it is possible to cancel with no consequences."
-  );
+  const context: MacContextType = CastContext();
+  const deadline_estimate: ContractDeadlineEstimate = computeDeadlineEstimate(context);
+  return <div>
+    <label className="form-control w-full max-w-xl">
+      <div className="label">
+        <span className="label-text">Deposit phase duration</span>
+        <span className="label-text-alt">Blocks</span>
+      </div>
+      <input
+        className="input input-bordered w-full max-w-xl"
+        name="deadline_deposit"
+        type="number"
+        min="1"
+        max=""
+        value={context.state.editor_deposit}
+        className="input input-bordered"
+        step="1"
+        onChange={(event: React.SyntheticEvent) => {
+          context.setState({...context.state, editor_deposit: (event.target as any).value});
+        }}
+      />
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        How much time everyone has to deposit. Within this time window it is possible to cancel with no consequences. Expected to occur between <MinaBlockchainLength>{deadline_estimate.deposit_block_min}</MinaBlockchainLength> (around <MinaBlockTimeEstimate>{ formatDateWithoutSeconds(deadline_estimate.deposit_date_min) }</MinaBlockTimeEstimate>) and <MinaBlockchainLength>{deadline_estimate.deposit_block_max}</MinaBlockchainLength> (around <MinaBlockTimeEstimate>{ formatDateWithoutSeconds(deadline_estimate.deposit_date_max) }</MinaBlockTimeEstimate>).
+      </span>
+    </label>
+  </div>;
 }
 
 const EntryDeadlineExecution = () => {
-  return ComponentDeadline(
-    "Execution time",
-    "deadline_execution",
-    "1",
-    "",
-    "480",
-    "1",
-    "Blocks",
-    "How much time does the Contractor have to do the work."
-  );
+  const context: MacContextType = CastContext();
+  const deadline_estimate: ContractDeadlineEstimate = computeDeadlineEstimate(context);
+  return <div>
+    <label className="form-control w-full max-w-xl">
+      <div className="label">
+        <span className="label-text">Execution phase duration</span>
+        <span className="label-text-alt">Blocks</span>
+      </div>
+      <input
+        className="input input-bordered w-full max-w-xl"
+        name="deadline_execution"
+        type="number"
+        min="1"
+        max=""
+        value={context.state.editor_execution}
+        className="input input-bordered"
+        step="1"
+        onChange={(event: React.SyntheticEvent) => {
+          context.setState({...context.state, editor_execution: (event.target as any).value});
+        }}
+      />
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        How much time does the Contractor have to do the work, within this time window the Arbiter is able to declare successful delivery of the work. Current value is <MinaBlockchainLength>{context.state.editor_execution}</MinaBlockchainLength>. Expected to occur between <MinaBlockchainLength>{deadline_estimate.success_block_min}</MinaBlockchainLength> (around <MinaBlockTimeEstimate>{ formatDateWithoutSeconds(deadline_estimate.success_date_min) }</MinaBlockTimeEstimate>) and <MinaBlockchainLength>{deadline_estimate.success_block_max}</MinaBlockchainLength> (around <MinaBlockTimeEstimate>{ formatDateWithoutSeconds(deadline_estimate.success_date_max) }</MinaBlockTimeEstimate>).
+      </span>
+    </label>
+  </div>;
 }
 
 const EntryDeadlineFailureDeclaration = () => {
-  return ComponentDeadline(
-    "Failure declaration time",
-    "deadline_failure",
-    "1",
-    "",
-    "480",
-    "1",
-    "Blocks",
-    "If after deadline, how much time the arbiter has to declare failure."
-  );
+  const context: MacContextType = CastContext();
+  const deadline_estimate: ContractDeadlineEstimate = computeDeadlineEstimate(context);
+  return <div>
+    <label className="form-control w-full max-w-xl">
+      <div className="label">
+        <span className="label-text">Failure declaration phase duration</span>
+        <span className="label-text-alt">Blocks</span>
+      </div>
+      <input
+        className="input input-bordered w-full max-w-xl"
+        name="deadline_failure"
+        type="number"
+        min="1"
+        max=""
+        value={context.state.editor_failure_declaraion}
+        className="input input-bordered"
+        step="1"
+        onChange={(event: React.SyntheticEvent) => {
+          context.setState({...context.state, editor_failure_declaraion: (event.target as any).value});
+        }}
+      />
+    </label>
+    <label className="label">
+      <span className="label-text-alt">
+        Within this time window the Arbiter is able to declare failed delivery of the work. Current value is <MinaBlockchainLength>{context.state.editor_failure_declaraion}</MinaBlockchainLength>. Expected to occur between <MinaBlockchainLength>{deadline_estimate.failure_block_min}</MinaBlockchainLength> (around <MinaBlockTimeEstimate>{ formatDateWithoutSeconds(deadline_estimate.failure_date_min) }</MinaBlockTimeEstimate>) and <MinaBlockchainLength>{deadline_estimate.failure_block_max}</MinaBlockchainLength> (around <MinaBlockTimeEstimate>{ formatDateWithoutSeconds(deadline_estimate.failure_date_max) }</MinaBlockTimeEstimate>).
+      </span>
+    </label>
+  </div>;
 }
 
 const EntryOutcomesDeposited = () => {
@@ -476,7 +632,8 @@ async function EditorFormSubmission(
   try {
     PrivateKey.fromBase58(private_key);
   } catch (e: any) {
-    return alert("Invalid private key");
+    toastError("Invalid or missing contract private key");
+    return;
   }
 
   // addresses
@@ -484,21 +641,24 @@ async function EditorFormSubmission(
   try {
     PublicKey.fromBase58(employer);
   } catch (e: any) {
-    return alert("Invalid employer address");
+    toastError("Invalid or missing employer MINA address");
+    return;
   }
 
   const contractor = (event.target as any).base58contractor.value;
   try {
     PublicKey.fromBase58(contractor);
   } catch (e: any) {
-    return alert("Invalid contractor address");
+    toastError("Invalid or missing contractor MINA address");
+    return;
   }
 
   const arbiter = (event.target as any).base58arbiter.value;
   try {
     PublicKey.fromBase58(arbiter);
   } catch (e: any) {
-    return alert("Invalid arbiter address");
+    toastError("Invalid or missing arbiter MINA address");
+    return;
   }
 
   const contract_subject = (event.target as any).contract_subject.value;
@@ -688,22 +848,12 @@ const Editor = () => {
       await EditorFormSubmission(event, context);
     }}>
       <p>
-        As your are the contract creator, you{" "}
-        <MinaValue>{context.connectedAddress}</MinaValue> will take the
-        Employer role. You will still need to define Contractor and Arbiter by
-        providing their Mina base58 account addresses.
+       This interface allows to create a new MAC! smart contract. The process is divided into following steps.
       </p>
-      <p>
-        The time reference for all the deadlines is current blockchain length{" "}
-        <MinaBlockchainLength>
-          {context.blockchainLength}
-        </MinaBlockchainLength>
-        .
-      </p>
-      <KeyGenerator />
       <ComponentAccordion>
         <ComponentCollapse title="Deployment" component_name="my-accordion-1">
           <EntrySecretKey />
+          <KeyGenerator />
         </ComponentCollapse>
         <ComponentCollapse title="Participants" component_name="my-accordion-1">
           <EntryEmployer />
@@ -728,7 +878,14 @@ const Editor = () => {
           <EntryArbiterSecurityDeposit />
           <EntryArbiterNonActingPenalty />
         </ComponentCollapse>
-        <ComponentCollapse title="Deadlines" component_name="my-accordion-1">
+        <ComponentCollapse title="Contract phases durations" component_name="my-accordion-1">
+          <p>
+            The time reference for all the deadlines is current blockchain length{" "}
+            <MinaBlockchainLength>
+              {context.blockchainLength}
+            </MinaBlockchainLength>
+            .
+          </p>
           <EntryDeadlineWarmUp />
           <EntryDeadlineDeposit />
           <EntryDeadlineExecution />

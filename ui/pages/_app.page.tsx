@@ -99,6 +99,7 @@ async function runLoadSnarkyJS(context: MacContextType) {
     return;
   }
   await context.setBlockchainLength(length);
+  await context.setBlockFetchDate(new Date());
   await context.setCompilationButtonState(2);
   await context.setConnectionError("");
   toastSuccess("Successfully connected to " + nice_name);
@@ -220,12 +221,17 @@ function MyApp({ Component, pageProps }: AppProps) {
     contract_outcome_cancel_employer: -1,
     contract_outcome_cancel_contractor: -1,
     contract_outcome_cancel_arbiter: -1,
+    editor_warm_up: 480,
+    editor_deposit: 480,
+    editor_execution: 480,
+    editor_failure_declaraion: 480,
   };
   let [state, setState] = useState(initial_state);
 
   let [compilationButtonState, setCompilationButtonState] = useState(0);
   let [connectionButtonState, setConnectionButtonState] = useState(0);
   let [blockchainLength, setBlockchainLength] = useState(0);
+  let [blockFetchDate, setBlockFetchDate] = useState(new Date());
   let [connectedAddress, setConnectedAddress] = useState("");
   let [connectionError, setConnectionError] = useState("");
   let [network, setNetwork] = useState("berkeley");
@@ -264,6 +270,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             const length = parseInt(block.blockchainLength.toString());
             if (length) {
               setBlockchainLength(length);
+              setBlockFetchDate(new Date());
             }
           } catch (e: unknown) {
             console.log("failed to fetch block :(");
@@ -287,6 +294,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         setConnectionButtonState,
         blockchainLength,
         setBlockchainLength,
+        blockFetchDate,
+        setBlockFetchDate,
         connectionError,
         setConnectionError,
         connectedAddress,
