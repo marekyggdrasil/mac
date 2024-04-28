@@ -80,6 +80,7 @@ export type MacContextStateType = {
   editor_deposit: number;
   editor_execution: number;
   editor_failure_declaraion: number;
+  unit_blockchain_length: boolean;
 };
 
 export type MacContextType = {
@@ -186,4 +187,23 @@ export function getTransactionBlockExplorerURL(
 // the MINA block time for real-time contract interaction estimations
 export function getBlockTime(): number {
   return 180.0;
+}
+
+export function computeBlockchainLengthDate(context: MacContextType, value: number): Date {
+  let computed = new Date();
+  let l = Number(context.blockchainLength);
+  let seconds: number = Number(value - l) * 3 * 60;
+  computed.setSeconds(context.blockFetchDate.getSeconds() + seconds);
+  return computed;
+}
+
+export function formatDateWithoutSeconds(value: Date): string {
+  return value.toLocaleString(
+    [], {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: "2-digit",
+      minute:"2-digit"
+  });
 }

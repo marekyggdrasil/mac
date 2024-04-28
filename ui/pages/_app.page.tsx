@@ -225,6 +225,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     editor_deposit: 480,
     editor_execution: 480,
     editor_failure_declaraion: 480,
+    unit_blockchain_length: false,
   };
   let [state, setState] = useState(initial_state);
 

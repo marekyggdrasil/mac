@@ -9,13 +9,24 @@ import {
   toastSuccess,
 } from "../components/toast";
 
-import { MacContextType, CastContext, ContractDeadlineEstimate } from "./AppContext";
+import {
+  MacContextType,
+  CastContext,
+  ContractDeadlineEstimate,
+  computeBlockchainLengthDate,
+  formatDateWithoutSeconds
+} from "./AppContext";
+
 import {
   MinaValue,
   MinaBlockchainLength,
   MinaSecretValue,
   MinaBlockTimeEstimate
 } from "./highlights";
+
+// TODO need to define it everywhere where custom components with arguments are
+// don't yet know how to avoid it...
+export type GenericComponentProps<T extends React.ElementType> = React.ComponentProps<T> & {};
 
 async function generateKeyPair(context: MacContextType) {
   const sk: PrivateKey = PrivateKey.random();
@@ -63,8 +74,6 @@ const KeyGenerator = () => {
     </p>
   );
 };
-
-type GenericComponentProps<T extends React.ElementType> = React.ComponentProps<T> & {}
 
 const ComponentAccordion: React.FC<GenericComponentProps<any>> = (props) => {
   return (
@@ -166,13 +175,12 @@ const ComponentRange = (
         <span className="label-text-alt"></span>
       </div>
       <input
-        className="input input-bordered w-full max-w-xl"
+        className="input range input-bordered w-full max-w-xl"
         name={name}
         type="range"
         min={min_value}
         max={max_value}
         defaultValue="{default_value}"
-        className="range"
         step={step}
       />
     </label>
@@ -398,25 +406,6 @@ const EntryArbiterNonActingPenalty = () => {
   );
 }
 
-const computeBlockchainLengthDate = (context: MacContextType, value: number) => {
-  let computed = new Date();
-  let l = Number(context.blockchainLength);
-  let seconds: number = Number(value - l) * 3 * 60;
-  computed.setSeconds(context.blockFetchDate.getSeconds() + seconds);
-  return computed;
-}
-
-const formatDateWithoutSeconds = (value: Date) => {
-  return value.toLocaleString(
-    [], {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: "2-digit",
-      minute:"2-digit"
-  });
-}
-
 const computeDeadlineEstimate = (context: MacContextType) => {
   // durations
   const a = Number(context.state.editor_warm_up);
@@ -469,7 +458,6 @@ const EntryDeadlineWarmUp = () => {
         min="1"
         max=""
         value={context.state.editor_warm_up}
-        className="input input-bordered"
         step="1"
         onChange={(event: React.SyntheticEvent) => {
           context.setState({...context.state, editor_warm_up: (event.target as any).value});
@@ -500,7 +488,6 @@ const EntryDeadlineDeposit = () => {
         min="1"
         max=""
         value={context.state.editor_deposit}
-        className="input input-bordered"
         step="1"
         onChange={(event: React.SyntheticEvent) => {
           context.setState({...context.state, editor_deposit: (event.target as any).value});
@@ -531,7 +518,6 @@ const EntryDeadlineExecution = () => {
         min="1"
         max=""
         value={context.state.editor_execution}
-        className="input input-bordered"
         step="1"
         onChange={(event: React.SyntheticEvent) => {
           context.setState({...context.state, editor_execution: (event.target as any).value});
@@ -562,7 +548,6 @@ const EntryDeadlineFailureDeclaration = () => {
         min="1"
         max=""
         value={context.state.editor_failure_declaraion}
-        className="input input-bordered"
         step="1"
         onChange={(event: React.SyntheticEvent) => {
           context.setState({...context.state, editor_failure_declaraion: (event.target as any).value});
