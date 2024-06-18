@@ -15,7 +15,7 @@ import {
   AccountUpdate,
 } from 'o1js';
 
-import { Preimage, Outcome } from './strpreim';
+import { Participant, Preimage, Outcome } from './preimage';
 
 const state_initial: number = 0;
 const state_deposited: number = 1;
@@ -30,9 +30,10 @@ export class Mac extends SmartContract {
 
   // 0 - initial
   // 1 - everyone deposited
-  // 2 - someone decided to cancel
-  // 3 - contract succeeded
-  // 4 - contract failed
+  // 2 - someone canceled for free because deposit was not yet done
+  // 3 - contractor canceled for penalty
+  // 4 - contract succeeded
+  // 5 - contract failed
   @state(Field) automaton_state = State<Field>();
 
   // E - employer
@@ -81,7 +82,7 @@ export class Mac extends SmartContract {
 
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
-    commitment.assertEquals(Preimage.hash(contract_preimage));
+    commitment.assertEquals(contract_preimage.getCommitment());
 
     // check if the deposit deadline is respected
     blockchain_length.assertGte(contract_preimage.deposited.start_after);
@@ -89,18 +90,18 @@ export class Mac extends SmartContract {
 
     // make sure the caller is a party in the contract
     actor
-      .equals(contract_preimage.arbiter)
-      .or(actor.equals(contract_preimage.contractor))
-      .or(actor.equals(contract_preimage.employer))
+      .equals(contract_preimage.arbiter.participant_address)
+      .or(actor.equals(contract_preimage.contractor.participant_address))
+      .or(actor.equals(contract_preimage.employer.participant_address))
       .assertTrue();
 
     // only someone who has not yet deposited can deposit
     const actions: Bool[] = memory.toBits(3);
     const acted: Bool = Circuit.if(
-      actor.equals(contract_preimage.employer),
+      actor.equals(contract_preimage.employer.participant_address),
       actions[2],
       Circuit.if(
-        actor.equals(contract_preimage.contractor),
+        actor.equals(contract_preimage.contractor.participant_address),
         actions[1],
         actions[0]
       )
@@ -110,19 +111,19 @@ export class Mac extends SmartContract {
 
     // do the deposit
     const amount: UInt64 = Circuit.if(
-      actor.equals(contract_preimage.employer),
+      actor.equals(contract_preimage.employer.participant_address),
       contract_preimage.deposited.payment_employer,
       Circuit.if(
-        actor.equals(contract_preimage.contractor),
+        actor.equals(contract_preimage.contractor.participant_address),
         contract_preimage.deposited.payment_contractor,
         Circuit.if(
-          actor.equals(contract_preimage.arbiter),
+          actor.equals(contract_preimage.arbiter.participant_address),
           contract_preimage.deposited.payment_arbiter,
           UInt64.from(0)
         )
       )
     );
-    // worked until here
+    // worked until here TODO delete this
 
     // transfer the funds
     const payerUpdate = AccountUpdate.createSigned(actor);
@@ -131,17 +132,17 @@ export class Mac extends SmartContract {
 
     // update the memory
     actions[2] = Circuit.if(
-      actor.equals(contract_preimage.employer),
+      actor.equals(contract_preimage.employer.participant_address),
       Bool(true),
       actions[2]
     );
     actions[1] = Circuit.if(
-      actor.equals(contract_preimage.contractor),
+      actor.equals(contract_preimage.contractor.participant_address),
       Bool(true),
       actions[1]
     );
     actions[0] = Circuit.if(
-      actor.equals(contract_preimage.arbiter),
+      actor.equals(contract_preimage.arbiter.participant_address),
       Bool(true),
       actions[0]
     );
@@ -178,25 +179,25 @@ export class Mac extends SmartContract {
 
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
-    commitment.assertEquals(Preimage.hash(contract_preimage));
+    commitment.assertEquals(contract_preimage.getCommitment());
 
     // make sure the caller is a party in the contract
     actor
-      .equals(contract_preimage.arbiter)
-      .or(actor.equals(contract_preimage.contractor))
-      .or(actor.equals(contract_preimage.employer))
+      .equals(contract_preimage.arbiter.participant_address)
+      .or(actor.equals(contract_preimage.contractor.participant_address))
+      .or(actor.equals(contract_preimage.employer.participant_address))
       .assertTrue();
 
     // check who has acted
     const actions: Bool[] = memory.toBits(3);
     const acted: Bool = Circuit.if(
-      actor.equals(contract_preimage.employer),
+      actor.equals(contract_preimage.employer.participant_address),
       actions[2],
       Circuit.if(
-        actor.equals(contract_preimage.contractor),
+        actor.equals(contract_preimage.contractor.participant_address),
         actions[1],
         Circuit.if(
-          actor.equals(contract_preimage.arbiter),
+          actor.equals(contract_preimage.arbiter.participant_address),
           actions[0],
           Bool(false)
         )
@@ -217,7 +218,7 @@ export class Mac extends SmartContract {
     const is_state_failed: Bool = automaton_state.equals(Field(state_failed));
 
     const withdraw_allowed: Bool = is_state_canceled_early
-      .and(acted)
+      .and(acted) // should it be in () ? TODO
       .or(is_state_canceled.and(has_not_acted))
       .or(is_state_succeeded.and(has_not_acted))
       .or(is_state_failed.and(has_not_acted));
@@ -241,10 +242,10 @@ export class Mac extends SmartContract {
       )
     );
     const amount: UInt64 = Circuit.if(
-      actor.equals(contract_preimage.employer),
+      actor.equals(contract_preimage.employer.participant_address),
       current_outcome.payment_employer,
       Circuit.if(
-        actor.equals(contract_preimage.contractor),
+        actor.equals(contract_preimage.contractor.participant_address),
         current_outcome.payment_contractor,
         current_outcome.payment_arbiter // only option left...
       )
@@ -255,17 +256,17 @@ export class Mac extends SmartContract {
 
     // update the memory
     actions[2] = Circuit.if(
-      actor.equals(contract_preimage.employer),
+      actor.equals(contract_preimage.employer.participant_address),
       actions[2].not(),
       actions[2]
     );
     actions[1] = Circuit.if(
-      actor.equals(contract_preimage.contractor),
+      actor.equals(contract_preimage.contractor.participant_address),
       actions[1].not(),
       actions[1]
     );
     actions[0] = Circuit.if(
-      actor.equals(contract_preimage.arbiter),
+      actor.equals(contract_preimage.arbiter.participant_address),
       actions[0].not(),
       actions[0]
     );
@@ -286,7 +287,7 @@ export class Mac extends SmartContract {
 
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
-    commitment.assertEquals(Preimage.hash(contract_preimage));
+    commitment.assertEquals(contract_preimage.getCommitment());
 
     // check if the deposit deadline is respected
     blockchain_length.assertGte(contract_preimage.success.start_after);
@@ -294,9 +295,9 @@ export class Mac extends SmartContract {
 
     // make sure the caller is a party in the contract
     actor_pk
-      .equals(contract_preimage.arbiter)
-      .or(actor_pk.equals(contract_preimage.contractor))
-      .or(actor_pk.equals(contract_preimage.employer))
+      .equals(contract_preimage.arbiter.participant_address)
+      .or(actor_pk.equals(contract_preimage.contractor.participant_address))
+      .or(actor_pk.equals(contract_preimage.employer.participant_address))
       .assertTrue();
 
     // make sure that the caller is approving this method
@@ -306,7 +307,7 @@ export class Mac extends SmartContract {
     automaton_state.assertEquals(Field(state_deposited));
 
     // ensure caller is the arbiter
-    actor_pk.equals(contract_preimage.arbiter).assertTrue();
+    actor_pk.equals(contract_preimage.arbiter.participant_address).assertTrue();
 
     // update the state to "succeeded"
     this.automaton_state.set(Field(state_succeeded));
@@ -327,7 +328,7 @@ export class Mac extends SmartContract {
 
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
-    commitment.assertEquals(Preimage.hash(contract_preimage));
+    commitment.assertEquals(contract_preimage.getCommitment());
 
     // check if the deposit deadline is respected
     blockchain_length.assertGte(contract_preimage.failure.start_after);
@@ -335,9 +336,9 @@ export class Mac extends SmartContract {
 
     // make sure the caller is a party in the contract
     actor_pk
-      .equals(contract_preimage.arbiter)
-      .or(actor_pk.equals(contract_preimage.contractor))
-      .or(actor_pk.equals(contract_preimage.employer))
+      .equals(contract_preimage.arbiter.participant_address)
+      .or(actor_pk.equals(contract_preimage.contractor.participant_address))
+      .or(actor_pk.equals(contract_preimage.employer.participant_address))
       .assertTrue();
 
     // make sure that the caller is approving this method
@@ -347,7 +348,7 @@ export class Mac extends SmartContract {
     automaton_state.assertEquals(Field(state_deposited));
 
     // ensure caller is the arbiter
-    actor_pk.equals(contract_preimage.arbiter).assertTrue();
+    actor_pk.equals(contract_preimage.arbiter.participant_address).assertTrue();
 
     // update the state to "canceled"
     this.automaton_state.set(Field(state_failed));
@@ -371,13 +372,13 @@ export class Mac extends SmartContract {
 
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
-    commitment.assertEquals(Preimage.hash(contract_preimage));
+    commitment.assertEquals(contract_preimage.getCommitment());
 
     // make sure the caller is a party in the contract
     actor_pk
-      .equals(contract_preimage.arbiter)
-      .or(actor_pk.equals(contract_preimage.contractor))
-      .or(actor_pk.equals(contract_preimage.employer))
+      .equals(contract_preimage.arbiter.participant_address)
+      .or(actor_pk.equals(contract_preimage.contractor.participant_address))
+      .or(actor_pk.equals(contract_preimage.employer.participant_address))
       .assertTrue();
 
     // make sure that the caller is approving this method
@@ -391,7 +392,7 @@ export class Mac extends SmartContract {
 
     // after deposit deadline only the employee can cancel
     const is_within_deadline: Bool = contract_preimage.success.start_after
-      .lte(blockchain_length)
+      .lte(blockchain_length) // TODO parentheses bug?
       .and(contract_preimage.success.finish_before.gt(blockchain_length))
       .and(automaton_state.equals(Field(state_deposited)));
 
@@ -402,7 +403,7 @@ export class Mac extends SmartContract {
     // if it is after the initial stage, caller must be employee
     const is_caller_correct: Bool = Circuit.if(
       is_within_deadline,
-      actor_pk.equals(contract_preimage.employer),
+      actor_pk.equals(contract_preimage.employer.participant_address), // TODO bug?, should be contractor?
       Bool(true)
     );
 

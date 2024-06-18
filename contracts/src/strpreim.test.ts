@@ -11,14 +11,13 @@ import {
   Poseidon,
 } from 'o1js';
 
-import { Outcome, Preimage } from './strpreim';
-import { makeDummyPreimage } from './strdummy';
-import { fromMacPack, toMacPack } from './helpers';
+import { Participant, Outcome, Preimage } from './preimage';
+import { makeDummyPreimage } from './dummy';
 
 describe('Preimage tests', () => {
-  let employer: PublicKey,
-    contractor: PublicKey,
-    arbiter: PublicKey,
+  let employer: Participant,
+    contractor: Participant,
+    arbiter: Participant,
     outcome_deposited: Outcome,
     outcome_success: Outcome,
     outcome_failure: Outcome,
@@ -31,6 +30,9 @@ describe('Preimage tests', () => {
 
   beforeEach(async () => {
     await isReady;
+    const protocol_version: Field = Field.from(0);
+    const format_version: Field = Field.from(0);
+    const nonce: Field = Field.from(43872);
 
     zkAppPrivateKey = PrivateKey.fromBase58(
       'EKDq4CzjuVc4vzYfFp1JW4oGhC7gnku1FupYqToo2r6YMDALoFiy'
@@ -56,10 +58,18 @@ describe('Preimage tests', () => {
       outcome_failure,
       outcome_cancel,
       mac_contract,
-    ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk, zkAppAddress);
+    ] = makeDummyPreimage(
+      protocol_version,
+      format_version,
+      nonce,
+      employer_sk,
+      contractor_sk,
+      arbiter_sk,
+      zkAppAddress
+    );
 
     commitment = Field(
-      '3262985893969862402364762079656198465695636832664339061743215480471813876993'
+      '19283366268175244124128055511224960666642359430760352707713842780859786748325'
     );
   });
 
@@ -68,13 +78,13 @@ describe('Preimage tests', () => {
   });
 
   it('should compute hash commitment of a Preimage', () => {
-    Preimage.hash(mac_contract).assertEquals(commitment);
+    mac_contract.getCommitment().assertEquals(commitment);
   });
 
   it('should correctly import/export a whole contract using macpacs', () => {
-    const macpack: string = toMacPack(mac_contract);
+    const macpack: string = mac_contract.getMacPack();
     console.log(macpack);
-    const deserialized: Preimage = fromMacPack(macpack);
+    const deserialized: Preimage = Preimage.fromMacPack(macpack);
     expect(deserialized).toEqual(mac_contract);
   });
 });

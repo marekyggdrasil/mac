@@ -11,9 +11,12 @@ import {
   UInt32,
 } from 'o1js';
 
-import { Outcome, Preimage } from './strpreim';
+import { Outcome, Preimage } from './preimage';
 
 export function makeDummyPreimage(
+  protocol_version: Field,
+  format_version: Field,
+  nonce: Field,
   employer_sk: PrivateKey,
   contractor_sk: PrivateKey,
   arbiter_sk: PrivateKey,
@@ -26,7 +29,7 @@ export function makeDummyPreimage(
   Outcome,
   Outcome,
   Outcome,
-  Preimage
+  Preimage,
 ] {
   let outcome_deposited: Outcome,
     outcome_success: Outcome,
@@ -38,61 +41,60 @@ export function makeDummyPreimage(
   let contractor: PublicKey = contractor_sk.toPublicKey();
   let arbiter: PublicKey = arbiter_sk.toPublicKey();
 
-  outcome_deposited = new Outcome({
-    description: CircuitString.fromString('Everyone deposited'),
-    payment_employer: UInt64.from(12000000),
-    payment_contractor: UInt64.from(6000000),
-    payment_arbiter: UInt64.from(6000000),
-    start_after: UInt32.from(0),
-    finish_before: UInt32.from(5),
-  });
+  outcome_deposited = new Outcome(
+    CircuitString.fromString('Everyone deposited'),
+    UInt64.from(12000000),
+    UInt64.from(6000000),
+    UInt64.from(6000000),
+    UInt32.from(0),
+    UInt32.from(5)
+  );
 
-  outcome_success = new Outcome({
-    description: CircuitString.fromString(
-      'The contractor successfully did the job'
-    ),
-    payment_employer: UInt64.from(5000000),
-    payment_contractor: UInt64.from(11000000),
-    payment_arbiter: UInt64.from(8000000),
-    start_after: UInt32.from(5),
-    finish_before: UInt32.from(15),
-  });
+  outcome_success = new Outcome(
+    CircuitString.fromString('The contractor successfully did the job'),
+    UInt64.from(5000000),
+    UInt64.from(11000000),
+    UInt64.from(8000000),
+    UInt32.from(5),
+    UInt32.from(15)
+  );
 
-  outcome_failure = new Outcome({
-    description: CircuitString.fromString(
-      'The contractor failed to do the job on time'
-    ),
-    payment_employer: UInt64.from(11000000),
-    payment_contractor: UInt64.from(5000000),
-    payment_arbiter: UInt64.from(8000000),
-    start_after: UInt32.from(15),
-    finish_before: UInt32.from(30),
-  });
+  outcome_failure = new Outcome(
+    CircuitString.fromString('The contractor failed to do the job on time'),
+    UInt64.from(11000000),
+    UInt64.from(5000000),
+    UInt64.from(8000000),
+    UInt32.from(15),
+    UInt32.from(30)
+  );
 
-  outcome_cancel = new Outcome({
-    description: CircuitString.fromString(
+  outcome_cancel = new Outcome(
+    CircuitString.fromString(
       'One of the parties decided to cancel the contract'
     ),
-    payment_employer: UInt64.from(12000000),
-    payment_contractor: UInt64.from(6000000),
-    payment_arbiter: UInt64.from(6000000),
-    start_after: UInt32.from(0),
-    finish_before: UInt32.from(5),
-  });
+    UInt64.from(12000000),
+    UInt64.from(6000000),
+    UInt64.from(6000000),
+    UInt32.from(0),
+    UInt32.from(5)
+  );
 
-  mac_contract = new Preimage({
-    contract: CircuitString.fromString(
+  mac_contract = new Preimage(
+    protocol_version,
+    format_version,
+    nonce,
+    CircuitString.fromString(
       'The contractor will do the job and arbiter will verify it'
     ),
-    address: zkAppAddress,
-    employer: employer,
-    contractor: contractor,
-    arbiter: arbiter,
-    deposited: outcome_deposited,
-    success: outcome_success,
-    failure: outcome_failure,
-    cancel: outcome_cancel,
-  });
+    zkAppAddress,
+    employer,
+    contractor,
+    arbiter,
+    outcome_deposited,
+    outcome_success,
+    outcome_failure,
+    outcome_cancel
+  );
 
   return [
     employer,

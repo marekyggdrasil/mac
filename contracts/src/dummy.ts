@@ -14,6 +14,9 @@ import {
 import { Participant, Outcome, Preimage } from './preimage';
 
 export function makeDummyPreimage(
+  protocol_version: Field,
+  format_version: Field,
+  nonce: Field,
   employer_sk: PrivateKey,
   contractor_sk: PrivateKey,
   arbiter_sk: PrivateKey,
@@ -26,7 +29,7 @@ export function makeDummyPreimage(
   Outcome,
   Outcome,
   Outcome,
-  Preimage
+  Preimage,
 ] {
   let employer: Participant,
     contractor: Participant,
@@ -85,6 +88,9 @@ export function makeDummyPreimage(
   );
 
   mac_contract = new Preimage(
+    protocol_version,
+    format_version,
+    nonce,
     CircuitString.fromString(
       'The contractor will do the job and arbiter will verify it'
     ),

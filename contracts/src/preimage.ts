@@ -15,6 +15,30 @@ import {
 import bs58 from 'bs58';
 import * as byteify from 'byteify';
 
+function bigIntTo32Bytes(bigInt: bigint): Uint8Array {
+  const byteArray = new Uint8Array(32);
+  for (let i = 31; i >= 0; i--) {
+    byteArray[i] = Number(bigInt & BigInt(0xff));
+    bigInt >>= BigInt(8);
+  }
+  return byteArray;
+}
+
+function bigintToByte(a: bigint) {
+  return Number(a % 256n);
+}
+
+function bytes32ToBigInt(byteArray: Uint8Array): bigint {
+  if (byteArray.length !== 32) {
+    throw new Error('Byte array must be exactly 32 bytes long');
+  }
+  let bigInt = BigInt(0);
+  for (let i = 0; i < 32; i++) {
+    bigInt = (bigInt << BigInt(8)) + BigInt(byteArray[i]);
+  }
+  return bigInt;
+}
+
 function Uint8ArrayConcat(arrays: Uint8Array[]): Uint8Array {
   let t: number[] = [];
   for (let j = 0; j < arrays.length; ++j) {
@@ -194,6 +218,8 @@ export class Outcome extends CircuitValue {
 
 export class Preimage extends CircuitValue {
   @prop protocol_version: Field;
+  @prop format_version: Field;
+  @prop nonce: Field;
 
   @prop contract: CircuitString;
   @prop address: PublicKey;
@@ -208,6 +234,9 @@ export class Preimage extends CircuitValue {
   @prop cancel: Outcome;
 
   constructor(
+    protocol_version: Field,
+    format_version: Field,
+    nonce: Field,
     contract: CircuitString,
     address: PublicKey,
     employer: Participant,
@@ -220,7 +249,9 @@ export class Preimage extends CircuitValue {
   ) {
     super();
 
-    this.protocol_version = Field(0);
+    this.protocol_version = protocol_version;
+    this.format_version = format_version;
+    this.nonce = nonce;
 
     this.contract = contract;
     this.address = address;
@@ -277,8 +308,11 @@ export class Preimage extends CircuitValue {
 
   // handling the serialization
   serialize(): Field[] {
-    // [Field[], string] {
-    let serialized: Field[] = [this.protocol_version];
+    let serialized: Field[] = [
+      this.protocol_version,
+      this.format_version,
+      this.nonce,
+    ];
     serialized = serialized.concat(this.address.toFields());
     serialized = serialized.concat(this.employer.serialize());
     serialized = serialized.concat(this.contractor.serialize());
@@ -288,14 +322,15 @@ export class Preimage extends CircuitValue {
     serialized = serialized.concat(this.failure.serialize());
     serialized = serialized.concat(this.cancel.serialize());
 
-    // const contract_string: string = this.contract.toString();
-    // return [serialized, contract_string];
     return serialized;
   }
 
   static deserialize(serialized: Field[], contract_string: string): Preimage {
     const protocol_version: Field = serialized[0];
+    const format_version: Field = serialized[1];
     protocol_version.assertEquals(Field(0));
+    format_version.assertEquals(Field(0));
+    const nonce: Field = serialized[2];
 
     let address: PublicKey;
 
@@ -309,9 +344,9 @@ export class Preimage extends CircuitValue {
     let outcome_cancel: Outcome;
 
     let mac_contract: Preimage;
-    address = PublicKey.fromFields(serialized.slice(1, 41));
+    address = PublicKey.fromFields(serialized.slice(3, 43));
 
-    let rem: Field[] = serialized.slice(41, serialized.length);
+    let rem: Field[] = serialized.slice(43, serialized.length);
 
     [employer, rem] = Participant.deserializeBuffer(rem);
     if (employer === null) {
@@ -349,6 +384,9 @@ export class Preimage extends CircuitValue {
     }
 
     mac_contract = new Preimage(
+      protocol_version,
+      format_version,
+      nonce,
       CircuitString.fromString(contract_string),
       address,
       employer,
@@ -369,8 +407,12 @@ export class Preimage extends CircuitValue {
   }
 
   toBytes(): Uint8Array {
-    // protocol version and format version
-    const bytes_header = Uint8Array.from([1, 1]); // contract version, format version
+    const bytes_header = Uint8Array.from([
+      bigintToByte(this.protocol_version.toBigInt()),
+      bigintToByte(this.format_version.toBigInt()),
+    ]);
+
+    const bytes_nonce: Uint8Array = bigIntTo32Bytes(this.nonce.toBigInt());
 
     const bytes_contract_text: Uint8Array = Buffer.from(
       this.contract.toString()
@@ -408,6 +450,7 @@ export class Preimage extends CircuitValue {
 
     return Uint8ArrayConcat([
       bytes_header,
+      bytes_nonce,
       bytes_address,
       bytes_employer,
       bytes_contractor,
@@ -426,12 +469,16 @@ export class Preimage extends CircuitValue {
   }
 
   static fromBytes(bytes: Uint8Array): Preimage {
-    // for now ignore the protocol version and format version and contract address...
-    const address: PublicKey = PublicKey.fromBase58(
-      bs58.encode(bytes.slice(2, 42))
-    );
+    const protocol_version: Field = Field.from(bytes[0]);
+    const format_version: Field = Field.from(bytes[1]);
+    let start = 2 + 32;
 
-    let i = 2 + 40;
+    const nonce: Field = Field.from(bytes32ToBigInt(bytes.slice(2, 2 + 32)));
+
+    let i = start + 40;
+    const address: PublicKey = PublicKey.fromBase58(
+      bs58.encode(bytes.slice(start, i))
+    );
 
     const employer: Participant = Participant.fromBytes(bytes.slice(i, i + 40));
     i += 40;
@@ -487,6 +534,9 @@ export class Preimage extends CircuitValue {
     const contract: string = Buffer.from(bytes.slice(i, i + length)).toString();
 
     return new Preimage(
+      protocol_version,
+      format_version,
+      nonce,
       CircuitString.fromString(contract),
       address,
       employer,

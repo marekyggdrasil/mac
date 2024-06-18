@@ -15,8 +15,8 @@ import {
   AccountUpdate,
 } from 'o1js';
 
-import { Outcome, Preimage } from './strpreim';
-import { makeDummyPreimage } from './strdummy';
+import { Participant, Outcome, Preimage } from './preimage';
+import { makeDummyPreimage } from './dummy';
 import { Mac } from './Mac';
 
 const cache_directory = 'compile-cache';
@@ -118,7 +118,7 @@ async function localDeploy(
   const tx_deploy = await Mina.transaction(deployer_pk, () => {
     AccountUpdate.fundNewAccount(deployer_pk);
     zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
-    zkAppInstance.initialize(Preimage.hash(mac_contract));
+    zkAppInstance.initialize(mac_contract.getCommitment());
   });
   await tx_deploy.prove();
   await tx_deploy.sign([zkAppPrivateKey, deployerAccount]);
@@ -126,9 +126,9 @@ async function localDeploy(
 }
 
 describe('Mac tests', () => {
-  let employer: PublicKey,
-    contractor: PublicKey,
-    arbiter: PublicKey,
+  let employer: Participant,
+    contractor: Participant,
+    arbiter: Participant,
     outcome_deposited: Outcome,
     outcome_success: Outcome,
     outcome_failure: Outcome,
@@ -155,6 +155,10 @@ describe('Mac tests', () => {
   });
 
   beforeEach(async () => {
+    const protocol_version: Field = Field.from(0);
+    const format_version: Field = Field.from(0);
+    const nonce: Field = Field.from(43872);
+
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
 
@@ -182,7 +186,15 @@ describe('Mac tests', () => {
       outcome_failure,
       outcome_cancel,
       mac_contract,
-    ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk, zkAppAddress);
+    ] = makeDummyPreimage(
+      protocol_version,
+      format_version,
+      nonce,
+      employer_sk,
+      contractor_sk,
+      arbiter_sk,
+      zkAppAddress
+    );
 
     // deploy the contract
     zkAppInstance = new Mac(zkAppAddress);

@@ -31,6 +31,10 @@ describe('Preimage tests', () => {
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
 
+    const protocol_version: Field = Field.from(0);
+    const format_version: Field = Field.from(0);
+
+    const nonce: Field = Field.from(43872);
     const employer_sk: PrivateKey = PrivateKey.random();
     const contractor_sk: PrivateKey = PrivateKey.random();
     const arbiter_sk: PrivateKey = PrivateKey.random();
@@ -43,7 +47,15 @@ describe('Preimage tests', () => {
       outcome_failure,
       outcome_cancel,
       mac_contract,
-    ] = makeDummyPreimage(employer_sk, contractor_sk, arbiter_sk, zkAppAddress);
+    ] = makeDummyPreimage(
+      protocol_version,
+      format_version,
+      nonce,
+      employer_sk,
+      contractor_sk,
+      arbiter_sk,
+      zkAppAddress
+    );
   });
 
   afterAll(async () => {
@@ -112,5 +124,65 @@ describe('Preimage tests', () => {
     const macpack: string = mac_contract.getMacPack();
     const deserialized: Preimage = Preimage.fromMacPack(macpack);
     expect(deserialized).toEqual(mac_contract);
+  });
+
+  it('should be different based on nonce', () => {
+    // same protocol and format versions
+    const protocol_version: Field = Field.from(0);
+    const format_version: Field = Field.from(0);
+
+    // two difference nonce as Field
+    const nonce_1: Field = Field.from(32874);
+    const nonce_2: Field = Field.from(53782);
+
+    let mac_contract_1: Preimage;
+    let mac_contract_2: Preimage;
+
+    const a_zkAppPrivateKey: PrivateKey = PrivateKey.fromBase58(
+      'EKEqwTrRFNu6bwCWji4i6KgWWykvLKNimVKtK7ZTcDbubPrU5fV4'
+    );
+    const a_employer_sk: PrivateKey = PrivateKey.fromBase58(
+      'EKECgFon1mMkVZwKRHXLtNSWNpiw22EagHED62P6n1usFmcMwbEo'
+    );
+    const a_contractor_sk: PrivateKey = PrivateKey.fromBase58(
+      'EKEKR36hyKha55FLw1rFkEmjS9wo9cTWsog4mVZhP4ayYpUJBnnP'
+    );
+    const a_arbiter_sk: PrivateKey = PrivateKey.fromBase58(
+      'EKEtxU8KYaRK8kRCLYLY9TVdbpYe91LnM6t3ipkvP6RcgHYcuy23'
+    );
+
+    const a_zkAppAddress: PublicKey = a_zkAppPrivateKey.toPublicKey();
+
+    // we create two dummy preimages differing only by nonce
+    [, , , , , , , mac_contract_1] = makeDummyPreimage(
+      protocol_version,
+      format_version,
+      nonce_1,
+      a_employer_sk,
+      a_contractor_sk,
+      a_arbiter_sk,
+      a_zkAppAddress
+    );
+    [, , , , , , , mac_contract_2] = makeDummyPreimage(
+      protocol_version,
+      format_version,
+      nonce_2,
+      a_employer_sk,
+      a_contractor_sk,
+      a_arbiter_sk,
+      a_zkAppAddress
+    );
+
+    // compute hashes / commitments of both preimages
+    const commitment_1: Field = mac_contract_1.getCommitment();
+    const commitment_2: Field = mac_contract_2.getCommitment();
+
+    // confirm they are different values
+    expect(commitment_1.toString()).toEqual(
+      '10511020158907280664585139284625890160781169511257561805175734360310691487902'
+    );
+    expect(commitment_2.toString()).toEqual(
+      '18542406340939338461686344541956570156058207043711948723273274632752591731193'
+    );
   });
 });
