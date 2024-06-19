@@ -32,7 +32,9 @@ describe('Preimage tests', () => {
     await isReady;
     const protocol_version: Field = Field.from(0);
     const format_version: Field = Field.from(0);
-    const nonce: Field = Field.from(43872);
+    const nonce: Field = new Field(
+      '11914772681921537020063060414502317934853473769991850269354672459107614023531'
+    );
 
     zkAppPrivateKey = PrivateKey.fromBase58(
       'EKDq4CzjuVc4vzYfFp1JW4oGhC7gnku1FupYqToo2r6YMDALoFiy'
@@ -69,7 +71,7 @@ describe('Preimage tests', () => {
     );
 
     commitment = Field(
-      '19283366268175244124128055511224960666642359430760352707713842780859786748325'
+      '14776154507549896742007785109760718386156808007566721151609478425045589872085'
     );
   });
 

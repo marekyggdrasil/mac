@@ -34,7 +34,9 @@ describe('Preimage tests', () => {
     const protocol_version: Field = Field.from(0);
     const format_version: Field = Field.from(0);
 
-    const nonce: Field = Field.from(43872);
+    const nonce: Field = new Field(
+      '11914772681921537020063060414502317934853473769991850269354672459107614023531'
+    );
     const employer_sk: PrivateKey = PrivateKey.random();
     const contractor_sk: PrivateKey = PrivateKey.random();
     const arbiter_sk: PrivateKey = PrivateKey.random();
