@@ -232,6 +232,7 @@ export class Preimage extends CircuitValue {
   @prop success: Outcome;
   @prop failure: Outcome;
   @prop cancel: Outcome;
+  @prop unresolved: Outcome;
 
   constructor(
     protocol_version: Field,
@@ -245,7 +246,8 @@ export class Preimage extends CircuitValue {
     deposited: Outcome,
     success: Outcome,
     failure: Outcome,
-    cancel: Outcome
+    cancel: Outcome,
+    unresolved: Outcome
   ) {
     super();
 
@@ -264,6 +266,7 @@ export class Preimage extends CircuitValue {
     this.success = success;
     this.failure = failure;
     this.cancel = cancel;
+    this.unresolved = unresolved;
   }
 
   // identify the actor of the contract
@@ -321,6 +324,7 @@ export class Preimage extends CircuitValue {
     serialized = serialized.concat(this.success.serialize());
     serialized = serialized.concat(this.failure.serialize());
     serialized = serialized.concat(this.cancel.serialize());
+    serialized = serialized.concat(this.unresolved.serialize());
 
     return serialized;
   }
@@ -342,6 +346,7 @@ export class Preimage extends CircuitValue {
     let outcome_success: Outcome;
     let outcome_failure: Outcome;
     let outcome_cancel: Outcome;
+    let outcome_unresolved: Outcome;
 
     let mac_contract: Preimage;
     address = PublicKey.fromFields(serialized.slice(3, 43));
@@ -383,6 +388,11 @@ export class Preimage extends CircuitValue {
       throw Error();
     }
 
+    [outcome_unresolved, rem] = Outcome.deserializeBuffer(rem);
+    if (outcome_unresolved === null) {
+      throw Error();
+    }
+
     mac_contract = new Preimage(
       protocol_version,
       format_version,
@@ -395,7 +405,8 @@ export class Preimage extends CircuitValue {
       outcome_deposited,
       outcome_success,
       outcome_failure,
-      outcome_cancel
+      outcome_cancel,
+      outcome_unresolved
     );
     return mac_contract;
   }
@@ -448,6 +459,11 @@ export class Preimage extends CircuitValue {
       byteify.serializeUint8(bytes_cancel.length)
     );
 
+    const bytes_unresolved: Uint8Array = this.unresolved.toBytes();
+    const bytes_unresolved_length: Uint8Array = Uint8Array.from(
+      byteify.serializeUint8(bytes_unresolved.length)
+    );
+
     return Uint8ArrayConcat([
       bytes_header,
       bytes_nonce,
@@ -463,6 +479,8 @@ export class Preimage extends CircuitValue {
       bytes_failure,
       bytes_cancel_length,
       bytes_cancel,
+      bytes_unresolved_length,
+      bytes_unresolved,
       bytes_contract_text_length,
       bytes_contract_text,
     ]);
@@ -531,6 +549,15 @@ export class Preimage extends CircuitValue {
       Uint8ArrayToNumbers(bytes.slice(i, i + 1))
     );
     i += 1;
+    const outcome_unresolved: Outcome = Outcome.fromBytes(
+      bytes.slice(i, i + length)
+    );
+    i += length;
+
+    length = byteify.deserializeUint8(
+      Uint8ArrayToNumbers(bytes.slice(i, i + 1))
+    );
+    i += 1;
     const contract: string = Buffer.from(bytes.slice(i, i + length)).toString();
 
     return new Preimage(
@@ -545,7 +572,8 @@ export class Preimage extends CircuitValue {
       outcome_deposited,
       outcome_success,
       outcome_failure,
-      outcome_cancel
+      outcome_cancel,
+      outcome_unresolved
     );
   }
 

@@ -19,8 +19,9 @@ import { Participant, Outcome, Preimage } from './preimage';
 import { makeDummyPreimage } from './dummy';
 import { Mac } from './Mac';
 
-const cache_directory = 'compile-cache';
+const cache_directory = '../compile-cache';
 const cache: Cache = Cache.FileSystem(cache_directory);
+cache.debug = true;
 
 const state_initial: number = 0;
 const state_deposited: number = 1;
@@ -113,7 +114,7 @@ async function localDeploy(
   employer_sk: PrivateKey,
   contractor_sk: PrivateKey,
   arbiter_sk: PrivateKey
-) {
+): Promise<string> {
   const deployer_pk: PublicKey = deployerAccount.toPublicKey();
   const tx_deploy = await Mina.transaction(deployer_pk, () => {
     AccountUpdate.fundNewAccount(deployer_pk);
@@ -123,6 +124,8 @@ async function localDeploy(
   await tx_deploy.prove();
   await tx_deploy.sign([zkAppPrivateKey, deployerAccount]);
   await tx_deploy.send();
+
+  return tx_deploy.toJSON();
 }
 
 describe('Mac tests', () => {
@@ -134,6 +137,7 @@ describe('Mac tests', () => {
     outcome_failure: Outcome,
     outcome_cancel: Outcome,
     mac_contract: Preimage;
+  let tx_cached_deploy: string;
 
   let deployerAccount: PrivateKey,
     employer_sk: PrivateKey,
@@ -152,6 +156,7 @@ describe('Mac tests', () => {
   beforeAll(async () => {
     await isReady;
     await Mac.compile({ cache });
+    tx_cached_deploy = '';
   });
 
   beforeEach(async () => {
@@ -159,7 +164,9 @@ describe('Mac tests', () => {
     const format_version: Field = Field.from(0);
     const nonce: Field = Field.from(43872);
 
-    zkAppPrivateKey = PrivateKey.random();
+    zkAppPrivateKey = PrivateKey.fromBase58(
+      'EKFGwfgN6qiJN1usi5VnxUMvPsCWSdJUZryUEmBTHTCKicaXxCzG'
+    );
     zkAppAddress = zkAppPrivateKey.toPublicKey();
 
     local = Mina.LocalBlockchain();
@@ -198,7 +205,8 @@ describe('Mac tests', () => {
 
     // deploy the contract
     zkAppInstance = new Mac(zkAppAddress);
-    await localDeploy(
+    //if (tx_cached_deploy === "") {
+    tx_cached_deploy = await localDeploy(
       zkAppInstance,
       zkAppPrivateKey,
       deployerAccount,
@@ -207,6 +215,9 @@ describe('Mac tests', () => {
       contractor_sk,
       arbiter_sk
     );
+    //}
+    //const tx_deploy = Mina.Transaction.fromJSON(JSON.parse(tx_cached_deploy)); // as Mina.Transaction<false, false>;
+    //await tx_deploy.send();
   });
 
   afterAll(async () => {

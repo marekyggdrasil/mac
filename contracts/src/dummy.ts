@@ -38,6 +38,7 @@ export function makeDummyPreimage(
     outcome_success: Outcome,
     outcome_failure: Outcome,
     outcome_cancel: Outcome,
+    outcome_unresolved: Outcome,
     mac_contract: Preimage;
 
   const employer_pk: PublicKey = employer_sk.toPublicKey();
@@ -87,6 +88,15 @@ export function makeDummyPreimage(
     UInt32.from(5)
   );
 
+  outcome_unresolved = new Outcome(
+    CircuitString.fromString('The arbiter did not act at all'),
+    UInt64.from(12000000),
+    UInt64.from(6000000),
+    UInt64.from(6000000),
+    UInt32.from(31),
+    UInt32.from(99)
+  );
+
   mac_contract = new Preimage(
     protocol_version,
     format_version,
@@ -101,7 +111,8 @@ export function makeDummyPreimage(
     outcome_deposited,
     outcome_success,
     outcome_failure,
-    outcome_cancel
+    outcome_cancel,
+    outcome_unresolved
   );
 
   return [

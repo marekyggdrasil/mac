@@ -177,6 +177,9 @@ export class Mac extends SmartContract {
     const memory: Field = this.memory.get();
     this.memory.assertEquals(memory);
 
+    const blockchain_length: UInt32 = this.network.blockchainLength.get();
+    this.network.blockchainLength.assertEquals(blockchain_length);
+
     // make sure this is the right contract by checking if
     // the caller is in possession of the correct preimage
     commitment.assertEquals(contract_preimage.getCommitment());
@@ -217,11 +220,25 @@ export class Mac extends SmartContract {
     );
     const is_state_failed: Bool = automaton_state.equals(Field(state_failed));
 
+    // special case, unresolved is deposited but within unresolved deadline
+    const is_state_deposited: Bool = automaton_state.equals(
+      Field(state_deposited)
+    );
+    const is_within_unresolved_deadline: Bool = blockchain_length
+      .greaterThanOrEqual(contract_preimage.unresolved.start_after)
+      .and(
+        blockchain_length.lessThan(contract_preimage.unresolved.finish_before)
+      );
+    const is_state_unresolved: Bool = is_within_unresolved_deadline.and(
+      is_within_unresolved_deadline
+    );
+
     const withdraw_allowed: Bool = is_state_canceled_early
-      .and(acted) // should it be in () ? TODO
+      .and(acted)
       .or(is_state_canceled.and(has_not_acted))
       .or(is_state_succeeded.and(has_not_acted))
-      .or(is_state_failed.and(has_not_acted));
+      .or(is_state_failed.and(has_not_acted))
+      .or(is_state_unresolved.and(has_not_acted));
     withdraw_allowed.assertTrue();
 
     // determine the amount of the withdrawal
@@ -237,7 +254,12 @@ export class Mac extends SmartContract {
           is_state_succeeded,
           Outcome,
           contract_preimage.success,
-          contract_preimage.failure // only option left...
+          Circuit.if(
+            is_state_deposited,
+            Outcome,
+            contract_preimage.unresolved,
+            contract_preimage.failure // only option left...
+          )
         )
       )
     );
