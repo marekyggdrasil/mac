@@ -1,7 +1,5 @@
 import {
   Cache,
-  isReady,
-  shutdown,
   Bool,
   Field,
   Mina,
@@ -30,14 +28,16 @@ const state_canceled: number = 3;
 const state_succeeded: number = 4;
 const state_failed: number = 5;
 
+let proofsEnabled = false;
+
 async function deposit(
   mac_contract: Preimage,
   zkAppInstance: Mac,
   actor_sk: PrivateKey
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_pk, () => {
-    zkAppInstance.deposit(mac_contract, actor_pk);
+  const tx = await Mina.transaction(actor_pk, async () => {
+    await zkAppInstance.deposit(mac_contract, actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
@@ -50,8 +50,8 @@ async function withdraw(
   actor_sk: PrivateKey
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_pk, () => {
-    zkAppInstance.withdraw(mac_contract, actor_pk);
+  const tx = await Mina.transaction(actor_pk, async () => {
+    await zkAppInstance.withdraw(mac_contract, actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
@@ -64,8 +64,8 @@ async function success(
   actor_sk: PrivateKey
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_pk, () => {
-    zkAppInstance.success(mac_contract, actor_pk);
+  const tx = await Mina.transaction(actor_pk, async () => {
+    await zkAppInstance.success(mac_contract, actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
@@ -78,8 +78,8 @@ async function failure(
   actor_sk: PrivateKey
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_pk, () => {
-    zkAppInstance.failure(mac_contract, actor_pk);
+  const tx = await Mina.transaction(actor_pk, async () => {
+    await zkAppInstance.failure(mac_contract, actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
@@ -92,8 +92,8 @@ async function cancel(
   actor_sk: PrivateKey
 ) {
   const actor_pk: PublicKey = actor_sk.toPublicKey();
-  const tx = await Mina.transaction(actor_pk, () => {
-    zkAppInstance.cancel(mac_contract, actor_pk);
+  const tx = await Mina.transaction(actor_pk, async () => {
+    await zkAppInstance.cancel(mac_contract, actor_pk);
   });
   await tx.prove();
   await tx.sign([actor_sk]);
@@ -116,10 +116,10 @@ async function localDeploy(
   arbiter_sk: PrivateKey
 ): Promise<string> {
   const deployer_pk: PublicKey = deployerAccount.toPublicKey();
-  const tx_deploy = await Mina.transaction(deployer_pk, () => {
+  const tx_deploy = await Mina.transaction(deployer_pk, async () => {
     AccountUpdate.fundNewAccount(deployer_pk);
-    zkAppInstance.deploy({ zkappKey: zkAppPrivateKey });
-    zkAppInstance.initialize(mac_contract.getCommitment());
+    await zkAppInstance.deploy();
+    await zkAppInstance.initialize(mac_contract.getCommitment());
   });
   await tx_deploy.prove();
   await tx_deploy.sign([zkAppPrivateKey, deployerAccount]);
@@ -151,10 +151,9 @@ describe('Mac tests', () => {
 
   let zkAppInstance: Mac;
 
-  let local: ReturnType<typeof Mina.LocalBlockchain>;
+  let local: Awaited<ReturnType<typeof Mina.LocalBlockchain>>;
 
   beforeAll(async () => {
-    await isReady;
     await Mac.compile({ cache });
     tx_cached_deploy = '';
   });
@@ -169,14 +168,14 @@ describe('Mac tests', () => {
     );
     zkAppAddress = zkAppPrivateKey.toPublicKey();
 
-    local = Mina.LocalBlockchain();
+    local = await Mina.LocalBlockchain({ proofsEnabled });
     Mina.setActiveInstance(local);
     local.setBlockchainLength(UInt32.from(0));
 
-    deployerAccount = local.testAccounts[0].privateKey;
-    employer_sk = local.testAccounts[1].privateKey;
-    contractor_sk = local.testAccounts[2].privateKey;
-    arbiter_sk = local.testAccounts[3].privateKey;
+    deployerAccount = local.testAccounts[0].key;
+    employer_sk = local.testAccounts[1].key;
+    contractor_sk = local.testAccounts[2].key;
+    arbiter_sk = local.testAccounts[3].key;
 
     employer_pk = employer_sk.toPublicKey();
     contractor_pk = contractor_sk.toPublicKey();
@@ -221,7 +220,7 @@ describe('Mac tests', () => {
   });
 
   afterAll(async () => {
-    setTimeout(shutdown, 0);
+    // in case if we need some post test stuff...
   });
 
   it('should correctly deploy Mac contract, approve and withdraw but only at correct stages', async () => {

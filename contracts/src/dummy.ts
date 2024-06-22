@@ -1,6 +1,4 @@
 import {
-  isReady,
-  shutdown,
   Bool,
   Field,
   Circuit,

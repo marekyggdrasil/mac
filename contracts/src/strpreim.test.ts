@@ -1,6 +1,4 @@
 import {
-  isReady,
-  shutdown,
   Bool,
   Field,
   Circuit,
@@ -29,7 +27,6 @@ describe('Preimage tests', () => {
   let zkAppAddress: PublicKey, zkAppPrivateKey: PrivateKey;
 
   beforeEach(async () => {
-    await isReady;
     const protocol_version: Field = Field.from(0);
     const format_version: Field = Field.from(0);
     const nonce: Field = new Field(
@@ -76,7 +73,7 @@ describe('Preimage tests', () => {
   });
 
   afterAll(async () => {
-    setTimeout(shutdown, 0);
+    // in case if we need some post test stuff...
   });
 
   it('should compute hash commitment of a Preimage', () => {

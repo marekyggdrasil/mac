@@ -1,6 +1,4 @@
 import {
-  isReady,
-  shutdown,
   Bool,
   Field,
   Circuit,
@@ -26,8 +24,6 @@ describe('Preimage tests', () => {
   let zkAppAddress: PublicKey, zkAppPrivateKey: PrivateKey;
 
   beforeEach(async () => {
-    await isReady;
-
     zkAppPrivateKey = PrivateKey.random();
     zkAppAddress = zkAppPrivateKey.toPublicKey();
 
@@ -61,7 +57,7 @@ describe('Preimage tests', () => {
   });
 
   afterAll(async () => {
-    setTimeout(shutdown, 0);
+    // in case if we need some post test stuff...
   });
 
   it('should correctly serialize/deserialize a participant to list of fields', () => {
@@ -97,23 +93,21 @@ describe('Preimage tests', () => {
   });
 
   it('should correctly identify the participants by their keys', () => {
-    Circuit.runAndCheck(() => {
-      mac_contract.isEmployer(employer.pk()).assertEquals(Bool(true));
-      mac_contract.isEmployer(contractor.pk()).assertEquals(Bool(false));
-      mac_contract.isEmployer(arbiter.pk()).assertEquals(Bool(false));
+    mac_contract.isEmployer(employer.pk()).assertEquals(Bool(true));
+    mac_contract.isEmployer(contractor.pk()).assertEquals(Bool(false));
+    mac_contract.isEmployer(arbiter.pk()).assertEquals(Bool(false));
 
-      mac_contract.isContractor(employer.pk()).assertEquals(Bool(false));
-      mac_contract.isContractor(contractor.pk()).assertEquals(Bool(true));
-      mac_contract.isContractor(arbiter.pk()).assertEquals(Bool(false));
+    mac_contract.isContractor(employer.pk()).assertEquals(Bool(false));
+    mac_contract.isContractor(contractor.pk()).assertEquals(Bool(true));
+    mac_contract.isContractor(arbiter.pk()).assertEquals(Bool(false));
 
-      mac_contract.isArbiter(employer.pk()).assertEquals(Bool(false));
-      mac_contract.isArbiter(contractor.pk()).assertEquals(Bool(false));
-      mac_contract.isArbiter(arbiter.pk()).assertEquals(Bool(true));
+    mac_contract.isArbiter(employer.pk()).assertEquals(Bool(false));
+    mac_contract.isArbiter(contractor.pk()).assertEquals(Bool(false));
+    mac_contract.isArbiter(arbiter.pk()).assertEquals(Bool(true));
 
-      mac_contract.isParty(employer.pk()).assertEquals(Bool(true));
-      mac_contract.isParty(contractor.pk()).assertEquals(Bool(true));
-      mac_contract.isParty(arbiter.pk()).assertEquals(Bool(true));
-    });
+    mac_contract.isParty(employer.pk()).assertEquals(Bool(true));
+    mac_contract.isParty(contractor.pk()).assertEquals(Bool(true));
+    mac_contract.isParty(arbiter.pk()).assertEquals(Bool(true));
   });
 
   it('should correctly serialize/deserialize a whole contract to bytes', () => {
