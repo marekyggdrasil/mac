@@ -32,6 +32,7 @@ export type MacContextStateType = {
   zkappPrivateKey: PrivateKey | null;
   zkappPublicKey: PublicKey;
   actorPublicKey: PublicKey;
+  contractNonce: Field | null;
   creatingTransaction: boolean;
   runLoadSnarkyJS: Function;
   runCompile: Function;
@@ -76,6 +77,12 @@ export type MacContextStateType = {
   contract_outcome_cancel_employer: number;
   contract_outcome_cancel_contractor: number;
   contract_outcome_cancel_arbiter: number;
+  // contract_outcome_unresolved_description lets always put empty string
+  contract_outcome_unresolved_after: number;
+  // contract_outcome_unresolved_before is going to be max unsigned int 32
+  contract_outcome_unresolved_employer: number;
+  contract_outcome_unresolved_contractor: number;
+  contract_outcome_unresolved_arbiter: number;
   editor_warm_up: number;
   editor_deposit: number;
   editor_execution: number;

@@ -692,6 +692,7 @@ async function EditorFormSubmission(
   const subject_success = (event.target as any).subject_success.value;
   const subject_failure = (event.target as any).subject_failure.value;
   const subject_cancel = (event.target as any).subject_cancel.value;
+  const subject_unresolved = (event.target as any).subject_unresolved.value;
 
   // compute the values
   const l = context.blockchainLength;
@@ -709,6 +710,7 @@ async function EditorFormSubmission(
   const contract_outcome_failure_before = l + a + b + c + d;
   const contract_outcome_cancel_after = l + a + b;
   const contract_outcome_cancel_before = l + a + b + c;
+  const contract_outcome_unresolved_after = contract_outcome_failure_before;
 
   // set the descriptions
   const contract_description = contract_subject;
@@ -716,6 +718,7 @@ async function EditorFormSubmission(
   const contract_outcome_success_description = subject_success;
   const contract_outcome_failure_description = subject_failure;
   const contract_outcome_cancel_description = subject_cancel;
+  const contract_outcome_unresolved_description = subject_unresolved;
 
   // compute the amounts
   console.log("helper values");
@@ -756,6 +759,10 @@ async function EditorFormSubmission(
     contractor_payment + employer_deposit + con_cancel;
   const contract_outcome_cancel_contractor = contractor_deposit - con_cancel;
   const contract_outcome_cancel_arbiter = arbiter_payment + arbiter_deposit;
+
+  const contract_outcome_unresolved_employer = 0; // TODO
+  const contract_outcome_unresolved_contractor = 0; // TODO
+  const contract_outcome_unresolved_arbiter = 0; // TODO
 
   // validate values positive
   const all_values = [

@@ -19,8 +19,7 @@ type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 // ---------------------------------------------------------------------------------------
 
 import type { Mac } from "../../contracts/src/Mac";
-import type { Outcome, Preimage } from "../../contracts/src/strpreim";
-import type { fromMacPack, toMacPack } from "../../contracts/src/helpers";
+import type { Outcome, Preimage } from "../../contracts/src/preimage";
 
 import CompilationCacheJSONList from "./compilation_cache_list.json";
 
@@ -31,8 +30,6 @@ type zkAppWorkerState = {
   zkapp: null | Mac;
   preimage: null | Preimage;
   transaction: null | Transaction;
-  fromMacPack: typeof fromMacPack;
-  toMacPack: typeof toMacPack;
 };
 
 type CompilationCacheJSONList = {
@@ -130,21 +127,14 @@ const functions = {
     if (Preimage === null) {
       throw Error("Preimage type is null");
     }
-    const { fromMacPack, toMacPack } = await import(
-      "../../contracts/build/helpers.js"
-    );
     state = {
       Mac: Mac,
       Outcome: Outcome,
       Preimage: Preimage,
       zkapp: null,
       preimage: null,
-      transaction: null,
-      fromMacPack: fromMacPack,
-      toMacPack: toMacPack,
+      transaction: null
     };
-    state.fromMacPack = fromMacPack;
-    state.toMacPack = toMacPack;
   },
   fetchBlockchainLength: async (args: {}) => {
     let block = await fetchLastBlock(
@@ -353,13 +343,13 @@ const functions = {
     if (state === null) {
       throw Error("state is null");
     }
-    state.preimage = state.fromMacPack(args.macpack);
+      state.preimage = state.Preimage.fromMacPack(args.macpack);
   },
   toMacPack: (args: {}) => {
     if (state === null) {
       throw Error("state is null");
     }
-    return state.toMacPack(castPreimageValue(state.preimage));
+      return state.preimage.getMacPack();
   },
   getPreimageData: (args: {}) => {
     if (state === null) {
