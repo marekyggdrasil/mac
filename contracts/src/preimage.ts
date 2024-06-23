@@ -25,7 +25,7 @@ function bigIntTo32Bytes(bigInt: bigint): Uint8Array {
 }
 
 function bigintToByte(a: bigint) {
-  return Number(a % 256n);
+  return Number(a % BigInt(256));
 }
 
 function bytes32ToBigInt(byteArray: Uint8Array): bigint {
