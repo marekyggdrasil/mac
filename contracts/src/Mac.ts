@@ -16,6 +16,14 @@ import {
   AccountUpdate,
 } from 'o1js';
 
+type RemoveMethods<T> = {
+  [K in keyof T]: T[K] extends Function ? never : T[K];
+};
+
+type FilterNever<T> = {
+  [K in keyof T as T[K] extends never ? never : K]: T[K];
+};
+
 import { Participant, Preimage, Outcome } from './preimage';
 
 const state_initial: number = 0;
@@ -233,7 +241,7 @@ export class Mac extends SmartContract {
     withdraw_allowed.assertTrue();
 
     // determine the amount of the withdrawal
-    const current_outcome: Outcome = Provable.if(
+    const current_outcome: FilterNever<RemoveMethods<Outcome>> = Provable.if(
       is_state_canceled_early,
       Outcome,
       contract_preimage.deposited,

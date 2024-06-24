@@ -1,9 +1,7 @@
 import {
   Field,
   PublicKey,
-  CircuitValue,
-  prop,
-  arrayProp,
+  Struct,
   Circuit,
   CircuitString,
   Poseidon,
@@ -57,24 +55,21 @@ function Uint8ArrayToNumbers(input: Uint8Array): number[] {
   return t;
 }
 
-export class Participant extends CircuitValue {
-  @prop participant_address: PublicKey;
-
-  constructor(participant_address: PublicKey) {
-    super();
-    this.participant_address = participant_address;
-  }
-
-  pk(): PublicKey {
+export class Participant extends Struct({
+  participant_address: PublicKey,
+}) {
+  public pk(): PublicKey {
     return this.participant_address;
   }
 
-  serialize(): Field[] {
-    return this.toFields();
+  public serialize(): Field[] {
+    return Participant.toFields(this);
   }
 
   static deserialize(serialized: Field[]): Participant {
-    const deserialized: Participant = Participant.fromFields(serialized);
+    const deserialized: Participant = new Participant({
+      participant_address: PublicKey.fromFields(serialized),
+    });
     if (deserialized === null) {
       throw Error();
     }
@@ -90,66 +85,31 @@ export class Participant extends CircuitValue {
     return [deserialized, serialized.slice(len, tot)];
   }
 
-  toBytes(): Uint8Array {
+  public toBytes(): Uint8Array {
     const bytes = bs58.decode(this.participant_address.toBase58());
     return bytes;
   } // 40 bytes
 
   static fromBytes(bytes: Uint8Array): Participant {
-    return new Participant(PublicKey.fromBase58(bs58.encode(bytes)));
+    return new Participant({
+      participant_address: PublicKey.fromBase58(bs58.encode(bytes)),
+    });
   }
 }
 
-export class Outcome extends CircuitValue {
-  @prop description: CircuitString;
-
-  @prop payment_employer: UInt64;
-  @prop payment_contractor: UInt64;
-  @prop payment_arbiter: UInt64;
-
-  @prop start_after: UInt32;
-  @prop finish_before: UInt32;
-
-  constructor(
-    description: CircuitString,
-    payment_employer: UInt64,
-    payment_contractor: UInt64,
-    payment_arbiter: UInt64,
-    start_after: UInt32,
-    finish_before: UInt32
-  ) {
-    super();
-
-    this.description = description;
-
-    this.payment_employer = payment_employer;
-    this.payment_contractor = payment_contractor;
-    this.payment_arbiter = payment_arbiter;
-
-    this.start_after = start_after;
-    this.finish_before = finish_before;
+export class Outcome extends Struct({
+  description: CircuitString,
+  payment_employer: UInt64,
+  payment_contractor: UInt64,
+  payment_arbiter: UInt64,
+  start_after: UInt32,
+  finish_before: UInt32,
+}) {
+  public serialize(): Field[] {
+    return Outcome.toFields(this);
   }
 
-  serialize(): Field[] {
-    return this.toFields();
-  }
-
-  static deserialize(serialized: Field[]): Outcome {
-    const deserialized: Outcome = Outcome.fromFields(serialized);
-    if (deserialized === null) {
-      throw Error();
-    }
-    return deserialized;
-  }
-
-  static deserializeBuffer(serialized: Field[]): [Outcome, Field[]] {
-    const len: number = 133;
-    const tot: number = serialized.length;
-    const deserialized: Outcome = Outcome.deserialize(serialized.slice(0, len));
-    return [deserialized, serialized.slice(len, tot)];
-  }
-
-  toBytes(): Uint8Array {
+  public toBytes(): Uint8Array {
     const bytes_text: Uint8Array = Buffer.from(this.description.toString());
     const bytes_text_length: Uint8Array = Uint8Array.from(
       byteify.serializeUint8(bytes_text.length)
@@ -205,112 +165,74 @@ export class Outcome extends CircuitValue {
       bytes.slice(41, 41 + text_length)
     ).toString();
     const description: CircuitString = CircuitString.fromString(text);
-    return new Outcome(
-      description,
-      payment_employer,
-      payment_contractor,
-      payment_arbiter,
-      start_after,
-      finish_before
-    );
+    return new Outcome({
+      description: description,
+      payment_employer: payment_employer,
+      payment_contractor: payment_contractor,
+      payment_arbiter: payment_arbiter,
+      start_after: start_after,
+      finish_before: finish_before,
+    });
   }
 }
 
-export class Preimage extends CircuitValue {
-  @prop protocol_version: Field;
-  @prop format_version: Field;
-  @prop nonce: Field;
-
-  @prop contract: CircuitString;
-  @prop address: PublicKey;
-
-  @prop employer: Participant;
-  @prop contractor: Participant;
-  @prop arbiter: Participant;
-
-  @prop deposited: Outcome;
-  @prop success: Outcome;
-  @prop failure: Outcome;
-  @prop cancel: Outcome;
-  @prop unresolved: Outcome;
-
-  constructor(
-    protocol_version: Field,
-    format_version: Field,
-    nonce: Field,
-    contract: CircuitString,
-    address: PublicKey,
-    employer: Participant,
-    contractor: Participant,
-    arbiter: Participant,
-    deposited: Outcome,
-    success: Outcome,
-    failure: Outcome,
-    cancel: Outcome,
-    unresolved: Outcome
-  ) {
-    super();
-
-    this.protocol_version = protocol_version;
-    this.format_version = format_version;
-    this.nonce = nonce;
-
-    this.contract = contract;
-    this.address = address;
-
-    this.employer = employer;
-    this.contractor = contractor;
-    this.arbiter = arbiter;
-
-    this.deposited = deposited;
-    this.success = success;
-    this.failure = failure;
-    this.cancel = cancel;
-    this.unresolved = unresolved;
-  }
-
+export class Preimage extends Struct({
+  protocol_version: Field,
+  format_version: Field,
+  nonce: Field,
+  contract: CircuitString,
+  address: PublicKey,
+  employer: Participant,
+  contractor: Participant,
+  arbiter: Participant,
+  deposited: Outcome,
+  success: Outcome,
+  failure: Outcome,
+  cancel: Outcome,
+  unresolved: Outcome,
+}) {
   // identify the actor of the contract
-  isEmployer(actor: PublicKey): Bool {
+  public isEmployer(actor: PublicKey): Bool {
     return actor.equals(this.employer.participant_address);
   }
 
-  isContractor(actor: PublicKey): Bool {
+  public isContractor(actor: PublicKey): Bool {
     return actor.equals(this.contractor.participant_address);
   }
 
-  isArbiter(actor: PublicKey): Bool {
+  public isArbiter(actor: PublicKey): Bool {
     return actor.equals(this.arbiter.participant_address);
   }
 
-  isParty(actor: PublicKey): Bool {
+  public isParty(actor: PublicKey): Bool {
     return this.isEmployer(actor)
       .or(this.isContractor(actor))
       .or(this.isArbiter(actor));
   }
 
   // state identification
-  isInitial(automaton_state: Field): Bool {
+  public isInitial(automaton_state: Field): Bool {
     return automaton_state.equals(Field(0)); // initial state
   }
 
-  isDeposit(automaton_state: Field): Bool {
+  public isDeposit(automaton_state: Field): Bool {
     return automaton_state.equals(Field(1)); // deposit state
   }
 
-  isCanceled(automaton_state: Field): Bool {
+  public isCanceled(automaton_state: Field): Bool {
     return automaton_state.equals(Field(2)); // canceled state
   }
 
-  isSuccess(automaton_state: Field): Bool {
+  public isSuccess(automaton_state: Field): Bool {
     return automaton_state.equals(Field(3)); // success state
   }
 
-  isFailed(automaton_state: Field): Bool {
+  public isFailed(automaton_state: Field): Bool {
     return automaton_state.equals(Field(4)); // failed state
   }
 
   // handling the serialization
-  serialize(): Field[] {
+  public serialize(): Field[] {
     let serialized: Field[] = [
       this.protocol_version,
       this.format_version,
@@ -329,95 +251,13 @@ export class Preimage extends CircuitValue {
     return serialized;
   }
 
-  static deserialize(serialized: Field[], contract_string: string): Preimage {
-    const protocol_version: Field = serialized[0];
-    const format_version: Field = serialized[1];
-    protocol_version.assertEquals(Field(0));
-    format_version.assertEquals(Field(0));
-    const nonce: Field = serialized[2];
-
-    let address: PublicKey;
-
-    let employer: Participant;
-    let contractor: Participant;
-    let arbiter: Participant;
-
-    let outcome_deposited: Outcome;
-    let outcome_success: Outcome;
-    let outcome_failure: Outcome;
-    let outcome_cancel: Outcome;
-    let outcome_unresolved: Outcome;
-
-    let mac_contract: Preimage;
-    address = PublicKey.fromFields(serialized.slice(3, 43));
-
-    let rem: Field[] = serialized.slice(43, serialized.length);
-
-    [employer, rem] = Participant.deserializeBuffer(rem);
-    if (employer === null) {
-      throw Error();
-    }
-
-    [contractor, rem] = Participant.deserializeBuffer(rem);
-    if (contractor === null) {
-      throw Error();
-    }
-
-    [arbiter, rem] = Participant.deserializeBuffer(rem);
-    if (arbiter === null) {
-      throw Error();
-    }
-
-    [outcome_deposited, rem] = Outcome.deserializeBuffer(rem);
-    if (outcome_deposited === null) {
-      throw Error();
-    }
-
-    [outcome_success, rem] = Outcome.deserializeBuffer(rem);
-    if (outcome_success === null) {
-      throw Error();
-    }
-
-    [outcome_failure, rem] = Outcome.deserializeBuffer(rem);
-    if (outcome_failure === null) {
-      throw Error();
-    }
-
-    [outcome_cancel, rem] = Outcome.deserializeBuffer(rem);
-    if (outcome_cancel === null) {
-      throw Error();
-    }
-
-    [outcome_unresolved, rem] = Outcome.deserializeBuffer(rem);
-    if (outcome_unresolved === null) {
-      throw Error();
-    }
-
-    mac_contract = new Preimage(
-      protocol_version,
-      format_version,
-      nonce,
-      CircuitString.fromString(contract_string),
-      address,
-      employer,
-      contractor,
-      arbiter,
-      outcome_deposited,
-      outcome_success,
-      outcome_failure,
-      outcome_cancel,
-      outcome_unresolved
-    );
-    return mac_contract;
-  }
-
-  getCommitment(): Field {
+  public getCommitment(): Field {
     const serialized: Field[] = this.serialize();
     serialized.concat(this.contract.hash());
     return Poseidon.hash(serialized);
   }
 
-  toBytes(): Uint8Array {
+  public toBytes(): Uint8Array {
     const bytes_header = Uint8Array.from([
       bigintToByte(this.protocol_version.toBigInt()),
       bigintToByte(this.format_version.toBigInt()),
@@ -560,25 +400,25 @@ export class Preimage extends CircuitValue {
     i += 1;
     const contract: string = Buffer.from(bytes.slice(i, i + length)).toString();
 
-    return new Preimage(
-      protocol_version,
-      format_version,
-      nonce,
-      CircuitString.fromString(contract),
-      address,
-      employer,
-      contractor,
-      arbiter,
-      outcome_deposited,
-      outcome_success,
-      outcome_failure,
-      outcome_cancel,
-      outcome_unresolved
-    );
+    return new Preimage({
+      protocol_version: protocol_version,
+      format_version: format_version,
+      nonce: nonce,
+      contract: CircuitString.fromString(contract),
+      address: address,
+      employer: employer,
+      contractor: contractor,
+      arbiter: arbiter,
+      deposited: outcome_deposited,
+      success: outcome_success,
+      failure: outcome_failure,
+      cancel: outcome_cancel,
+      unresolved: outcome_unresolved,
+    });
   }
 
   // shareable contract
-  getMacPack(): string {
+  public getMacPack(): string {
     const bytes: Uint8Array = this.toBytes();
     let encoded: string = bs58.encode(bytes);
 

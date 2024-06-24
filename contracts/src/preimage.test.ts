@@ -74,11 +74,8 @@ describe('Preimage tests', () => {
     expect(deserialized).toEqual(employer);
   });
 
-  it('should correctly serialize/deserialize an outcome to list of fields', () => {
+  it('should correctly serialize an outcome to list of fields', () => {
     const serialized: Field[] = outcome_success.serialize();
-    const deserialized: Outcome = Outcome.deserialize(serialized);
-    const [d, l]: [Outcome, Field[]] = Outcome.deserializeBuffer(serialized);
-    expect(l.length).toEqual(0);
   });
 
   it('should correctly serialize/deserialize an outcome to bytes', () => {
