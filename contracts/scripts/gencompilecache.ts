@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 import { Cache } from 'o1js';
 
-const { Mac } = await import('../build/Mac.js');
+const { Mac } = await import('../build/src/Mac.js');
 
 type CompilationCacheJSONList = {
   files: string[];
