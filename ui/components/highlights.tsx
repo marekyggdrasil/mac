@@ -14,6 +14,10 @@ export const MinaSecretValue = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export const MinaBlockTimeEstimate = ({ children }: { children: ReactNode}) => {
-  return (<code className="rounded-md bg-accent-content p-1">{children}</code>);
-}
+export const MinaBlockTimeEstimate = ({
+  children,
+}: {
+  children: ReactNode;
+}) => {
+  return <code className="rounded-md bg-accent-content p-1">{children}</code>;
+};

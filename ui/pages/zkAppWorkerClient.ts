@@ -63,6 +63,7 @@ export default class ZkappWorkerClient {
   }
 
   async definePreimage(
+    contract_nonce: string,
     address: string,
     employer: string,
     contractor: string,
@@ -92,8 +93,13 @@ export default class ZkappWorkerClient {
     contract_outcome_cancel_employer: number,
     contract_outcome_cancel_contractor: number,
     contract_outcome_cancel_arbiter: number,
+    contract_outcome_unresolved_after: number,
+    contract_outcome_unresolved_employer: number,
+    contract_outcome_unresolved_contractor: number,
+    contract_outcome_unresolved_arbiter: number,
   ) {
     await this._call("definePreimage", {
+      contract_nonce: contract_nonce,
       address: address,
       employer: employer,
       contractor: contractor,
@@ -126,6 +132,12 @@ export default class ZkappWorkerClient {
       contract_outcome_cancel_employer: contract_outcome_cancel_employer,
       contract_outcome_cancel_contractor: contract_outcome_cancel_contractor,
       contract_outcome_cancel_arbiter: contract_outcome_cancel_arbiter,
+      contract_outcome_unresolved_after: contract_outcome_unresolved_after,
+      contract_outcome_unresolved_employer:
+        contract_outcome_unresolved_employer,
+      contract_outcome_unresolved_contractor:
+        contract_outcome_unresolved_contractor,
+      contract_outcome_unresolved_arbiter: contract_outcome_unresolved_arbiter,
     });
   }
 

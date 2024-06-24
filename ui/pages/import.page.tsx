@@ -10,7 +10,7 @@ import {
   ContractStateType,
 } from "../components/AppContext";
 
-import { PublicKey, PrivateKey } from "o1js";
+import { Field, PublicKey, PrivateKey } from "o1js";
 
 import {
   toastInfo,
@@ -70,6 +70,7 @@ async function runImport(context: MacContextType) {
     console.log(r.address);
     // context.setState({ ...context.state, loaded: true, macpack: macpack });
 
+    let contract_nonce: Field = new Field(r.contract_nonce);
     let zkAppPublicKey: PublicKey = PublicKey.fromBase58(r.address);
     let zkAppPrivateKey: PrivateKey | null = null;
     if (private_key !== "") {
@@ -113,6 +114,7 @@ async function runImport(context: MacContextType) {
       finalized: true,
       deployed: is_deployed,
       macpack: macpack,
+      contract_nonce: contract_nonce,
       zkappPrivateKey: zkAppPrivateKey,
       zkappPublicKey: zkAppPublicKey,
       contract_employer: PublicKey.fromBase58(r.employer),
@@ -154,6 +156,13 @@ async function runImport(context: MacContextType) {
       contract_outcome_cancel_employer: r.contract_outcome_cancel_employer,
       contract_outcome_cancel_contractor: r.contract_outcome_cancel_contractor,
       contract_outcome_cancel_arbiter: r.contract_outcome_cancel_arbiter,
+      contract_outcome_unresolved_after: r.contract_outcome_unresolved_after,
+      contract_outcome_unresolved_employer:
+        r.contract_outcome_unresolved_employer,
+      contract_outcome_unresolved_contractor:
+        r.contract_outcome_unresolved_contractor,
+      contract_outcome_unresolved_arbiter:
+        r.contract_outcome_unresolved_arbiter,
     });
   } catch (e: any) {
     console.log("failed to import");

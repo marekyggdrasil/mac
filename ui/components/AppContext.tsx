@@ -32,7 +32,6 @@ export type MacContextStateType = {
   zkappPrivateKey: PrivateKey | null;
   zkappPublicKey: PublicKey;
   actorPublicKey: PublicKey;
-  contractNonce: Field | null;
   creatingTransaction: boolean;
   runLoadSnarkyJS: Function;
   runCompile: Function;
@@ -49,6 +48,7 @@ export type MacContextStateType = {
   employerBase58: string;
   contractorBase58: string;
   arbiterBase58: string;
+  contract_nonce: Field | null;
   contract_employer: PublicKey;
   contract_contractor: PublicKey;
   contract_arbiter: PublicKey;
@@ -132,7 +132,7 @@ export type ContractDeadlineEstimate = {
   cancel_block_max: number;
   cancel_date_min: Date;
   cancel_date_max: Date;
-}
+};
 
 export const AppContext = createContext<MacContextType | null>(null);
 
@@ -159,21 +159,15 @@ export function castZkAppWorkerClient(
 }
 
 export function getNetworkFromName(name: string): string {
-  if (name === "berkeley") {
-    return "https://proxy.berkeley.minaexplorer.com/graphql";
-  }
-  if (name === "testworld") {
-    return "https://proxy.testworld.minaexplorer.com/graphql";
+  if (name === "devnet") {
+    return "https://proxy.devnet.minaexplorer.com/graphql";
   }
   throw Error("unknown network");
 }
 
 export function getNetworkNiceName(name: string): string {
-  if (name === "berkeley") {
-    return "Berkeley";
-  }
-  if (name === "testworld") {
-    return "TestWorld 2";
+  if (name === "devnet") {
+    return "DevNet";
   }
   throw Error("unknown network");
 }
@@ -182,11 +176,8 @@ export function getTransactionBlockExplorerURL(
   name: string,
   txid: string,
 ): string {
-  if (name === "berkeley") {
-    return "https://minascan.io/berkeley/tx/" + txid;
-  }
-  if (name === "testworld") {
-    return "https://minascan.io/testworld/tx/" + txid;
+  if (name === "devnet") {
+    return "https://minascan.io/devnet/tx/" + txid;
   }
   throw Error("unknown network");
 }
@@ -196,7 +187,10 @@ export function getBlockTime(): number {
   return 180.0;
 }
 
-export function computeBlockchainLengthDate(context: MacContextType, value: number): Date {
+export function computeBlockchainLengthDate(
+  context: MacContextType,
+  value: number,
+): Date {
   let computed = new Date();
   let l = Number(context.blockchainLength);
   let seconds: number = Number(value - l) * 3 * 60;
@@ -205,12 +199,11 @@ export function computeBlockchainLengthDate(context: MacContextType, value: numb
 }
 
 export function formatDateWithoutSeconds(value: Date): string {
-  return value.toLocaleString(
-    [], {
-      year: 'numeric',
-      month: 'numeric',
-      day: 'numeric',
-      hour: "2-digit",
-      minute:"2-digit"
+  return value.toLocaleString([], {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }

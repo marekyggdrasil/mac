@@ -1,7 +1,6 @@
 import {
   Mina,
   Cache,
-  isReady,
   PublicKey,
   PrivateKey,
   Field,
@@ -18,15 +17,11 @@ type Transaction = Awaited<ReturnType<typeof Mina.transaction>>;
 
 // ---------------------------------------------------------------------------------------
 
-import type { Mac } from "../../contracts/src/Mac";
-import type { Outcome, Preimage } from "../../contracts/src/preimage";
+import { Mac, Participant, Outcome, Preimage } from "maccon";
 
 import CompilationCacheJSONList from "./compilation_cache_list.json";
 
 type zkAppWorkerState = {
-  Mac: typeof Mac;
-  Outcome: typeof Outcome;
-  Preimage: typeof Preimage;
   zkapp: null | Mac;
   preimage: null | Preimage;
   transaction: null | Transaction;
@@ -103,51 +98,22 @@ const FileSystem = (files: any): Cache => ({
 
 const functions = {
   setActiveInstanceToNetwork: async (args: { endpoint: string }) => {
-    const endpointGraphQL = args.endpoint;
-    const connection = Mina.BerkeleyQANet(endpointGraphQL);
-    Mina.setActiveInstance(connection);
-  },
-  setActiveInstanceToBerkeley: async (args: {}) => {
-    const Berkeley = Mina.BerkeleyQANet(
-      "https://proxy.berkeley.minaexplorer.com/graphql",
-    );
-    Mina.setActiveInstance(Berkeley);
+    const Network = Mina.Network(args.endpoint);
+    Mina.setActiveInstance(Network);
   },
   loadContract: async (args: {}) => {
-    const { Mac } = await import("../../contracts/build/Mac.js");
-    if (Mac === null) {
-      throw Error("Mac type is null");
-    }
-    const { Outcome, Preimage } = await import(
-      "../../contracts/build/strpreim.js"
-    );
-    if (Outcome === null) {
-      throw Error("Outcome type is null");
-    }
-    if (Preimage === null) {
-      throw Error("Preimage type is null");
-    }
     state = {
-      Mac: Mac,
-      Outcome: Outcome,
-      Preimage: Preimage,
       zkapp: null,
       preimage: null,
-      transaction: null
+      transaction: null,
     };
-  },
-  fetchBlockchainLength: async (args: {}) => {
-    let block = await fetchLastBlock(
-      "https://proxy.berkeley.minaexplorer.com/graphql",
-    );
-    return block.blockchainLength.toJSON();
   },
   compileContract: async (args: {}) => {
     if (state === null) {
       throw Error("state is null");
     }
     const cacheFiles = await fetchFiles();
-    await state.Mac!.compile({ cache: FileSystem(cacheFiles) });
+    await Mac.compile({ cache: FileSystem(cacheFiles) });
   },
   fetchAccount: async (args: { publicKey58: string }) => {
     const pk = PublicKey.fromBase58(args.publicKey58);
@@ -162,7 +128,7 @@ const functions = {
       throw Error("state is null");
     }
     const publicKey = PublicKey.fromBase58(args.publicKey58);
-    state.zkapp = new state.Mac!(publicKey);
+    state.zkapp = new Mac!(publicKey);
   },
   getBlockchainLength: async (args: { endpoint: string }) => {
     const endpointGraphQL = args.endpoint;
@@ -184,16 +150,16 @@ const functions = {
     );
     const feePayer: PublicKey = PublicKey.fromBase58(args.feePayerAddress58);
     let transactionFee = 100_000_000;
-    const _commitment: Field = state.Preimage.hash(state.preimage);
+    const _commitment: Field = state.preimage.getCommitment();
     const transaction = await Mina.transaction(
       { sender: feePayer, fee: transactionFee },
-      () => {
+      async () => {
         if (state === null) {
           throw Error("state is null");
         }
         AccountUpdate.fundNewAccount(feePayer);
-        state.zkapp!.deploy({ zkappKey: zkAppPrivateKey });
-        state.zkapp!.initialize(_commitment);
+        await state.zkapp!.deploy();
+        await state.zkapp!.initialize(_commitment);
       },
     );
     transaction.sign([zkAppPrivateKey]);
@@ -207,14 +173,14 @@ const functions = {
     let transactionFee = 100_000_000;
     const transaction = await Mina.transaction(
       { sender: feePayer, fee: transactionFee },
-      () => {
+      async () => {
         if (state === null) {
           throw Error("state is null");
         }
         if (state.preimage === null) {
           throw Error("state.preimage is null");
         }
-        state.zkapp!.deposit(state.preimage, feePayer);
+        await state.zkapp!.deposit(state.preimage, feePayer);
       },
     );
     state.transaction = transaction;
@@ -227,14 +193,14 @@ const functions = {
     let transactionFee = 100_000_000;
     const transaction = await Mina.transaction(
       { sender: feePayer, fee: transactionFee },
-      () => {
+      async () => {
         if (state === null) {
           throw Error("state is null");
         }
         if (state.preimage === null) {
           throw Error("state.preimage is null");
         }
-        state.zkapp!.withdraw(state.preimage, feePayer);
+        await state.zkapp!.withdraw(state.preimage, feePayer);
       },
     );
     state.transaction = transaction;
@@ -247,14 +213,14 @@ const functions = {
     let transactionFee = 100_000_000;
     const transaction = await Mina.transaction(
       { sender: feePayer, fee: transactionFee },
-      () => {
+      async () => {
         if (state === null) {
           throw Error("state is null");
         }
         if (state.preimage === null) {
           throw Error("state.preimage is null");
         }
-        state.zkapp!.success(state.preimage, feePayer);
+        await state.zkapp!.success(state.preimage, feePayer);
       },
     );
     state.transaction = transaction;
@@ -267,14 +233,14 @@ const functions = {
     let transactionFee = 100_000_000;
     const transaction = await Mina.transaction(
       { sender: feePayer, fee: transactionFee },
-      () => {
+      async () => {
         if (state === null) {
           throw Error("state is null");
         }
         if (state.preimage === null) {
           throw Error("state.preimage is null");
         }
-        state.zkapp!.failure(state.preimage, feePayer);
+        await state.zkapp!.failure(state.preimage, feePayer);
       },
     );
     state.transaction = transaction;
@@ -287,14 +253,14 @@ const functions = {
     let transactionFee = 100_000_000;
     const transaction = await Mina.transaction(
       { sender: feePayer, fee: transactionFee },
-      () => {
+      async () => {
         if (state === null) {
           throw Error("state is null");
         }
         if (state.preimage === null) {
           throw Error("state.preimage is null");
         }
-        state.zkapp!.cancel(state.preimage, feePayer);
+        await state.zkapp!.cancel(state.preimage, feePayer);
       },
     );
     state.transaction = transaction;
@@ -343,13 +309,16 @@ const functions = {
     if (state === null) {
       throw Error("state is null");
     }
-      state.preimage = state.Preimage.fromMacPack(args.macpack);
+    state.preimage = Preimage.fromMacPack(args.macpack);
   },
   toMacPack: (args: {}) => {
     if (state === null) {
       throw Error("state is null");
     }
-      return state.preimage.getMacPack();
+    if (state.preimage === null) {
+      throw Error("state.preimage is null");
+    }
+    return state.preimage.getMacPack();
   },
   getPreimageData: (args: {}) => {
     if (state === null) {
@@ -359,10 +328,11 @@ const functions = {
       throw Error("Preimage is null");
     }
     return JSON.stringify({
+      contract_nonce: state.preimage.nonce.toString(),
       address: state.preimage.address.toBase58(),
-      employer: state.preimage.employer.toBase58(),
-      contractor: state.preimage.contractor.toBase58(),
-      arbiter: state.preimage.arbiter.toBase58(),
+      employer: state.preimage.employer.participant_address.toBase58(),
+      contractor: state.preimage.contractor.participant_address.toBase58(),
+      arbiter: state.preimage.arbiter.participant_address.toBase58(),
       contract_description: state.preimage.contract.toString(),
       contract_outcome_deposit_description:
         state.preimage.deposited.description.toString(),
@@ -432,9 +402,22 @@ const functions = {
       contract_outcome_cancel_arbiter: parseInt(
         state.preimage.cancel.payment_arbiter.toString(),
       ),
+      contract_outcome_unresolved_after: parseInt(
+        state.preimage.unresolved.start_after.toString(),
+      ),
+      contract_outcome_unresolved_employer: parseInt(
+        state.preimage.unresolved.payment_employer.toString(),
+      ),
+      contract_outcome_unresolved_contractor: parseInt(
+        state.preimage.unresolved.payment_contractor.toString(),
+      ),
+      contract_outcome_unresolved_arbiter: parseInt(
+        state.preimage.unresolved.payment_arbiter.toString(),
+      ),
     });
   },
   definePreimage: (args: {
+    contract_nonce: string;
     address: string;
     employer: string;
     contractor: string;
@@ -464,11 +447,15 @@ const functions = {
     contract_outcome_cancel_employer: number;
     contract_outcome_cancel_contractor: number;
     contract_outcome_cancel_arbiter: number;
+    contract_outcome_unresolved_after: number;
+    contract_outcome_unresolved_employer: number;
+    contract_outcome_unresolved_contractor: number;
+    contract_outcome_unresolved_arbiter: number;
   }) => {
     if (state === null) {
       throw Error("state is null");
     }
-    const outcome_deposited: Outcome = new state.Outcome({
+    const outcome_deposited: Outcome = new Outcome({
       description: CircuitString.fromString(
         args.contract_outcome_deposit_description,
       ),
@@ -479,7 +466,7 @@ const functions = {
       finish_before: UInt32.from(args.contract_outcome_deposit_before),
     });
 
-    const outcome_success: Outcome = new state.Outcome({
+    const outcome_success: Outcome = new Outcome({
       description: CircuitString.fromString(
         args.contract_outcome_success_description,
       ),
@@ -490,7 +477,7 @@ const functions = {
       finish_before: UInt32.from(args.contract_outcome_success_before),
     });
 
-    const outcome_failure: Outcome = new state.Outcome({
+    const outcome_failure: Outcome = new Outcome({
       description: CircuitString.fromString(
         args.contract_outcome_failure_description,
       ),
@@ -501,7 +488,7 @@ const functions = {
       finish_before: UInt32.from(args.contract_outcome_failure_before),
     });
 
-    const outcome_cancel: Outcome = new state.Outcome({
+    const outcome_cancel: Outcome = new Outcome({
       description: CircuitString.fromString(
         args.contract_outcome_cancel_description,
       ),
@@ -512,16 +499,41 @@ const functions = {
       finish_before: UInt32.from(args.contract_outcome_cancel_before),
     });
 
-    state.preimage = new state.Preimage({
+    const outcome_unresolved: Outcome = new Outcome({
+      description: CircuitString.fromString(""),
+      payment_employer: UInt64.from(args.contract_outcome_unresolved_employer),
+      payment_contractor: UInt64.from(
+        args.contract_outcome_unresolved_contractor,
+      ),
+      payment_arbiter: UInt64.from(args.contract_outcome_unresolved_arbiter),
+      start_after: UInt32.from(args.contract_outcome_unresolved_after),
+      finish_before: UInt32.MAXINT(),
+    });
+
+    const protocol_version: Field = Field.from(0);
+    const format_version: Field = Field.from(0);
+    const nonce: Field = new Field(args.contract_nonce);
+
+    state.preimage = new Preimage({
+      protocol_version: protocol_version,
+      format_version: format_version,
+      nonce: nonce,
       contract: CircuitString.fromString(args.contract_description),
       address: PublicKey.fromBase58(args.address),
-      employer: PublicKey.fromBase58(args.employer),
-      contractor: PublicKey.fromBase58(args.contractor),
-      arbiter: PublicKey.fromBase58(args.arbiter),
+      employer: new Participant({
+        participant_address: PublicKey.fromBase58(args.employer),
+      }),
+      contractor: new Participant({
+        participant_address: PublicKey.fromBase58(args.contractor),
+      }),
+      arbiter: new Participant({
+        participant_address: PublicKey.fromBase58(args.arbiter),
+      }),
       deposited: outcome_deposited,
       success: outcome_success,
       failure: outcome_failure,
       cancel: outcome_cancel,
+      unresolved: outcome_unresolved,
     });
   },
   proveTransaction: async (args: {}) => {

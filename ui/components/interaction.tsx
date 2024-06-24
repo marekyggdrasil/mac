@@ -33,7 +33,12 @@ import { PublicKey } from "o1js";
 export async function finalizeContract(context: MacContextType) {
   // instantiate preimage via worker and compute macpack
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
+  if (context.state.contract_nonce === null) {
+    toastError("random nonce is not set");
+    throw Error("random nonce is not set");
+  }
   await zkappWorkerClient.definePreimage(
+    context.state.contract_nonce.toString(),
     context.state.zkappPublicKey.toBase58(),
     context.state.contract_employer.toBase58(),
     context.state.contract_contractor.toBase58(),
@@ -63,6 +68,10 @@ export async function finalizeContract(context: MacContextType) {
     Math.abs(context.state.contract_outcome_cancel_employer),
     Math.abs(context.state.contract_outcome_cancel_contractor),
     Math.abs(context.state.contract_outcome_cancel_arbiter),
+    Math.abs(context.state.contract_outcome_unresolved_after),
+    Math.abs(context.state.contract_outcome_unresolved_employer),
+    Math.abs(context.state.contract_outcome_unresolved_contractor),
+    Math.abs(context.state.contract_outcome_unresolved_arbiter),
   );
   // now get its macpack
   const macpack = await zkappWorkerClient.toMacPack();

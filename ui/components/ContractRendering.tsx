@@ -6,14 +6,19 @@ import {
   MacContextType,
   CastContext,
   computeBlockchainLengthDate,
-  formatDateWithoutSeconds
+  formatDateWithoutSeconds,
 } from "./AppContext";
 
-import { MinaValue, MinaBlockchainLength, MinaBlockTimeEstimate } from "./highlights";
+import {
+  MinaValue,
+  MinaBlockchainLength,
+  MinaBlockTimeEstimate,
+} from "./highlights";
 
 // TODO need to define it everywhere where custom components with arguments are
 // don't yet know how to avoid it...
-export type GenericComponentProps<T extends React.ElementType> = React.ComponentProps<T> & {};
+export type GenericComponentProps<T extends React.ElementType> =
+  React.ComponentProps<T> & {};
 
 function minaValue(v: number) {
   let text = "";
@@ -35,34 +40,38 @@ const DeadlineUnitSwitchComponent = () => {
   const context: MacContextType = CastContext();
   return (
     <label className="flex cursor-pointer gap-2">
-    Time-estimates
-    <input
-    type="checkbox"
-    className="toggle"
-    checked={context.state.unit_blockchain_length}
-    onChange={
-          (event: React.SyntheticEvent) => {
-            const is_checked = (event.target as any).checked;
-            context.setState({...context.state, unit_blockchain_length: is_checked});
-          }
-    }
-    />
-    Blockchain lengths
-    </label>);
-}
+      Time-estimates
+      <input
+        type="checkbox"
+        className="toggle"
+        checked={context.state.unit_blockchain_length}
+        onChange={(event: React.SyntheticEvent) => {
+          const is_checked = (event.target as any).checked;
+          context.setState({
+            ...context.state,
+            unit_blockchain_length: is_checked,
+          });
+        }}
+      />
+      Blockchain lengths
+    </label>
+  );
+};
 
 const DeadlineInFormat: React.FC<GenericComponentProps<any>> = (props) => {
   const context: MacContextType = CastContext();
   if (context.state.unit_blockchain_length) {
-    return <MinaBlockchainLength>
-      {props.deadline}
-    </MinaBlockchainLength>;
+    return <MinaBlockchainLength>{props.deadline}</MinaBlockchainLength>;
   } else {
-    return <MinaBlockTimeEstimate>
-      { formatDateWithoutSeconds(computeBlockchainLengthDate(context, props.deadline)) }
-    </MinaBlockTimeEstimate>;
+    return (
+      <MinaBlockTimeEstimate>
+        {formatDateWithoutSeconds(
+          computeBlockchainLengthDate(context, props.deadline),
+        )}
+      </MinaBlockTimeEstimate>
+    );
   }
-}
+};
 
 export const RenderOutcomes = () => {
   const context: MacContextType = CastContext();
@@ -103,8 +112,8 @@ export const RenderOutcomes = () => {
             <td>
               {minaValue(
                 context.state.contract_outcome_deposit_employer +
-                context.state.contract_outcome_deposit_contractor +
-                context.state.contract_outcome_deposit_arbiter,
+                  context.state.contract_outcome_deposit_contractor +
+                  context.state.contract_outcome_deposit_arbiter,
               )}
             </td>
           </tr>
@@ -130,8 +139,8 @@ export const RenderOutcomes = () => {
             <td>
               {minaValue(
                 context.state.contract_outcome_success_employer +
-                context.state.contract_outcome_success_contractor +
-                context.state.contract_outcome_success_arbiter,
+                  context.state.contract_outcome_success_contractor +
+                  context.state.contract_outcome_success_arbiter,
               )}
             </td>
           </tr>
@@ -157,8 +166,8 @@ export const RenderOutcomes = () => {
             <td>
               {minaValue(
                 context.state.contract_outcome_failure_employer +
-                context.state.contract_outcome_failure_contractor +
-                context.state.contract_outcome_failure_arbiter,
+                  context.state.contract_outcome_failure_contractor +
+                  context.state.contract_outcome_failure_arbiter,
               )}
             </td>
           </tr>
@@ -182,8 +191,8 @@ export const RenderOutcomes = () => {
             <td>
               {minaValue(
                 context.state.contract_outcome_cancel_employer +
-                context.state.contract_outcome_cancel_contractor +
-                context.state.contract_outcome_cancel_arbiter,
+                  context.state.contract_outcome_cancel_contractor +
+                  context.state.contract_outcome_cancel_arbiter,
               )}
             </td>
           </tr>

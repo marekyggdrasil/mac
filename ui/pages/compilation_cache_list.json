@@ -1,5 +1,6 @@
 {
   "files": [
+    "README.md",
     "lagrange-basis-fp-1024",
     "lagrange-basis-fp-16384",
     "srs-fp-65536",

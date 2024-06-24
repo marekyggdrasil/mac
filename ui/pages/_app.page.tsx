@@ -22,11 +22,9 @@ import {
 } from "../components/toast";
 
 import { createContext, useEffect, useState, useContext } from "react";
-import type { Mac } from "../../contracts/src/Mac";
 import {
   Mina,
   Field,
-  isReady,
   PrivateKey,
   PublicKey,
   fetchAccount,
@@ -62,6 +60,7 @@ async function runLoadSnarkyJS(context: MacContextType) {
   const nice_name = getNetworkNiceName(context.network);
   const network_endpoint = getNetworkFromName(context.network);
   console.log("setting active instance to " + nice_name);
+  console.log(network_endpoint);
   try {
     await zkappWorkerClient.setActiveInstanceToNetwork(network_endpoint);
   } catch (error) {
@@ -193,6 +192,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     employerBase58: "",
     contractorBase58: "",
     arbiterBase58: "",
+    contract_nonce: null,
     contract_employer: PublicKey.empty(),
     contract_contractor: PublicKey.empty(),
     contract_arbiter: PublicKey.empty(),
@@ -221,6 +221,10 @@ function MyApp({ Component, pageProps }: AppProps) {
     contract_outcome_cancel_employer: -1,
     contract_outcome_cancel_contractor: -1,
     contract_outcome_cancel_arbiter: -1,
+    contract_outcome_unresolved_after: -1,
+    contract_outcome_unresolved_employer: -1,
+    contract_outcome_unresolved_contractor: -1,
+    contract_outcome_unresolved_arbiter: -1,
     editor_warm_up: 480,
     editor_deposit: 480,
     editor_execution: 480,
@@ -235,7 +239,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   let [blockFetchDate, setBlockFetchDate] = useState(new Date());
   let [connectedAddress, setConnectedAddress] = useState("");
   let [connectionError, setConnectionError] = useState("");
-  let [network, setNetwork] = useState("berkeley");
+  let [network, setNetwork] = useState("devnet");
   let [txHash, setTxHash] = useState("");
 
   // -------------------------------------------------------

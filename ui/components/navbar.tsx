@@ -10,18 +10,28 @@ const NetworkSelectionComponent = () => {
         onChange={async (event) => {
           await context.setNetwork(event.target.value);
         }}
-        defaultValue="berkeley"
+        defaultValue="devnet"
       >
-        <option value="berkeley">Berkeley</option>
-        <option value="testworld">TestWorld</option>
+        <option value="devnet">DevNet</option>
+        <option disabled value="berkeley">
+          Berkeley
+        </option>
+        <option disabled value="testworld">
+          TestWorld
+        </option>
         <option disabled>Mainnet</option>
       </select>
     );
   }
   return (
-    <select className="select select-bordered" defaultValue="berkeley" disabled>
-      <option value="berkeley">Berkeley</option>
-      <option value="testworld">TestWorld</option>
+    <select className="select select-bordered" defaultValue="devnet" disabled>
+      <option value="devnet">DevNet</option>
+      <option disabled value="berkeley">
+        Berkeley
+      </option>
+      <option disabled value="testworld">
+        TestWorld
+      </option>
       <option disabled>Mainnet</option>
     </select>
   );
