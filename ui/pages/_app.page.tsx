@@ -13,6 +13,8 @@ import {
   getNetworkNiceName,
 } from "../components/AppContext";
 
+import { WalletAURO } from "../components/wallets";
+
 import Layout from "../components/Layout";
 import {
   toastInfo,
@@ -123,6 +125,7 @@ async function runCompile(context: MacContextType) {
   }
 }
 
+/*
 async function connectAURO(): Promise<string[]> {
   const mina = (window as any).mina;
   if (mina == null) {
@@ -131,17 +134,22 @@ async function connectAURO(): Promise<string[]> {
   const publicKeyBase58: string[] = await mina.requestAccounts();
   console.log("auro connected");
   console.log(publicKeyBase58);
+  console.log("on", mina.on);
+  console.log("off", mina.off);
   return publicKeyBase58;
 }
+*/
 
 async function connectWallet(context: MacContextType) {
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
+  //const auro: WalletAURO = new WalletAURO();
   console.log("connectWallet");
   await context.setConnectionButtonState(1);
   setTimeout(async () => {
     await context.setConnectionButtonState(1);
     try {
       // await zkappWorkerClient.setActiveInstanceToBerkeley();
+      /*
       const publicKeyBase58: string[] = await connectAURO();
       if (publicKeyBase58.length === 0) {
         context.setState({
@@ -150,6 +158,12 @@ async function connectWallet(context: MacContextType) {
         });
       }
       context.setConnectedAddress(publicKeyBase58[0]);
+      */
+      const connected_address: string =
+        await context.wallet.getConnectedAddress(context);
+      if (connected_address !== "") {
+        context.setConnectedAddress(connected_address);
+      }
       await context.setConnectionButtonState(2);
     } catch (e: any) {
       console.log(e);
@@ -239,13 +253,35 @@ function MyApp({ Component, pageProps }: AppProps) {
   let [blockFetchDate, setBlockFetchDate] = useState(new Date());
   let [connectedAddress, setConnectedAddress] = useState("");
   let [connectionError, setConnectionError] = useState("");
+  let [wallet, setWallet] = useState(new WalletAURO());
   let [network, setNetwork] = useState("devnet");
   let [txHash, setTxHash] = useState("");
 
   // -------------------------------------------------------
   // Do Setup
+
+  useEffect(() => {
+    if (!wallet) return;
+
+    const handleAccountsChanged = async (connected_account: string) => {
+      if (connected_account != "") {
+        console.log("wallet changed account to:", connected_account);
+        setConnectedAddress(connected_account);
+      }
+    };
+
+    // Add the event listener
+    wallet.enableAccountsChangedListener(handleAccountsChanged);
+
+    // Clean up the event listener when the extension changes or the component unmounts
+    return () => {
+      wallet.disableAccountsChangedListener(handleAccountsChanged);
+    };
+  }, [wallet]);
+
   useEffect(() => {
     (async () => {
+      /*
       const mina = (window as any).mina;
       if (mina === null) {
         throw Error("window.mina is not defined");
@@ -267,6 +303,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         }
         // let res = await state.zkappWorkerClient.fetchAccount({ publicKey: publicKey! });
       });
+      */
       const interval = setInterval(async () => {
         if (compilationButtonState > 1) {
           try {
@@ -305,6 +342,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         setConnectionError,
         connectedAddress,
         setConnectedAddress,
+        wallet,
+        setWallet,
         network,
         setNetwork,
         txHash,

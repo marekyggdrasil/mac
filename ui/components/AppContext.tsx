@@ -4,6 +4,8 @@ import { Field, PrivateKey, PublicKey } from "o1js";
 
 import ZkappWorkerClient from "../pages/zkAppWorkerClient";
 
+import { WalletInterface } from "./wallets";
+
 export interface ContractStateActedType {
   employer: boolean;
   contractor: boolean;
@@ -105,6 +107,8 @@ export type MacContextType = {
   setConnectionError: Function;
   connectedAddress: string;
   setConnectedAddress: Function;
+  wallet: WalletInterface;
+  setWallet: Function;
   network: string;
   setNetwork: Function;
   txHash: string;

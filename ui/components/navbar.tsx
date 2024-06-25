@@ -1,6 +1,43 @@
 import Link from "next/link";
 import { MacContextType, CastContext } from "./AppContext";
 
+import { WalletAURO, WalletPallad } from "../components/wallets";
+
+const WalletSelectionComponent = () => {
+  const context: MacContextType = CastContext();
+  if (context.connectionButtonState == 0) {
+    return (
+      <select
+        className="select select-bordered"
+        onChange={async (event) => {
+          if (event.target.value == "auro") {
+            await context.setNetwork(new WalletAURO());
+          } else if (event.target.value == "pallad") {
+            await context.setNetwork(new WalletPallad());
+          }
+        }}
+        defaultValue="auro"
+      >
+        <option value="auro">Auro Wallet</option>
+        <option disabled value="pallad">
+          Pallad
+        </option>
+      </select>
+    );
+  }
+  /*
+  return (
+    <select className="select select-bordered" defaultValue="auro" disabled>
+      <option value="auro">Auro Wallet</option>
+      <option disabled value="pallad">
+        Pallad
+      </option>
+    </select>
+  );
+  */
+  return;
+};
+
 const NetworkSelectionComponent = () => {
   const context: MacContextType = CastContext();
   if (context.compilationButtonState == 0) {
@@ -23,6 +60,7 @@ const NetworkSelectionComponent = () => {
       </select>
     );
   }
+  /*
   return (
     <select className="select select-bordered" defaultValue="devnet" disabled>
       <option value="devnet">DevNet</option>
@@ -35,6 +73,8 @@ const NetworkSelectionComponent = () => {
       <option disabled>Mainnet</option>
     </select>
   );
+  */
+  return;
 };
 
 const CircuitCompileButton = () => {
@@ -257,6 +297,7 @@ const Navbar = () => {
       <div className="navbar-end">
         <NetworkSelectionComponent />
         <CircuitCompileButton />
+        <WalletSelectionComponent />
         <ConnectButton />
       </div>
     </div>

@@ -17,6 +17,7 @@ import { finalizeContract } from "./interaction";
 import { PublicKey, PrivateKey } from "o1js";
 
 export async function contractDeploy(context: MacContextType) {
+  console.log("contractDeploy run");
   const zkappWorkerClient: ZkappWorkerClient = castZkAppWorkerClient(context);
   const transactionFee = 0.1;
   await context.setState({
@@ -26,9 +27,11 @@ export async function contractDeploy(context: MacContextType) {
     tx_command: "deploy",
   });
   if (!context.state.finalized) {
+    console.log("not finalized, finalizing");
     await finalizeContract(context);
   }
   const connectedAddress58: string = context.connectedAddress;
+  console.log("connected address", connectedAddress58);
   const connectedAddress: PublicKey = PublicKey.fromBase58(connectedAddress58);
   console.log("fetchAccount");
   await zkappWorkerClient.fetchAccount({ publicKey: connectedAddress });
@@ -92,12 +95,7 @@ export async function contractDeploy(context: MacContextType) {
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
   console.log(transactionJSON);
-  const { hash } = await (window as any).mina.sendTransaction({
-    transaction: transactionJSON,
-    feePayer: {
-      memo: "",
-    },
-  });
+  const hash = await context.wallet.sendTX(context, transactionJSON);
   await context.setTxHash(hash);
   console.log("done");
   console.log(hash);
@@ -175,12 +173,7 @@ export async function contractDeposit(context: MacContextType) {
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
   console.log(transactionJSON);
-  const { hash } = await (window as any).mina.sendTransaction({
-    transaction: transactionJSON,
-    feePayer: {
-      memo: "",
-    },
-  });
+  const hash = await context.wallet.sendTX(context, transactionJSON);
   await context.setTxHash(hash);
   console.log("done");
   console.log(hash);
@@ -258,12 +251,7 @@ export async function contractWithdraw(context: MacContextType) {
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
   console.log(transactionJSON);
-  const { hash } = await (window as any).mina.sendTransaction({
-    transaction: transactionJSON,
-    feePayer: {
-      memo: "",
-    },
-  });
+  const hash = await context.wallet.sendTX(context, transactionJSON);
   await context.setTxHash(hash);
   console.log("done");
   console.log(hash);
@@ -341,12 +329,7 @@ export async function contractCancel(context: MacContextType) {
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
   console.log(transactionJSON);
-  const { hash } = await (window as any).mina.sendTransaction({
-    transaction: transactionJSON,
-    feePayer: {
-      memo: "",
-    },
-  });
+  const hash = await context.wallet.sendTX(context, transactionJSON);
   await context.setTxHash(hash);
   console.log("done");
   console.log(hash);
@@ -424,12 +407,7 @@ export async function contractSuccess(context: MacContextType) {
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
   console.log(transactionJSON);
-  const { hash } = await (window as any).mina.sendTransaction({
-    transaction: transactionJSON,
-    feePayer: {
-      memo: "",
-    },
-  });
+  const hash = await context.wallet.sendTX(context, transactionJSON);
   await context.setTxHash(hash);
   console.log("done");
   console.log(hash);
@@ -507,12 +485,7 @@ export async function contractFailure(context: MacContextType) {
   console.log("getTransactionJSON");
   const transactionJSON = await zkappWorkerClient.getTransactionJSON();
   console.log(transactionJSON);
-  const { hash } = await (window as any).mina.sendTransaction({
-    transaction: transactionJSON,
-    feePayer: {
-      memo: "",
-    },
-  });
+  const hash = await context.wallet.sendTX(context, transactionJSON);
   await context.setTxHash(hash);
   console.log("done");
   console.log(hash);
