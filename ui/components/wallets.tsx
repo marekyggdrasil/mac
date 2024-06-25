@@ -135,7 +135,7 @@ export class WalletPallad implements WalletInterface {
   async getConnectedAddress(context: MacContextType): Promise<string> {
     const mina = (window as any).mina;
     if (mina !== null) {
-      const response = await window.mina.request({ method: "mina_accounts" });
+      // const response = await window.mina.request({ method: "mina_accounts" });
     }
     return "";
   }
