@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MacContextType, CastContext } from "./AppContext";
+import { MacContextType, CastContext, getNetworkNiceName } from "./AppContext";
 
 import { WalletAURO, WalletPallad } from "../components/wallets";
 
@@ -11,9 +11,9 @@ const WalletSelectionComponent = () => {
         className="select select-bordered"
         onChange={async (event) => {
           if (event.target.value == "auro") {
-            await context.setNetwork(new WalletAURO());
+            await context.setWallet(new WalletAURO());
           } else if (event.target.value == "pallad") {
-            await context.setNetwork(new WalletPallad());
+            await context.setWallet(new WalletPallad());
           }
         }}
         defaultValue="auro"
@@ -24,17 +24,16 @@ const WalletSelectionComponent = () => {
         </option>
       </select>
     );
+  } else if (context.connectionButtonState == 1) {
+    return (
+      <select className="select select-bordered" defaultValue="auro" disabled>
+        <option value="auro">Auro Wallet</option>
+        <option disabled value="pallad">
+          Pallad
+        </option>
+      </select>
+    );
   }
-  /*
-  return (
-    <select className="select select-bordered" defaultValue="auro" disabled>
-      <option value="auro">Auro Wallet</option>
-      <option disabled value="pallad">
-        Pallad
-      </option>
-    </select>
-  );
-  */
   return;
 };
 
@@ -59,26 +58,26 @@ const NetworkSelectionComponent = () => {
         <option disabled>Mainnet</option>
       </select>
     );
+  } else if (context.compilationButtonState == 1) {
+    return (
+      <select className="select select-bordered" defaultValue="devnet" disabled>
+        <option value="devnet">DevNet</option>
+        <option disabled value="berkeley">
+          Berkeley
+        </option>
+        <option disabled value="testworld">
+          TestWorld
+        </option>
+        <option disabled>Mainnet</option>
+      </select>
+    );
   }
-  /*
-  return (
-    <select className="select select-bordered" defaultValue="devnet" disabled>
-      <option value="devnet">DevNet</option>
-      <option disabled value="berkeley">
-        Berkeley
-      </option>
-      <option disabled value="testworld">
-        TestWorld
-      </option>
-      <option disabled>Mainnet</option>
-    </select>
-  );
-  */
   return;
 };
 
 const CircuitCompileButton = () => {
   const context: MacContextType = CastContext();
+  const nice_name = getNetworkNiceName(context.network);
   if (context.compilationButtonState == 0) {
     if (context.connectionError !== "") {
       return (
@@ -92,7 +91,7 @@ const CircuitCompileButton = () => {
               context.state.runLoadSnarkyJS(context);
             }}
           >
-            Load o1js
+            Connect to {nice_name}
           </button>
         </div>
       );
@@ -104,7 +103,7 @@ const CircuitCompileButton = () => {
           context.state.runLoadSnarkyJS(context);
         }}
       >
-        Load o1js
+        Connect to {nice_name}
       </button>
     );
   } else if (context.compilationButtonState == 1) {
@@ -115,21 +114,21 @@ const CircuitCompileButton = () => {
           data-tip={context.connectionError}
         >
           <button className="btn btn-disabled animate-pulse">
-            Loading o1js...
+            Connecting to {nice_name}...
           </button>
         </div>
       );
     }
     return (
       <button className="btn btn-disabled animate-pulse">
-        Loading o1js...
+        Connecting to {nice_name}...
       </button>
     );
   } else if (
     context.compilationButtonState == 2 &&
     context.connectionButtonState <= 1
   ) {
-    return <button className="btn btn-disabled">Compile circuit</button>;
+    return <button className="btn btn-disabled">Compile Circuit</button>;
   } else if (
     context.compilationButtonState == 2 &&
     context.connectionButtonState > 1
@@ -141,7 +140,7 @@ const CircuitCompileButton = () => {
           context.state.runCompile(context);
         }}
       >
-        Compile circuit
+        Compile Circuit
       </button>
     );
   } else if (context.compilationButtonState == 3) {
@@ -149,7 +148,7 @@ const CircuitCompileButton = () => {
       <button className="btn btn-disabled animate-pulse">Compiling...</button>
     );
   } else if (context.compilationButtonState == 4) {
-    return <button className="btn btn-disabled">Circuit compiled!</button>;
+    return <button className="btn btn-disabled">Circuit Compiled</button>;
   } else {
     return <button className="btn btn-disabled">Unknown</button>;
   }
@@ -197,11 +196,11 @@ const ConnectButton = () => {
         className="tooltip tooltip-open tooltip-bottom tooltip-accent"
         data-tip={currentBlock(context.blockchainLength)}
       >
-        <button className="btn btn-disabled">Connected!</button>
+        <button className="btn btn-disabled">Connected</button>
       </div>
     );
   } else if (context.connectionButtonState == 2) {
-    return <button className="btn btn-disabled">Connected!</button>;
+    return <button className="btn btn-disabled">Connected</button>;
   } else {
     return <button className="btn btn-disabled">Unknown</button>;
   }

@@ -32,6 +32,7 @@ export interface WalletInterface {
 
 export class WalletAURO implements WalletInterface {
   initialize(context: MacContextType): void {
+    console.log("auro");
     const mina = (window as any).mina;
     if (mina == null) {
       toastError("AuroWallet is not available");
@@ -39,6 +40,7 @@ export class WalletAURO implements WalletInterface {
         ...context.state,
         hasWallet: false,
       });
+      throw Error("AuroWallet not available");
     }
   }
 
@@ -56,7 +58,7 @@ export class WalletAURO implements WalletInterface {
     if (accounts.length === 0) {
       return "";
     }
-    return "";
+    return accounts[0];
   }
 
   async sendTX(context: MacContextType, transactionJSON: any): Promise<string> {
@@ -93,7 +95,7 @@ export class WalletAURO implements WalletInterface {
           }
         }
       };
-      mina.on("accountsChanged", handler);
+      mina?.on("accountsChanged", handler);
     }
   }
 
@@ -112,15 +114,29 @@ export class WalletAURO implements WalletInterface {
           }
         }
       };
-      mina.off("accountsChanged", handler);
+      mina?.off("accountsChanged", handler);
     }
   }
 }
 
 export class WalletPallad implements WalletInterface {
-  initialize(context: MacContextType): void {}
+  initialize(context: MacContextType): void {
+    const mina = (window as any).mina;
+    if (mina == null) {
+      toastError("Pallad is not available");
+      context.setState({
+        ...context.state,
+        hasWallet: false,
+      });
+      throw Error("Pallad not available");
+    }
+  }
 
   async getConnectedAddress(context: MacContextType): Promise<string> {
+    const mina = (window as any).mina;
+    if (mina !== null) {
+      const response = await window.mina.request({ method: "mina_accounts" });
+    }
     return "";
   }
 
