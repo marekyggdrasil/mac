@@ -19,6 +19,7 @@ import {
 } from "./AppContext";
 
 import { MinaValue } from "./highlights";
+
 import {
   contractDeploy,
   contractDeposit,
@@ -27,7 +28,14 @@ import {
   contractSuccess,
   contractFailure,
 } from "./txBuilding";
-import { RenderContractDescription } from "./ContractRendering";
+
+import {
+  DeadlineUnitSwitchComponent,
+  DeadlineInFormat,
+  CountdownInFormat,
+  RenderContractDescription,
+} from "./ContractRendering";
+
 import { PublicKey } from "o1js";
 
 export async function finalizeContract(context: MacContextType) {
@@ -86,7 +94,7 @@ async function contractRefreshState(context: MacContextType) {
   const length =
     await zkappWorkerClient.fetchBlockchainLength(network_endpoint);
   await context.setBlockchainLength(length);
-  await context.setBlockFetchDate(new Date());
+  await context.setBlockFetchDate(new Date()); // TODO replace it with that block timestamp
 
   // refresh the contract state
   const contract_state = await zkappWorkerClient.getContractState();
@@ -495,6 +503,17 @@ const CancelTimeLine = () => {
   );
 };
 
+/*
+   DeadlineUnitSwitchComponent
+   <DeadlineUnitSwitchComponent />
+   <DeadlineInFormat
+   deadline={context.state.contract_outcome_failure_after}
+   />
+   <CountdownInFormat
+   deadline={context.state.contract_outcome_failure_after}
+   />
+ */
+
 const ContractTimeline = () => {
   const context: MacContextType = CastContext();
   if (context.blockchainLength !== null) {
@@ -502,9 +521,17 @@ const ContractTimeline = () => {
       context.blockchainLength < context.state.contract_outcome_deposit_after
     ) {
       return (
-        <p>
-          The contract is in the <strong>warm-up</strong> stage.
-        </p>
+        <div>
+          <DeadlineUnitSwitchComponent />
+          <p>
+            The contract is in the <strong>warm-up</strong> stage. Next stage is{" "}
+            <strong>deposit</strong> stage and will occurr in{" "}
+            <CountdownInFormat
+              deadline={context.state.contract_outcome_deposit_after}
+            />
+            .
+          </p>
+        </div>
       );
     } else if (
       context.state.contract_outcome_deposit_after <=
@@ -513,18 +540,34 @@ const ContractTimeline = () => {
     ) {
       if (context.state.automatonState == "deposited") {
         return (
-          <p>
-            Everyone made their deposit but the contract is is still in the{" "}
-            <strong>deposit</strong> stage. It is possible to{" "}
-            <strong>cancel</strong> for free with no consequences.
-          </p>
+          <div>
+            <DeadlineUnitSwitchComponent />
+            <p>
+              Everyone made their deposit but the contract is is still in the{" "}
+              <strong>deposit</strong> stage. It is possible to{" "}
+              <strong>cancel</strong> for free with no consequences. The current
+              stage will end in{" "}
+              <CountdownInFormat
+                deadline={context.state.contract_outcome_deposit_before}
+              />
+              .
+            </p>
+          </div>
         );
       }
       return (
-        <p>
-          The contract is in the <strong>deposit</strong> stage. It is possible
-          to <strong>cancel</strong> for free with no consequences.
-        </p>
+        <div>
+          <DeadlineUnitSwitchComponent />
+          <p>
+            The contract is in the <strong>deposit</strong> stage. It is
+            possible to <strong>cancel</strong> for free with no consequences.
+            The current stage will end in{" "}
+            <CountdownInFormat
+              deadline={context.state.contract_outcome_deposit_before}
+            />
+            .
+          </p>
+        </div>
       );
     } else if (
       context.state.contract_outcome_success_after <=
@@ -534,9 +577,15 @@ const ContractTimeline = () => {
       if (context.state.automatonState == "succeeded") {
         return (
           <div>
+            <DeadlineUnitSwitchComponent />
             <p>
               The contract was judged <strong>success</strong> but it is still
-              in the <strong>success declaration</strong> stage.
+              in the <strong>success declaration</strong> stage. The current
+              stage will end in{" "}
+              <CountdownInFormat
+                deadline={context.state.contract_outcome_success_before}
+              />
+              .
             </p>
             <CancelTimeLine />
           </div>
@@ -544,8 +593,14 @@ const ContractTimeline = () => {
       }
       return (
         <div>
+          <DeadlineUnitSwitchComponent />
           <p>
             The contract is in the <strong>success declaration</strong> stage.
+            The current stage will end in{" "}
+            <CountdownInFormat
+              deadline={context.state.contract_outcome_success_before}
+            />
+            .
           </p>
           <CancelTimeLine />
         </div>
@@ -558,9 +613,15 @@ const ContractTimeline = () => {
       if (context.state.automatonState == "succeeded") {
         return (
           <div>
+            <DeadlineUnitSwitchComponent />
             <p>
               The contract was judged <strong>success</strong> but it is still
-              in the <strong>failure declaration</strong> stage.
+              in the <strong>failure declaration</strong> stage. The current
+              stage will end in{" "}
+              <CountdownInFormat
+                deadline={context.state.contract_outcome_failure_before}
+              />
+              .
             </p>
             <CancelTimeLine />
           </div>
@@ -568,9 +629,15 @@ const ContractTimeline = () => {
       } else if (context.state.automatonState == "failed") {
         return (
           <div>
+            <DeadlineUnitSwitchComponent />
             <p>
               The contract was judged <strong>failed</strong> but it is still in
-              the <strong>failure declaration</strong> stage.
+              the <strong>failure declaration</strong> stage. The current stage
+              will end in{" "}
+              <CountdownInFormat
+                deadline={context.state.contract_outcome_failure_before}
+              />
+              .
             </p>
             <CancelTimeLine />
           </div>
@@ -578,8 +645,14 @@ const ContractTimeline = () => {
       }
       return (
         <div>
+          <DeadlineUnitSwitchComponent />
           <p>
             The contract is in the <strong>failure declaration</strong> stage.
+            The current stage will end in{" "}
+            <CountdownInFormat
+              deadline={context.state.contract_outcome_failure_before}
+            />
+            .
           </p>
           <CancelTimeLine />
         </div>
@@ -587,7 +660,11 @@ const ContractTimeline = () => {
     } else {
       return (
         <div>
-          <p>All the contract stages have expired.</p>
+          <DeadlineUnitSwitchComponent />
+          <p>
+            All the contract stages have expired. It is possible to withdraw
+            according to <strong>unresolved</strong> outcome specification.
+          </p>
           <CancelTimeLine />
         </div>
       );

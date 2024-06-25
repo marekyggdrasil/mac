@@ -1,5 +1,7 @@
 import React from "react";
 
+import Countdown from "react-countdown";
+
 import { PublicKey } from "o1js";
 
 import {
@@ -36,7 +38,7 @@ function outcomeDescription(v: string) {
   return v;
 }
 
-const DeadlineUnitSwitchComponent = () => {
+export const DeadlineUnitSwitchComponent = () => {
   const context: MacContextType = CastContext();
   return (
     <label className="flex cursor-pointer gap-2">
@@ -58,7 +60,9 @@ const DeadlineUnitSwitchComponent = () => {
   );
 };
 
-const DeadlineInFormat: React.FC<GenericComponentProps<any>> = (props) => {
+export const DeadlineInFormat: React.FC<GenericComponentProps<any>> = (
+  props,
+) => {
   const context: MacContextType = CastContext();
   if (context.state.unit_blockchain_length) {
     return <MinaBlockchainLength>{props.deadline}</MinaBlockchainLength>;
@@ -68,6 +72,27 @@ const DeadlineInFormat: React.FC<GenericComponentProps<any>> = (props) => {
         {formatDateWithoutSeconds(
           computeBlockchainLengthDate(context, props.deadline),
         )}
+      </MinaBlockTimeEstimate>
+    );
+  }
+};
+
+export const CountdownInFormat: React.FC<GenericComponentProps<any>> = (
+  props,
+) => {
+  const context: MacContextType = CastContext();
+  if (context.state.unit_blockchain_length) {
+    return (
+      <MinaBlockchainLength>
+        {props.deadline - context.blockchainLength}
+      </MinaBlockchainLength>
+    );
+  } else {
+    return (
+      <MinaBlockTimeEstimate>
+        <Countdown
+          date={computeBlockchainLengthDate(context, props.deadline)}
+        />
       </MinaBlockTimeEstimate>
     );
   }
