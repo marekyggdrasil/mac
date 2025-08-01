@@ -39,13 +39,21 @@ cd ../
 sh copy_cache_ui.sh
 ```
 
+pack it to be imported from the UI
+
+```sh
+npm pack
+```
+
+it should create a file `mac-contracts-0.3.0.tgz` under same directory. Note the directory path and filename.
+
 now to prepare the UI of the MAC! app, from same directory run
 
 ```sh
 cd ui
 ```
 
-to change the UI directory, now install the dependencies
+to change the UI directory, now update the `package.json` and set the pack of `maccon` to the path of `mac-contracts-0.3.0.tzg` you built in the last step, then install the dependencies
 
 ```sh
 npm install
